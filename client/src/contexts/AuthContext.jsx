@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { authAPI } from '../services/api'
 
 const AuthContext = createContext()
@@ -70,16 +71,27 @@ export function AuthProvider({ children }) {
   }, [state.token])
 
   const login = async (credentials) => {
+    console.log('🔐 AuthContext Debug - Login started with credentials:', credentials)
     dispatch({ type: 'LOGIN_START' })
     try {
+      console.log('🌐 AuthContext Debug - Making API call to login...')
       const response = await authAPI.login(credentials)
+      console.log('📡 AuthContext Debug - API response:', response.data)
+      
       localStorage.setItem('token', response.data.token)
+      console.log('💾 AuthContext Debug - Token saved to localStorage')
+      
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: response.data
       })
-      return { success: true }
+      console.log('✅ AuthContext Debug - Login success, user:', response.data.user)
+      return { success: true, user: response.data.user }
     } catch (error) {
+      console.log('❌ AuthContext Debug - Login error:', error)
+      console.log('❌ AuthContext Debug - Error response:', error.response?.data)
+      console.log('❌ AuthContext Debug - Error status:', error.response?.status)
+      
       const errorMessage = error.response?.data?.message || 'Login failed'
       dispatch({
         type: 'LOGIN_FAILURE',
@@ -98,7 +110,7 @@ export function AuthProvider({ children }) {
         type: 'LOGIN_SUCCESS',
         payload: response.data
       })
-      return { success: true }
+      return { success: true, user: response.data.user }
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Registration failed'
       dispatch({

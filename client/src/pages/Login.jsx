@@ -23,17 +23,33 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
+    console.log('🔍 Login Debug - Form Data:', formData)
+    
     if (!formData.email || !formData.password) {
+      console.log('❌ Login Debug - Missing fields')
       toast.error('Please fill in all fields')
       return
     }
 
+    console.log('🚀 Login Debug - Starting login process...')
     const result = await login(formData)
     
+    console.log('📊 Login Debug - Login result:', result)
+    
     if (result.success) {
+      console.log('✅ Login Debug - Login successful, user:', result.user)
       toast.success('Login successful!')
-      navigate('/dashboard')
+      
+      // Navigate based on user role
+      if (result.user?.role === 'admin') {
+        console.log('👑 Login Debug - Admin user, navigating to admin dashboard')
+        navigate('/admin/dashboard')
+      } else {
+        console.log('👤 Login Debug - Regular user, navigating to homepage')
+        navigate('/')
+      }
     } else {
+      console.log('❌ Login Debug - Login failed:', result.error)
       toast.error(result.error)
     }
   }

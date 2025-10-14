@@ -6,6 +6,7 @@ const router = express.Router();
 // Register
 router.post('/register', async (req, res) => {
   try {
+    console.log('🔐 Server Debug - JWT_SECRET:', process.env.JWT_SECRET ? 'Present' : 'Missing');
     const { username, email, password } = req.body;
 
     // Check if user already exists
@@ -57,28 +58,44 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
   try {
+    console.log('🔐 Server Debug - Login request received');
+    console.log('🔐 Server Debug - Request body:', req.body);
+    
     const { email, password } = req.body;
 
+    console.log('🔍 Server Debug - Looking for user with email:', email);
     // Find user
     const user = await User.findOne({ email });
     if (!user) {
+      console.log('❌ Server Debug - User not found');
       return res.status(401).json({
         message: 'Invalid credentials'
       });
     }
 
+    console.log('👤 Server Debug - User found:', {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role
+    });
+
+    console.log('🔑 Server Debug - Checking password...');
     // Check password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      console.log('❌ Server Debug - Password mismatch');
       return res.status(401).json({
         message: 'Invalid credentials'
       });
     }
 
+    console.log('✅ Server Debug - Password match, updating last login');
     // Update last login
     user.lastLogin = new Date();
     await user.save();
 
+    console.log('🎫 Server Debug - Generating JWT token...');
     // Generate JWT token
     const token = jwt.sign(
       { userId: user._id },
@@ -86,6 +103,7 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    console.log('✅ Server Debug - Login successful, sending response');
     res.json({
       message: 'Login successful',
       token,
@@ -97,7 +115,7 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('❌ Server Debug - Login error:', error);
     res.status(500).json({
       message: 'Login failed',
       error: error.message

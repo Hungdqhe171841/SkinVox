@@ -49,7 +49,13 @@ export default function Register() {
     
     if (result.success) {
       toast.success('Registration successful!')
-      navigate('/dashboard')
+      
+      // Navigate based on user role
+      if (result.user?.role === 'admin') {
+        navigate('/admin/dashboard')
+      } else {
+        navigate('/')
+      }
     } else {
       toast.error(result.error)
     }

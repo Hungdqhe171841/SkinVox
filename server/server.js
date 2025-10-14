@@ -1,10 +1,19 @@
+// Load environment variables first
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+
+// Debug environment variables
+console.log('🔧 Server Debug - Environment variables:');
+console.log('🔧 Server Debug - PORT:', process.env.PORT);
+console.log('🔧 Server Debug - MONGODB_URI:', process.env.MONGODB_URI);
+console.log('🔧 Server Debug - JWT_SECRET:', process.env.JWT_SECRET ? 'Present' : 'Missing');
+console.log('🔧 Server Debug - NODE_ENV:', process.env.NODE_ENV);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -12,12 +21,25 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(helmet());
 app.use(morgan('combined'));
-app.use(cors({
+
+// CORS Configuration
+const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://yourdomain.com'] 
-    : ['http://localhost:3000', 'http://localhost:5173'],
+    : ['http://localhost:3000', 'http://localhost:3002', 'http://localhost:5173'],
   credentials: true
-}));
+};
+
+console.log('🌐 Server Debug - CORS origins:', corsOptions.origin);
+app.use(cors(corsOptions));
+
+// CORS Debug middleware
+app.use((req, res, next) => {
+  console.log('🌐 Server Debug - CORS request from origin:', req.headers.origin);
+  console.log('🌐 Server Debug - Request method:', req.method);
+  console.log('🌐 Server Debug - Request URL:', req.url);
+  next();
+});
 
 // Rate limiting
 const limiter = rateLimit({
@@ -30,8 +52,13 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/skinvox')
-.then(() => console.log('✅ Connected to MongoDB'))
+console.log('🔗 Server Debug - Connecting to MongoDB...');
+const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/SkinVox'
+console.log('🔗 Server Debug - MongoDB URI:', mongoURI);
+mongoose.connect(mongoURI, {
+  dbName: 'SkinVox' // Use existing database
+})
+.then(() => console.log('✅ Connected to MongoDB - SkinVox database'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // Routes
@@ -52,7 +79,11 @@ app.get('/api/health', (req, res) => {
 });
 
 // API Routes
+console.log('🛣️ Server Debug - Setting up API routes...');
 app.use('/api/auth', require('./routes/auth'));
+console.log('🛣️ Server Debug - Auth routes mounted at /api/auth');
+app.use('/api/products', require('./routes/products'));
+console.log('🛣️ Server Debug - Products routes mounted at /api/products');
 // app.use('/api/users', require('./routes/users'));
 
 // Error handling middleware
