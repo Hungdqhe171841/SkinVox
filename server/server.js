@@ -84,6 +84,8 @@ app.use('/api/auth', require('./routes/auth'));
 console.log('🛣️ Server Debug - Auth routes mounted at /api/auth');
 app.use('/api/products', require('./routes/products'));
 console.log('🛣️ Server Debug - Products routes mounted at /api/products');
+app.use('/api/admin', require('./routes/admin'));
+console.log('🛣️ Server Debug - Admin routes mounted at /api/admin');
 // app.use('/api/users', require('./routes/users'));
 
 // Error handling middleware
