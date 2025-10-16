@@ -13,17 +13,14 @@ const eyebrowsSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['pencil', 'powder', 'gel', 'pomade', 'marker', 'tint'],
-    required: [true, 'Product type is required']
+    enum: ['pencil', 'powder', 'gel', 'pomade', 'marker', 'tint']
   },
   color: {
     type: String,
-    required: [true, 'Color is required'],
     trim: true
   },
   price: {
     type: Number,
-    required: [true, 'Price is required'],
     min: [0, 'Price cannot be negative']
   },
   description: {
@@ -38,6 +35,11 @@ const eyebrowsSchema = new mongoose.Schema({
     type: String,
     enum: ['black', 'brown', 'blonde', 'red', 'gray', 'auburn']
   }],
+  shades: {
+    type: Map,
+    of: String,
+    default: {}
+  },
   rating: {
     type: Number,
     min: 0,
@@ -65,7 +67,8 @@ const eyebrowsSchema = new mongoose.Schema({
     default: true
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  collection: 'eyebrows'
 });
 
 // Index for search

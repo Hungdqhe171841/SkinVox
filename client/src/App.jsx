@@ -11,6 +11,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import AdminDashboard from './pages/AdminDashboard'
 import Profile from './pages/Profile'
+import BeautyBar from './pages/BeautyBar'
 import NotFound from './pages/NotFound'
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="beautybar" element={<BeautyBar />} />
           <Route 
             path="dashboard" 
             element={

@@ -8,12 +8,10 @@ const blushSchema = new mongoose.Schema({
   },
   brand: {
     type: String,
-    required: [true, 'Brand is required'],
     trim: true
   },
   color: {
     type: String,
-    required: [true, 'Color is required'],
     trim: true
   },
   shade: {
@@ -22,7 +20,6 @@ const blushSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
-    required: [true, 'Price is required'],
     min: [0, 'Price cannot be negative']
   },
   description: {
@@ -42,6 +39,11 @@ const blushSchema = new mongoose.Schema({
     type: String,
     enum: ['fair', 'light', 'medium', 'tan', 'dark', 'deep']
   }],
+  shades: {
+    type: Map,
+    of: String,
+    default: {}
+  },
   rating: {
     type: Number,
     min: 0,
@@ -69,7 +71,8 @@ const blushSchema = new mongoose.Schema({
     default: true
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  collection: 'blush' // match existing collection name in MongoDB Compass
 });
 
 // Index for search

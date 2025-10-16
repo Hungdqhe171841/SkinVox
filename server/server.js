@@ -86,6 +86,8 @@ app.use('/api/products', require('./routes/products'));
 console.log('🛣️ Server Debug - Products routes mounted at /api/products');
 app.use('/api/admin', require('./routes/admin'));
 console.log('🛣️ Server Debug - Admin routes mounted at /api/admin');
+app.use('/api/beautybar', require('./routes/beautybar'));
+console.log('🛣️ Server Debug - BeautyBar routes mounted at /api/beautybar');
 // app.use('/api/users', require('./routes/users'));
 
 // Error handling middleware

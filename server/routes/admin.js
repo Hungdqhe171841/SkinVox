@@ -294,6 +294,85 @@ router.put('/blogs/:id', async (req, res) => {
   }
 });
 
+// @route   GET /api/admin/blogs/:id
+// @desc    Get single blog by ID
+// @access  Private (Admin only)
+router.get('/blogs/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const blog = await Blog.findById(id)
+      .populate('author', 'username email')
+      .populate('comments.user', 'username');
+    
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+    
+    res.json({ blog });
+  } catch (error) {
+    console.error('❌ Admin Debug - Get blog error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// @route   PUT /api/admin/blogs/:id/status
+// @desc    Update blog status (draft, published, archived)
+// @access  Private (Admin only)
+router.put('/blogs/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    const validStatuses = ['draft', 'published', 'archived'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status. Must be draft, published, or archived' });
+    }
+    
+    const blog = await Blog.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true, runValidators: true }
+    ).populate('author', 'username email');
+    
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+    
+    console.log(`✅ Admin Debug - Blog "${blog.title}" status changed to ${status} by admin ${req.user.username}`);
+    res.json({ message: 'Blog status updated successfully', blog });
+  } catch (error) {
+    console.error('❌ Admin Debug - Update blog status error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// @route   PUT /api/admin/blogs/:id/featured
+// @desc    Toggle blog featured status
+// @access  Private (Admin only)
+router.put('/blogs/:id/featured', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isFeatured } = req.body;
+    
+    const blog = await Blog.findByIdAndUpdate(
+      id,
+      { isFeatured },
+      { new: true, runValidators: true }
+    ).populate('author', 'username email');
+    
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+    
+    console.log(`✅ Admin Debug - Blog "${blog.title}" featured status changed to ${isFeatured} by admin ${req.user.username}`);
+    res.json({ message: 'Blog featured status updated successfully', blog });
+  } catch (error) {
+    console.error('❌ Admin Debug - Update blog featured status error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 // @route   DELETE /api/admin/blogs/:id
 // @desc    Delete blog
 // @access  Private (Admin only)
@@ -310,6 +389,178 @@ router.delete('/blogs/:id', async (req, res) => {
     res.json({ message: 'Blog deleted successfully' });
   } catch (error) {
     console.error('❌ Admin Debug - Delete blog error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// ==================== CATEGORY MANAGEMENT ====================
+// @route   GET /api/admin/categories
+// @desc    Get all categories with pagination
+// @access  Private (Admin only)
+router.get('/categories', async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search = '', isActive = '' } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    let query = {};
+    
+    // Search by name or description
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    // Filter by active status
+    if (isActive !== '') {
+      query.isActive = isActive === 'true';
+    }
+    
+    const categories = await Category.find(query)
+      .populate('createdBy', 'username email')
+      .sort({ sortOrder: 1, createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const totalCategories = await Category.countDocuments(query);
+    
+    res.json({
+      categories,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalCategories / parseInt(limit)),
+        totalCategories,
+        hasNext: skip + categories.length < totalCategories,
+        hasPrev: parseInt(page) > 1
+      }
+    });
+  } catch (error) {
+    console.error('❌ Admin Debug - Get categories error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// @route   POST /api/admin/categories
+// @desc    Create new category
+// @access  Private (Admin only)
+router.post('/categories', async (req, res) => {
+  try {
+    const categoryData = {
+      ...req.body,
+      createdBy: req.user._id
+    };
+    
+    const category = new Category(categoryData);
+    await category.save();
+    
+    await category.populate('createdBy', 'username email');
+    
+    console.log(`✅ Admin Debug - Category "${category.name}" created by admin ${req.user.username}`);
+    res.status(201).json({ message: 'Category created successfully', category });
+  } catch (error) {
+    console.error('❌ Admin Debug - Create category error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// @route   GET /api/admin/categories/:id
+// @desc    Get single category by ID
+// @access  Private (Admin only)
+router.get('/categories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const category = await Category.findById(id)
+      .populate('createdBy', 'username email')
+      .populate('parentCategory', 'name')
+      .populate('subcategories', 'name slug');
+    
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    
+    res.json({ category });
+  } catch (error) {
+    console.error('❌ Admin Debug - Get category error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// @route   PUT /api/admin/categories/:id
+// @desc    Update category
+// @access  Private (Admin only)
+router.put('/categories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const category = await Category.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    ).populate('createdBy', 'username email');
+    
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    
+    console.log(`✅ Admin Debug - Category "${category.name}" updated by admin ${req.user.username}`);
+    res.json({ message: 'Category updated successfully', category });
+  } catch (error) {
+    console.error('❌ Admin Debug - Update category error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// @route   PUT /api/admin/categories/:id/status
+// @desc    Toggle category active status
+// @access  Private (Admin only)
+router.put('/categories/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+    
+    const category = await Category.findByIdAndUpdate(
+      id,
+      { isActive },
+      { new: true, runValidators: true }
+    ).populate('createdBy', 'username email');
+    
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    
+    console.log(`✅ Admin Debug - Category "${category.name}" status changed to ${isActive} by admin ${req.user.username}`);
+    res.json({ message: 'Category status updated successfully', category });
+  } catch (error) {
+    console.error('❌ Admin Debug - Update category status error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// @route   DELETE /api/admin/categories/:id
+// @desc    Delete category
+// @access  Private (Admin only)
+router.delete('/categories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if category has subcategories
+    const category = await Category.findById(id);
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    
+    if (category.subcategories && category.subcategories.length > 0) {
+      return res.status(400).json({ message: 'Cannot delete category with subcategories' });
+    }
+    
+    await Category.findByIdAndDelete(id);
+    
+    console.log(`✅ Admin Debug - Category "${category.name}" deleted by admin ${req.user.username}`);
+    res.json({ message: 'Category deleted successfully' });
+  } catch (error) {
+    console.error('❌ Admin Debug - Delete category error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -414,3 +665,4 @@ router.delete('/reviews/:id', async (req, res) => {
 });
 
 module.exports = router;
+

@@ -8,12 +8,10 @@ const lipstickSchema = new mongoose.Schema({
   },
   brand: {
     type: String,
-    required: [true, 'Brand is required'],
     trim: true
   },
   color: {
     type: String,
-    required: [true, 'Color is required'],
     trim: true
   },
   shade: {
@@ -22,7 +20,6 @@ const lipstickSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
-    required: [true, 'Price is required'],
     min: [0, 'Price cannot be negative']
   },
   description: {
@@ -37,6 +34,11 @@ const lipstickSchema = new mongoose.Schema({
     type: String,
     enum: ['matte', 'glossy', 'satin', 'cream', 'liquid'],
     default: 'matte'
+  },
+  shades: {
+    type: Map,
+    of: String,
+    default: {}
   },
   rating: {
     type: Number,
@@ -65,7 +67,8 @@ const lipstickSchema = new mongoose.Schema({
     default: true
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  collection: 'lipsticks'
 });
 
 // Index for search

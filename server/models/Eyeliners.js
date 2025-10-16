@@ -8,22 +8,18 @@ const eyelinersSchema = new mongoose.Schema({
   },
   brand: {
     type: String,
-    required: [true, 'Brand is required'],
     trim: true
   },
   type: {
     type: String,
-    enum: ['pencil', 'liquid', 'gel', 'cream', 'marker', 'kohl'],
-    required: [true, 'Eyeliner type is required']
+    enum: ['pencil', 'liquid', 'gel', 'cream', 'marker', 'kohl']
   },
   color: {
     type: String,
-    required: [true, 'Color is required'],
     trim: true
   },
   price: {
     type: Number,
-    required: [true, 'Price is required'],
     min: [0, 'Price cannot be negative']
   },
   description: {
@@ -42,6 +38,11 @@ const eyelinersSchema = new mongoose.Schema({
   waterproof: {
     type: Boolean,
     default: false
+  },
+  shades: {
+    type: Map,
+    of: String,
+    default: {}
   },
   rating: {
     type: Number,
@@ -70,7 +71,8 @@ const eyelinersSchema = new mongoose.Schema({
     default: true
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  collection: 'eyeliners' // ensure collection name matches Compass
 });
 
 // Index for search

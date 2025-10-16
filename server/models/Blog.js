@@ -9,7 +9,6 @@ const blogSchema = new mongoose.Schema({
   },
   slug: {
     type: String,
-    unique: true,
     lowercase: true,
     trim: true
   },
@@ -90,7 +89,7 @@ const blogSchema = new mongoose.Schema({
 
 // Create slug from title before saving
 blogSchema.pre('save', function(next) {
-  if (this.isModified('title')) {
+  if (this.isModified('title') && this.title) {
     this.slug = this.title
       .toLowerCase()
       .replace(/[^a-z0-9 -]/g, '')
@@ -113,3 +112,4 @@ blogSchema.pre('save', function(next) {
 blogSchema.index({ title: 'text', content: 'text', tags: 'text' });
 
 module.exports = mongoose.model('Blog', blogSchema);
+

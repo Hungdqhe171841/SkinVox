@@ -8,7 +8,6 @@ const eyeshadowSchema = new mongoose.Schema({
   },
   brand: {
     type: String,
-    required: [true, 'Brand is required'],
     trim: true
   },
   palette: {
@@ -25,7 +24,6 @@ const eyeshadowSchema = new mongoose.Schema({
   }],
   price: {
     type: Number,
-    required: [true, 'Price is required'],
     min: [0, 'Price cannot be negative']
   },
   description: {
@@ -63,7 +61,8 @@ const eyeshadowSchema = new mongoose.Schema({
     default: true
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  collection: 'eyeshadows'
 });
 
 // Index for search

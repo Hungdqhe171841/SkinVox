@@ -10,7 +10,6 @@ const categorySchema = new mongoose.Schema({
   },
   slug: {
     type: String,
-    unique: true,
     lowercase: true,
     trim: true
   },
@@ -90,3 +89,4 @@ categorySchema.virtual('subcategoryCount').get(function() {
 });
 
 module.exports = mongoose.model('Category', categorySchema);
+
