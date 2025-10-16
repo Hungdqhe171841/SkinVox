@@ -106,6 +106,22 @@ export default function BeautyBar() {
     ))
   }
 
+  const toVnd = (num) => {
+    if (typeof num !== 'number') return '—'
+    return num.toLocaleString('vi-VN') + ' VND'
+  }
+
+  // Prefer local asset by product name; fallback to product.image, then placeholder
+  const sanitizeName = (name) => {
+    return name
+      .replace(/[®™©]/g, '')
+      .replace(/[^a-zA-Z0-9\s\-_.]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const getProductImage = (product) => `/assets/${encodeURIComponent(product.name)}.jpg`;
+
   const getCategoryColor = (category) => {
     const colors = {
       lipstick: 'bg-red-100 text-red-800',
@@ -124,8 +140,8 @@ export default function BeautyBar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">BeautyBar</h1>
-              <p className="mt-2 text-gray-600">Khám phá bộ sưu tập mỹ phẩm cao cấp</p>
+              <p className="text-sm text-gray-400">/ Affiliate Picks</p>
+              <h1 className="mt-1 text-3xl font-bold text-gray-900">SHOP OUR PICKS</h1>
             </div>
             
             {/* Search Bar */}
@@ -134,7 +150,7 @@ export default function BeautyBar() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm sản phẩm..."
+                  placeholder="Search Products"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full lg:w-80 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
@@ -151,18 +167,18 @@ export default function BeautyBar() {
           <div className="lg:w-64">
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Bộ lọc</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
                 <button
                   onClick={clearFilters}
                   className="text-sm text-pink-600 hover:text-pink-700"
                 >
-                  Xóa tất cả
+                  Clear all
                 </button>
               </div>
 
               {/* Category Filter */}
               <div className="mb-6">
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Danh mục</h4>
+                <h4 className="text-sm font-medium text-gray-900 mb-3">Categories</h4>
                 <div className="space-y-2">
                   <label className="flex items-center">
                     <input
@@ -173,7 +189,7 @@ export default function BeautyBar() {
                       onChange={(e) => handleFilterChange('category', e.target.value)}
                       className="mr-2"
                     />
-                    <span className="text-sm text-gray-700">Tất cả</span>
+                    <span className="text-sm text-gray-700">All</span>
                   </label>
                   {filters.categories.map((category) => (
                     <label key={category} className="flex items-center">
@@ -193,7 +209,7 @@ export default function BeautyBar() {
 
               {/* Brand Filter */}
               <div className="mb-6">
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Thương hiệu</h4>
+                <h4 className="text-sm font-medium text-gray-900 mb-3">Brand</h4>
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   <label className="flex items-center">
                     <input
@@ -204,7 +220,7 @@ export default function BeautyBar() {
                       onChange={(e) => handleFilterChange('brand', e.target.value)}
                       className="mr-2"
                     />
-                    <span className="text-sm text-gray-700">Tất cả</span>
+                    <span className="text-sm text-gray-700">All</span>
                   </label>
                   {filters.brands.map((brand) => (
                     <label key={brand} className="flex items-center">
@@ -224,18 +240,18 @@ export default function BeautyBar() {
 
               {/* Price Range */}
               <div className="mb-6">
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Khoảng giá</h4>
+                <h4 className="text-sm font-medium text-gray-900 mb-3">Price</h4>
                 <div className="space-y-2">
                   <input
                     type="number"
-                    placeholder="Từ"
+                    placeholder="From"
                     value={priceRange.min}
                     onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                   />
                   <input
                     type="number"
-                    placeholder="Đến"
+                    placeholder="To"
                     value={priceRange.max}
                     onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
@@ -268,7 +284,7 @@ export default function BeautyBar() {
 
                 <div className="flex items-center space-x-2 mt-4 sm:mt-0">
                   <span className="text-sm text-gray-600">
-                    {products.length} sản phẩm
+                    {products.length} products
                   </span>
                   <div className="flex border border-gray-300 rounded-md">
                     <button
@@ -289,7 +305,7 @@ export default function BeautyBar() {
             </div>
 
             {/* Products Grid/List */}
-            {loading ? (
+              {loading ? (
               <div className="flex justify-center items-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
               </div>
@@ -298,8 +314,8 @@ export default function BeautyBar() {
                 <div className="text-gray-400 mb-4">
                   <ShoppingCart className="w-16 h-16 mx-auto" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Không tìm thấy sản phẩm</h3>
-                <p className="text-gray-600">Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No products</h3>
+                  <p className="text-gray-600">Try changing filters or search keywords</p>
               </div>
             ) : (
               <>
@@ -310,19 +326,42 @@ export default function BeautyBar() {
                   {products.map((product) => (
                     <div
                       key={`${product.productType}-${product._id}`}
-                      className={`bg-white rounded-lg shadow hover:shadow-lg transition-shadow ${
+                      className={`bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow ${
                         viewMode === 'list' ? 'flex' : ''
                       }`}
                     >
-                      <div className={viewMode === 'list' ? 'w-48 h-48' : 'aspect-square'}>
+                      <div className={(viewMode === 'list' ? 'w-48 h-48' : 'aspect-square') + ' relative bg-gray-50 rounded-xl'}>
                         <img
-                          src={product.image || 'https://via.placeholder.com/300x300'}
+                          data-attempt="0"
+                          src={getProductImage(product)}
                           alt={product.name}
-                          className="w-full h-full object-cover rounded-t-lg"
+                          className="w-full h-full object-cover rounded-xl"
+                          onError={(e) => {
+                            const img = e.currentTarget;
+                            const attempt = parseInt(img.getAttribute('data-attempt') || '0', 10);
+                            const name = product?.name || '';
+                            if (attempt === 0) {
+                              img.setAttribute('data-attempt', '1');
+                              const alt1 = `/assets/${encodeURIComponent(sanitizeName(name))}.jpg`;
+                              img.src = alt1;
+                              return;
+                            }
+                            if (attempt === 1) {
+                              img.setAttribute('data-attempt', '2');
+                              const alt2 = `/assets/${encodeURIComponent(name)} copy.jpg`;
+                              img.src = alt2;
+                              return;
+                            }
+                            img.onerror = null;
+                            img.src = product.image || 'https://via.placeholder.com/300x300';
+                          }}
                         />
+                        <span className="absolute top-2 right-3 text-[10px] uppercase text-gray-400 tracking-wider">
+                          Explore
+                        </span>
                       </div>
                       
-                      <div className={`p-4 ${viewMode === 'list' ? 'flex-1' : ''}`}>
+                      <div className={`p-5 ${viewMode === 'list' ? 'flex-1' : ''}`}>
                         <div className="flex items-start justify-between mb-2">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(product.productType)}`}>
                             {product.type}
@@ -332,11 +371,11 @@ export default function BeautyBar() {
                           </button>
                         </div>
 
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 line-clamp-2">
                           {product.name}
                         </h3>
                         
-                        <p className="text-sm text-gray-600 mb-2">{product.brand}</p>
+                        <p className="text-sm text-gray-600 mb-2">{product.brand || '—'}</p>
                         
                         {product.description && (
                           <p className="text-sm text-gray-500 mb-3 line-clamp-2">
@@ -344,7 +383,7 @@ export default function BeautyBar() {
                           </p>
                         )}
 
-                        <div className="flex items-center mb-3">
+                        <div className="flex items-center mb-2">
                           <div className="flex items-center">
                             {renderStars(product.rating)}
                           </div>
@@ -354,24 +393,20 @@ export default function BeautyBar() {
                         </div>
 
                         <div className="flex items-center justify-between">
-                          <span className="text-xl font-bold text-pink-600">
-                            ${product.price}
+                          <span className="text-lg sm:text-xl font-bold text-pink-600">
+                            {toVnd(product.price)}
                           </span>
-                          <div className="flex space-x-2">
-                            <button className="p-2 text-gray-400 hover:text-gray-600">
-                              <Eye className="w-4 h-4" />
-                            </button>
-                          </div>
+                          <div className="flex space-x-2" />
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex space-x-2 mt-3">
-                          <button className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 flex items-center justify-center">
-                            <span className="text-sm font-medium">✨ Thử sản phẩm</span>
+                        <div className="flex space-x-2 mt-4">
+                          <button className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full hover:from-purple-600 hover:to-pink-600 transition-all duration-200 text-sm">
+                            <span className="text-sm font-medium">Try AR</span>
                           </button>
-                          <button className="flex-1 bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition-colors flex items-center justify-center">
-                            <ShoppingCart className="w-4 h-4 mr-1" />
-                            <span className="text-sm font-medium">Mua ngay</span>
+                          <button className="flex-1 bg-pink-600 text-white px-4 py-2 rounded-full hover:bg-pink-700 transition-colors flex items-center justify-center text-sm">
+                            <ShoppingCart className="w-4 h-4 mr-1"/>
+                            <span className="font-medium">Shop now</span>
                           </button>
                         </div>
                       </div>
