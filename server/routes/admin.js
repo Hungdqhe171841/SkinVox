@@ -34,7 +34,7 @@ const simpleUpload = multer({
     filename: function (req, file, cb) {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
       const adminId = req.user?.id || 'admin';
-      cb(null, `${adminId}-${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
+      cb(null, `${adminId}-images-${uniqueSuffix}${path.extname(file.originalname)}`);
     }
   }),
   limits: {
