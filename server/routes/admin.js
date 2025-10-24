@@ -56,7 +56,7 @@ const simpleUpload = multer({
 // @route   POST /api/admin/upload
 // @desc    Upload blog images
 // @access  Private (Admin only)
-router.post('/upload', upload.array('images', 10), async (req, res) => {
+router.post('/upload', simpleUpload.array('images', 10), async (req, res) => {
   try {
     console.log('📝 Admin Debug - Upload API called');
     console.log('📝 Admin Debug - Files:', req.files);
@@ -69,33 +69,14 @@ router.post('/upload', upload.array('images', 10), async (req, res) => {
     const adminId = req.user?.id || 'admin';
     let uploadedFiles = [];
     
-    // Handle upload based on storage type
-    if (cloudStorage.storageType === 'cloudinary') {
-      // Upload to Cloudinary
-      for (const file of req.files) {
-        try {
-          const result = await cloudStorage.uploadToCloudinary(file, adminId);
-          uploadedFiles.push({
-            filename: file.originalname,
-            originalname: file.originalname,
-            url: result.url,
-            public_id: result.public_id,
-            size: file.size
-          });
-        } catch (uploadError) {
-          console.error('❌ Admin Debug - Cloudinary upload error:', uploadError);
-          throw uploadError;
-        }
-      }
-    } else {
-      // Handle local storage upload
-      uploadedFiles = req.files.map(file => ({
-        filename: file.filename,
-        originalname: file.originalname,
-        path: `/uploads/admins/${adminId}/blogs/${file.filename}`,
-        size: file.size
-      }));
-    }
+    // Handle local storage upload (temporary fix)
+    uploadedFiles = req.files.map(file => ({
+      filename: file.filename,
+      originalname: file.originalname,
+      path: `/uploads/admins/${adminId}/blogs/${file.filename}`,
+      url: `/uploads/admins/${adminId}/blogs/${file.filename}`,
+      size: file.size
+    }));
     
     console.log('✅ Admin Debug - Files uploaded successfully:', uploadedFiles);
     res.json({ 
