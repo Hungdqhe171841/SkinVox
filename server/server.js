@@ -36,6 +36,7 @@ app.use(morgan('combined'));
 // CORS Configuration
 const corsOptions = {
   origin: [
+    'https://ddaa7.vercel.app',
     'https://skinvox-client.vercel.app',
     'https://skinvox.vercel.app', 
     'https://skin-vox.vercel.app',

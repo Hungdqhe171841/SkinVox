@@ -118,7 +118,7 @@ export default function Blog() {
                   <article key={blog._id} className="blog-card">
                     <div className="blog-card-image">
                       <img 
-                        src={blog.featuredImage || "/assets/Ava.jpg"} 
+                        src={blog.featuredImage || (blog.images && blog.images[0]) || "/assets/Ava.jpg"} 
                         alt={blog.title}
                         onError={(e) => {
                           e.target.src = "/assets/Ava.jpg"
@@ -181,7 +181,7 @@ export default function Blog() {
                 {blogs.slice(0, 3).map((blog) => (
                   <div key={blog._id} className="latest-article-item">
                     <img 
-                      src={blog.featuredImage || "/assets/Ava.jpg"} 
+                      src={blog.featuredImage || (blog.images && blog.images[0]) || "/assets/Ava.jpg"} 
                       alt={blog.title}
                       onError={(e) => {
                         e.target.src = "/assets/Ava.jpg"

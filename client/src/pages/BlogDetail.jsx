@@ -32,7 +32,7 @@ export default function BlogDetail() {
         title: data.title || 'Không có tiêu đề',
         content: data.content || 'Nội dung không có sẵn.',
         description: data.description || data.excerpt || 'Mô tả không có sẵn.',
-        featuredImage: data.featuredImage || '/assets/Ava.jpg',
+        featuredImage: data.featuredImage || (data.images && data.images[0]) || '/assets/Ava.jpg',
         images: data.images || [],
         category: data.category || 'general',
         formatType: data.formatType || 1,
