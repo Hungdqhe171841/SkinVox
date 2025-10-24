@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const { auth, adminAuth } = require('../middleware/auth');
 const cloudStorage = require('../services/cloudStorage');
 const User = require('../models/User');
@@ -17,6 +18,37 @@ const Eyeliner = require('../models/Eyeliners');
 // Get storage configuration from cloud storage service
 const upload = cloudStorage.getStorageConfig();
 
+// Simple upload for testing
+const simpleUpload = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      const adminId = req.user?.id || 'admin';
+      const uploadPath = path.join(__dirname, '../public/uploads/admins', adminId, 'blogs');
+      
+      if (!fs.existsSync(uploadPath)) {
+        fs.mkdirSync(uploadPath, { recursive: true });
+      }
+      
+      cb(null, uploadPath);
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const adminId = req.user?.id || 'admin';
+      cb(null, `${adminId}-${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
+    }
+  }),
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  }
+});
+
 // Apply auth and admin middleware to all routes
 // router.use(auth, adminAuth); // Temporarily disabled for testing
 
@@ -24,7 +56,7 @@ const upload = cloudStorage.getStorageConfig();
 // @route   POST /api/admin/upload
 // @desc    Upload blog images
 // @access  Private (Admin only)
-router.post('/upload', upload.array('images', 10), async (req, res) => {
+router.post('/upload', simpleUpload.array('images', 10), async (req, res) => {
   try {
     console.log('📝 Admin Debug - Upload API called');
     console.log('📝 Admin Debug - Files:', req.files);
@@ -37,27 +69,13 @@ router.post('/upload', upload.array('images', 10), async (req, res) => {
     const adminId = req.user?.id || 'admin';
     let uploadedFiles = [];
     
-    // Handle different storage types
-    if (cloudStorage.storageType === 'cloudinary') {
-      // Upload to Cloudinary
-      for (const file of req.files) {
-        const result = await cloudStorage.uploadToCloudinary(file, adminId);
-        uploadedFiles.push({
-          filename: result.public_id,
-          originalname: file.originalname,
-          path: result.url,
-          size: result.bytes
-        });
-      }
-    } else {
-      // Handle S3 and local storage
-      uploadedFiles = req.files.map(file => ({
-        filename: file.key || file.filename,
-        originalname: file.originalname,
-        path: cloudStorage.getFileUrl(file),
-        size: file.size
-      }));
-    }
+    // Handle local storage upload
+    uploadedFiles = req.files.map(file => ({
+      filename: file.filename,
+      originalname: file.originalname,
+      path: `/uploads/admins/${adminId}/blogs/${file.filename}`,
+      size: file.size
+    }));
     
     console.log('✅ Admin Debug - Files uploaded successfully:', uploadedFiles);
     res.json({ 
