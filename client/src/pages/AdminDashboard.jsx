@@ -526,7 +526,7 @@ export default function AdminDashboard() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div className="flex space-x-2">
                               <button 
-                                onClick={() => window.open(`/blog/${blog._id}`, '_blank')}
+                                onClick={() => window.open(`/blog-detail/${blog._id}`, '_blank')}
                                 className="text-blue-600 hover:text-blue-900"
                                 title="Xem bài viết"
                               >

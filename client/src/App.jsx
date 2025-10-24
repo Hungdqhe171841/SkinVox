@@ -8,6 +8,7 @@ import Layout from './components/Layout'
 import DebugConsole from './components/DebugConsole'
 import { initGA } from './utils/analytics'
 import { monitorGALoading } from './utils/testGALoading'
+import { testGAConfig, testSkinVoxEvents } from './utils/testGAConfig'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -93,6 +94,12 @@ function App() {
             value: 1
           });
           console.log('✅ App Debug - Google Analytics event sent');
+          
+          // Test GA configuration
+          testGAConfig();
+          
+          // Test SkinVox specific events
+          testSkinVoxEvents();
         }, 500);
       } else {
         console.log('⏳ App Debug - Waiting for Google Analytics gtag...');

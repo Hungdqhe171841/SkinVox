@@ -110,9 +110,9 @@ export default function BlogForm({
 
     try {
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append('images', file);
 
-      const response = await fetch('/api/admin/upload', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -126,7 +126,7 @@ export default function BlogForm({
       
       setFormData(prev => ({
         ...prev,
-        images: [...prev.images, uploadedFile.path]
+        images: [...prev.images, uploadedFile.url || uploadedFile.path]
       }));
 
       console.log('✅ Image uploaded successfully:', uploadedFile);
@@ -170,7 +170,7 @@ export default function BlogForm({
         }
 
         const result = await response.json();
-        return result.files[0].path;
+        return result.files[0].url || result.files[0].path;
       });
 
       const uploadedUrls = await Promise.all(uploadPromises);
