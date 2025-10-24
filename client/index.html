@@ -16,7 +16,8 @@
       
       // Debug: Log Google Analytics initialization
       console.log('🔍 Google Analytics initialized with ID: G-C4NFL3C9TF');
-      console.log('🔍 Environment GA ID:', import.meta?.env?.VITE_GA_MEASUREMENT_ID || 'Not available in HTML');
+      console.log('🔍 gtag function available:', typeof window.gtag);
+      console.log('🔍 dataLayer available:', typeof window.dataLayer);
     </script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">

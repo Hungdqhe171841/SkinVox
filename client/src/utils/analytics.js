@@ -6,15 +6,30 @@ export const initGA = () => {
   console.log('🔍 Analytics Debug - initGA called');
   console.log('🔍 Analytics Debug - GA_MEASUREMENT_ID:', GA_MEASUREMENT_ID);
   console.log('🔍 Analytics Debug - window.gtag available:', typeof window !== 'undefined' && window.gtag);
+  console.log('🔍 Analytics Debug - dataLayer available:', typeof window !== 'undefined' && window.dataLayer);
   
   if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('config', GA_MEASUREMENT_ID, {
-      page_title: document.title,
-      page_location: window.location.href,
-    });
-    console.log('✅ Analytics Debug - Google Analytics configured successfully');
+    try {
+      window.gtag('config', GA_MEASUREMENT_ID, {
+        page_title: document.title,
+        page_location: window.location.href,
+      });
+      console.log('✅ Analytics Debug - Google Analytics configured successfully');
+      
+      // Send a test event
+      window.gtag('event', 'ga_initialized', {
+        event_category: 'Analytics',
+        event_label: 'GA Initialized',
+        value: 1
+      });
+      console.log('✅ Analytics Debug - Test event sent');
+      
+    } catch (error) {
+      console.error('❌ Analytics Debug - Error configuring Google Analytics:', error);
+    }
   } else {
     console.error('❌ Analytics Debug - Google Analytics not available');
+    console.log('🔍 Analytics Debug - Available window properties:', Object.keys(window).filter(key => key.includes('gtag') || key.includes('data')));
   }
 };
 

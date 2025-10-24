@@ -7,6 +7,7 @@ import AdminProtectedRoute from './components/AdminProtectedRoute'
 import Layout from './components/Layout'
 import DebugConsole from './components/DebugConsole'
 import { initGA } from './utils/analytics'
+import { monitorGALoading } from './utils/testGALoading'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -74,21 +75,32 @@ function App() {
   // Initialize Google Analytics
   React.useEffect(() => {
     console.log('🔍 App Debug - Initializing Google Analytics...');
-    initGA();
     
-    // Test Google Analytics after initialization
-    setTimeout(() => {
+    // Start monitoring Google Analytics loading
+    monitorGALoading();
+    
+    // Wait for gtag to be available
+    const waitForGtag = () => {
       if (typeof window !== 'undefined' && window.gtag) {
-        console.log('✅ App Debug - Google Analytics is working');
-        window.gtag('event', 'app_initialized', {
-          event_category: 'App',
-          event_label: 'App Initialized',
-          value: 1
-        });
+        console.log('✅ App Debug - Google Analytics gtag is available');
+        initGA();
+        
+        // Test Google Analytics after initialization
+        setTimeout(() => {
+          window.gtag('event', 'app_initialized', {
+            event_category: 'App',
+            event_label: 'App Initialized',
+            value: 1
+          });
+          console.log('✅ App Debug - Google Analytics event sent');
+        }, 500);
       } else {
-        console.error('❌ App Debug - Google Analytics not working');
+        console.log('⏳ App Debug - Waiting for Google Analytics gtag...');
+        setTimeout(waitForGtag, 100);
       }
-    }, 1000);
+    };
+    
+    waitForGtag();
   }, []);
 
   return (
