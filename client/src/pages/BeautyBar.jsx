@@ -49,7 +49,7 @@ export default function BeautyBar() {
         sortOrder
       })
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/beautybar/products?${params}`)
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/beautybar/products?${params}`)
       const data = await response.json()
       
       setProducts(data.products || [])

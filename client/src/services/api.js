@@ -52,10 +52,10 @@ api.interceptors.response.use(
 
 export const authAPI = {
   login: async (credentials) => {
-    console.log('🌐 API Debug - Login request to:', '/auth/login')
+    console.log('🌐 API Debug - Login request to:', '/api/auth/login')
     console.log('🌐 API Debug - Login credentials:', credentials)
     try {
-      const response = await api.post('/auth/login', credentials)
+      const response = await api.post('/api/auth/login', credentials)
       console.log('📡 API Debug - Login response:', response.data)
       return response
     } catch (error) {
@@ -65,8 +65,8 @@ export const authAPI = {
       throw error
     }
   },
-  register: (userData) => api.post('/auth/register', userData),
-  getMe: () => api.get('/auth/me'),
+  register: (userData) => api.post('/api/auth/register', userData),
+  getMe: () => api.get('/api/auth/me'),
 }
 
 export const userAPI = {

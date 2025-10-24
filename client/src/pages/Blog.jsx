@@ -96,7 +96,7 @@ export default function Blog() {
               >
                 Tất cả
               </button>
-              {categories.map((category) => (
+              {categories && Array.isArray(categories) && categories.map((category) => (
                 <button
                   key={category.value || category.name}
                   className={`category-btn ${selectedCategory === (category.value || category.name) ? 'active' : ''}`}
