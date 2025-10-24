@@ -73,7 +73,22 @@ const router = createBrowserRouter([
 function App() {
   // Initialize Google Analytics
   React.useEffect(() => {
+    console.log('🔍 App Debug - Initializing Google Analytics...');
     initGA();
+    
+    // Test Google Analytics after initialization
+    setTimeout(() => {
+      if (typeof window !== 'undefined' && window.gtag) {
+        console.log('✅ App Debug - Google Analytics is working');
+        window.gtag('event', 'app_initialized', {
+          event_category: 'App',
+          event_label: 'App Initialized',
+          value: 1
+        });
+      } else {
+        console.error('❌ App Debug - Google Analytics not working');
+      }
+    }, 1000);
   }, []);
 
   return (

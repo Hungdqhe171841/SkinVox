@@ -3,11 +3,18 @@ export const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-C4
 
 // Initialize Google Analytics
 export const initGA = () => {
+  console.log('🔍 Analytics Debug - initGA called');
+  console.log('🔍 Analytics Debug - GA_MEASUREMENT_ID:', GA_MEASUREMENT_ID);
+  console.log('🔍 Analytics Debug - window.gtag available:', typeof window !== 'undefined' && window.gtag);
+  
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('config', GA_MEASUREMENT_ID, {
       page_title: document.title,
       page_location: window.location.href,
     });
+    console.log('✅ Analytics Debug - Google Analytics configured successfully');
+  } else {
+    console.error('❌ Analytics Debug - Google Analytics not available');
   }
 };
 
@@ -22,12 +29,17 @@ export const trackPageView = (url) => {
 
 // Track custom events
 export const trackEvent = (action, category, label, value) => {
+  console.log('🔍 Analytics Debug - trackEvent called:', { action, category, label, value });
+  
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', action, {
       event_category: category,
       event_label: label,
       value: value,
     });
+    console.log('✅ Analytics Debug - Event tracked successfully');
+  } else {
+    console.error('❌ Analytics Debug - Cannot track event, gtag not available');
   }
 };
 
