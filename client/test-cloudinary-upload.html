@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Cloudinary Upload</title>
+</head>
+<body>
+    <h1>Test Cloudinary Upload</h1>
+    
+    <div>
+        <h2>Cloudinary Upload Test</h2>
+        <input type="file" id="uploadInput" accept="image/*">
+        <button onclick="testCloudinaryUpload()">Test Cloudinary Upload</button>
+        <div id="uploadResult"></div>
+    </div>
+    
+    <div>
+        <h2>Storage Info</h2>
+        <button onclick="checkStorageInfo()">Check Storage Info</button>
+        <div id="storageResult"></div>
+    </div>
+    
+    <div>
+        <h2>Image Preview</h2>
+        <div id="imagePreview"></div>
+    </div>
+    
+    <script>
+        function log(message, elementId) {
+            console.log(message);
+            document.getElementById(elementId).innerHTML += '<div>' + message + '</div>';
+        }
+        
+        async function testCloudinaryUpload() {
+            const fileInput = document.getElementById('uploadInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                log('❌ Please select a file', 'uploadResult');
+                return;
+            }
+            
+            log('🧪 Testing Cloudinary upload...', 'uploadResult');
+            log('📊 File name: ' + file.name, 'uploadResult');
+            log('📊 File size: ' + file.size + ' bytes', 'uploadResult');
+            log('📊 File type: ' + file.type, 'uploadResult');
+            
+            const formData = new FormData();
+            formData.append('images', file);
+            
+            try {
+                const response = await fetch('https://skinvox-backend.onrender.com/api/admin/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+                
+                log('📊 Response status: ' + response.status, 'uploadResult');
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log('❌ Upload failed: ' + errorText, 'uploadResult');
+                    return;
+                }
+                
+                const result = await response.json();
+                log('✅ Upload successful!', 'uploadResult');
+                log('📊 Result: ' + JSON.stringify(result, null, 2), 'uploadResult');
+                
+                // Show image preview
+                if (result.files && result.files[0]) {
+                    const imageUrl = result.files[0].url;
+                    log('🔗 Image URL: ' + imageUrl, 'uploadResult');
+                    
+                    // Display image preview
+                    const preview = document.getElementById('imagePreview');
+                    preview.innerHTML = `
+                        <h3>Uploaded Image Preview:</h3>
+                        <img src="${imageUrl}" alt="Uploaded image" style="max-width: 400px; max-height: 300px; border: 1px solid #ccc;">
+                        <p><strong>URL:</strong> ${imageUrl}</p>
+                        <p><strong>Public ID:</strong> ${result.files[0].public_id || 'N/A'}</p>
+                        <p><strong>Size:</strong> ${result.files[0].size || 'N/A'} bytes</p>
+                    `;
+                    
+                    // Test URL accessibility
+                    try {
+                        const imageResponse = await fetch(imageUrl);
+                        if (imageResponse.ok) {
+                            log('✅ Image URL is accessible', 'uploadResult');
+                        } else {
+                            log('❌ Image URL is not accessible: ' + imageResponse.status, 'uploadResult');
+                        }
+                    } catch (error) {
+                        log('❌ Error testing image URL: ' + error.message, 'uploadResult');
+                    }
+                }
+                
+            } catch (error) {
+                log('❌ Upload error: ' + error.message, 'uploadResult');
+            }
+        }
+        
+        async function checkStorageInfo() {
+            log('🧪 Checking storage info...', 'storageResult');
+            
+            try {
+                const response = await fetch('https://skinvox-backend.onrender.com/api/admin/storage-info');
+                
+                if (!response.ok) {
+                    log('❌ Failed to get storage info: ' + response.status, 'storageResult');
+                    return;
+                }
+                
+                const result = await response.json();
+                log('✅ Storage info retrieved!', 'storageResult');
+                log('📊 Storage Info: ' + JSON.stringify(result, null, 2), 'storageResult');
+                
+            } catch (error) {
+                log('❌ Error getting storage info: ' + error.message, 'storageResult');
+            }
+        }
+    </script>
+</body>
+</html>

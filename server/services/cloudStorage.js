@@ -132,8 +132,8 @@ class CloudStorageService {
       return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
-            public_id: `admins/${adminId}/blogs/${fileName}`,
-            folder: `admins/${adminId}/blogs`,
+            public_id: `blogs/${fileName}`,
+            folder: `blogs`,
             resource_type: 'auto',
             transformation: [
               { width: 1200, height: 800, crop: 'limit' },

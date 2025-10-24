@@ -69,9 +69,6 @@ app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from uploads directory
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
-
 // MongoDB Connection
 console.log('🔗 Server Debug - Connecting to MongoDB...');
 const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/SkinVox'
