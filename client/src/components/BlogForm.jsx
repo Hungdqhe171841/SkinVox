@@ -138,13 +138,55 @@ export default function BlogForm({
     }
   }
 
-  const handleImageAdd = (e) => {
-    const files = Array.from(e.target.files)
-    const newImages = files.map(file => `/uploads/blogs/${file.name}`)
-    setFormData(prev => ({
-      ...prev,
-      images: [...prev.images, ...newImages]
-    }))
+  const handleMultipleImageUpload = async (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
+    setUploading(true);
+    setUploadError(null);
+
+    try {
+      const uploadPromises = files.map(async (file) => {
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          throw new Error(`${file.name} không phải là file hình ảnh`);
+        }
+
+        // Validate file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+          throw new Error(`${file.name} quá lớn. Vui lòng chọn file nhỏ hơn 10MB`);
+        }
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await fetch('/api/admin/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Upload ${file.name} failed`);
+        }
+
+        const result = await response.json();
+        return result.files[0].path;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, ...uploadedUrls]
+      }));
+
+      console.log('✅ All images uploaded successfully:', uploadedUrls);
+    } catch (error) {
+      console.error('❌ Upload error:', error);
+      setUploadError(error.message || 'Lỗi khi upload hình ảnh. Vui lòng thử lại.');
+    } finally {
+      setUploading(false);
+    }
   }
 
   const handleImageRemove = (index) => {
@@ -319,9 +361,15 @@ export default function BlogForm({
               type="file"
               multiple
               accept="image/*"
-              onChange={handleImageAdd}
+              onChange={handleMultipleImageUpload}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+            {uploading && (
+              <div className="text-blue-600 text-sm">Đang upload ảnh...</div>
+            )}
+            {uploadError && (
+              <div className="text-red-600 text-sm">{uploadError}</div>
+            )}
           </div>
 
           {/* Affiliate Links */}

@@ -1,3 +1,0 @@
-# Placeholder file for blog images directory
-# This directory contains placeholder files to prevent 404 errors
-# In production, these would be replaced with actual image files
