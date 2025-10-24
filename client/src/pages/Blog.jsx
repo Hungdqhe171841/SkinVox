@@ -31,7 +31,7 @@ export default function Blog() {
 
   const loadBlogs = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/blog/blogs`)
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/blog/blogs`)
       const data = await response.json()
       console.log('Blogs API response:', data)
       console.log('First blog createdAt:', data.blogs?.[0]?.createdAt)
@@ -45,7 +45,7 @@ export default function Blog() {
 
   const loadCategories = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/blog/blog-categories`)
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/blog/blog-categories`)
       const data = await response.json()
       console.log('Categories API response:', data)
       setCategories(data || [])

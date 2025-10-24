@@ -51,7 +51,7 @@ export default function AdminDashboard() {
   const loadBlogs = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/blogs`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/blogs`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -64,7 +64,7 @@ export default function AdminDashboard() {
       console.error('Error loading blogs:', error)
       // Fallback to public blog API if admin API fails
       try {
-        const fallbackResponse = await fetch(`${import.meta.env.VITE_API_URL}/blog/blogs`)
+        const fallbackResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/blog/blogs`)
         const fallbackData = await fallbackResponse.json()
         console.log('Fallback blogs API response:', fallbackData)
         setBlogs(fallbackData.blogs || [])
@@ -79,7 +79,7 @@ export default function AdminDashboard() {
 
   const loadCategories = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/categories`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/categories`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
       console.error('Error loading categories:', error)
       // Fallback to public categories API
       try {
-        const fallbackResponse = await fetch(`${import.meta.env.VITE_API_URL}/blog/blog-categories`)
+        const fallbackResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/blog/blog-categories`)
         const fallbackData = await fallbackResponse.json()
         console.log('Fallback categories API response:', fallbackData)
         setCategories(fallbackData || [])
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
   const handleDeleteBlog = async (blogId) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/blogs/${blogId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/blogs/${blogId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -144,8 +144,8 @@ export default function AdminDashboard() {
   const handleSaveBlog = async (blogData) => {
     try {
       const url = editingBlog 
-        ? `${import.meta.env.VITE_API_URL}/admin/blogs/${editingBlog._id}`
-        : `${import.meta.env.VITE_API_URL}/admin/blogs`
+        ? `${import.meta.env.VITE_API_URL}/api/admin/blogs/${editingBlog._id}`
+        : `${import.meta.env.VITE_API_URL}/api/admin/blogs`
       
       const method = editingBlog ? 'PUT' : 'POST'
       

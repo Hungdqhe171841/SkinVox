@@ -18,7 +18,7 @@ export default function BlogDetail() {
 
   const loadBlog = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/blog/blogs/${id}`)
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/blog/blogs/${id}`)
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -55,7 +55,7 @@ export default function BlogDetail() {
 
   const loadRelatedBlogs = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/blog/blogs`)
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/blog/blogs`)
       const data = await response.json()
       setRelatedBlogs(data.blogs || data || [])
     } catch (error) {
