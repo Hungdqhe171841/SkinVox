@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import ARModal from '../makeup/components/ARModal'
+import { useAnalytics, useTrackProductInteraction } from '../hooks/useAnalytics'
 import '../styles/ProductPage.css'
 import { 
   Search, 
@@ -29,6 +30,10 @@ export default function BeautyBar() {
   const [filters, setFilters] = useState({ brands: [], categories: [] })
   const [showAR, setShowAR] = useState(false)
   const [arProduct, setArProduct] = useState(null)
+  
+  // Google Analytics hooks
+  useAnalytics()
+  const { trackProductView, trackARView } = useTrackProductInteraction()
 
   useEffect(() => {
     loadProducts()
@@ -72,6 +77,10 @@ export default function BeautyBar() {
       alert('AR is not supported for this product type yet.')
       return
     }
+    
+    // Track AR view
+    trackARView(product.name, product.productType)
+    
     setArProduct(product)
     setShowAR(true)
   }

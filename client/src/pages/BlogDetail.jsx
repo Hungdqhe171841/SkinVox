@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Calendar, User, Tag, ArrowLeft, Share2, Heart, ExternalLink } from 'lucide-react'
+import { useAnalytics, useTrackBlogInteraction } from '../hooks/useAnalytics'
 import '../styles/Blog.css'
 
 export default function BlogDetail() {
@@ -10,6 +11,10 @@ export default function BlogDetail() {
   const [relatedBlogs, setRelatedBlogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [liked, setLiked] = useState(false)
+  
+  // Google Analytics hooks
+  useAnalytics()
+  const { trackBlogView, trackBlogLike, trackBlogShare } = useTrackBlogInteraction()
 
   useEffect(() => {
     loadBlog()
@@ -45,6 +50,9 @@ export default function BlogDetail() {
       }
       
       setBlog(processedBlog)
+      
+      // Track blog view
+      trackBlogView(processedBlog.title, processedBlog._id)
     } catch (error) {
       console.error('Error loading blog:', error)
       setBlog(null)
@@ -66,9 +74,16 @@ export default function BlogDetail() {
 
   const handleLike = () => {
     setLiked(!liked)
+    if (blog) {
+      trackBlogLike(blog.title, blog._id)
+    }
   }
 
   const handleShare = () => {
+    if (blog) {
+      trackBlogShare(blog.title, blog._id, 'native_share')
+    }
+    
     if (navigator.share) {
       navigator.share({
         title: blog.title,

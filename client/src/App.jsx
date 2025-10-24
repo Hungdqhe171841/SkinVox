@@ -1,3 +1,4 @@
+import React from 'react'
 import { Routes, Route, createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
@@ -5,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import AdminProtectedRoute from './components/AdminProtectedRoute'
 import Layout from './components/Layout'
 import DebugConsole from './components/DebugConsole'
+import { initGA } from './utils/analytics'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -69,6 +71,11 @@ const router = createBrowserRouter([
 });
 
 function App() {
+  // Initialize Google Analytics
+  React.useEffect(() => {
+    initGA();
+  }, []);
+
   return (
     <AuthProvider>
       <RouterProvider router={router} />

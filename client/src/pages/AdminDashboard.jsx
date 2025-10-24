@@ -21,6 +21,7 @@ import {
   Filter
 } from 'lucide-react'
 import BlogForm from '../components/BlogForm'
+import { useAnalytics, useTrackAdminAction } from '../hooks/useAnalytics'
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
@@ -33,12 +34,19 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState('')
   const [showBlogForm, setShowBlogForm] = useState(false)
   const [editingBlog, setEditingBlog] = useState(null)
+  
+  // Google Analytics hooks
+  useAnalytics()
+  const { trackAdminLogin, trackBlogCreate, trackBlogUpdate, trackBlogDelete } = useTrackAdminAction()
 
   useEffect(() => {
     if (!user || user.role !== 'admin') {
       navigate('/')
+    } else {
+      // Track admin login
+      trackAdminLogin()
     }
-  }, [user, navigate])
+  }, [user, navigate, trackAdminLogin])
 
   // Load blogs when blog management tab is active
   useEffect(() => {
@@ -121,6 +129,7 @@ export default function AdminDashboard() {
   const handleDeleteBlog = async (blogId) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
       try {
+        const blog = blogs.find(b => b._id === blogId)
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/blogs/${blogId}`, {
           method: 'DELETE',
           headers: {
@@ -129,6 +138,10 @@ export default function AdminDashboard() {
         })
         
         if (response.ok) {
+          // Track blog delete
+          if (blog) {
+            trackBlogDelete(blog.title, blog._id)
+          }
           loadBlogs() // Reload blogs
           alert('Xóa bài viết thành công!')
         } else {
@@ -159,6 +172,13 @@ export default function AdminDashboard() {
       })
       
       if (response.ok) {
+        // Track blog create/update
+        if (editingBlog) {
+          trackBlogUpdate(blogData.title, editingBlog._id)
+        } else {
+          trackBlogCreate(blogData.title)
+        }
+        
         setShowBlogForm(false)
         setEditingBlog(null)
         loadBlogs() // Reload blogs
