@@ -126,26 +126,46 @@ class CloudStorageService {
   // Upload to Cloudinary
   async uploadToCloudinary(file, adminId = 'admin') {
     try {
+      console.log('📝 Cloudinary Debug - Starting upload for file:', file.originalname);
+      console.log('📝 Cloudinary Debug - File buffer:', file.buffer ? 'exists' : 'missing');
+      console.log('📝 Cloudinary Debug - File size:', file.size);
+      console.log('📝 Cloudinary Debug - Cloudinary config:', {
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? 'set' : 'missing',
+        api_key: process.env.CLOUDINARY_API_KEY ? 'set' : 'missing',
+        api_secret: process.env.CLOUDINARY_API_SECRET ? 'set' : 'missing'
+      });
+      
+      if (!file.buffer) {
+        throw new Error('File buffer is missing. Make sure multer is using memoryStorage.');
+      }
+      
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
       const fileName = `${adminId}-${file.fieldname}-${uniqueSuffix}`;
       
+      console.log('📝 Cloudinary Debug - Generated file name:', fileName);
+      
       return new Promise((resolve, reject) => {
+        const uploadOptions = {
+          public_id: `blogs/${fileName}`,
+          folder: `blogs`,
+          resource_type: 'auto',
+          transformation: [
+            { width: 1200, height: 800, crop: 'limit' },
+            { quality: 'auto' }
+          ]
+        };
+        
+        console.log('📝 Cloudinary Debug - Upload options:', uploadOptions);
+        
         const uploadStream = cloudinary.uploader.upload_stream(
-          {
-            public_id: `blogs/${fileName}`,
-            folder: `blogs`,
-            resource_type: 'auto',
-            transformation: [
-              { width: 1200, height: 800, crop: 'limit' },
-              { quality: 'auto' }
-            ]
-          },
+          uploadOptions,
           (error, result) => {
             if (error) {
-              console.error('Cloudinary upload error:', error);
+              console.error('❌ Cloudinary Debug - Upload error:', error);
+              console.error('❌ Cloudinary Debug - Error details:', JSON.stringify(error, null, 2));
               reject(error);
             } else {
-              console.log('✅ Cloudinary upload successful:', result.secure_url);
+              console.log('✅ Cloudinary Debug - Upload successful:', result.secure_url);
               resolve({
                 url: result.secure_url,
                 public_id: result.public_id,
@@ -156,10 +176,12 @@ class CloudStorageService {
           }
         );
         
+        console.log('📝 Cloudinary Debug - Writing buffer to stream');
         uploadStream.end(file.buffer);
       });
     } catch (error) {
-      console.error('Cloudinary upload error:', error);
+      console.error('❌ Cloudinary Debug - Exception in uploadToCloudinary:', error);
+      console.error('❌ Cloudinary Debug - Stack:', error.stack);
       throw error;
     }
   }
