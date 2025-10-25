@@ -80,6 +80,9 @@ export default function Blog() {
     return acc;
   }, {});
 
+  // Remove 'Khác' group if it exists
+  delete groupedCategories['Khác'];
+
   return (
     <div className="blog-page" style={{ display: 'flex', gap: '20px', maxWidth: '1400px', margin: '0 auto', padding: '20px' }}>
       {/* Left Sidebar - Menu */}
