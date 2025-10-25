@@ -680,6 +680,7 @@ router.get('/categories', async (req, res) => {
     ];
     
     // Flatten categories for dropdown selection
+    // Only show main categories and subcategories, NOT the children to keep it compact
     const flatCategories = [];
     
     blogCategories.forEach(category => {
@@ -690,28 +691,14 @@ router.get('/categories', async (req, res) => {
         description: category.description
       });
       
-      // Add subcategories
+      // Add subcategories only (skip children to keep dropdown compact)
       category.subcategories.forEach(subcategory => {
         flatCategories.push({
-          name: `${category.name} - ${subcategory.name}`,
-          value: `${category.name.toLowerCase().replace(/\s+/g, '-')}-${subcategory.name.toLowerCase().replace(/\s+/g, '-')}`,
+          name: subcategory.name,
+          value: subcategory.name.toLowerCase().replace(/\s+/g, '-'),
           description: subcategory.description || subcategory.name,
-          parent: category.name,
-          children: subcategory.children || []
+          parent: category.name
         });
-        
-        // Add children categories
-        if (subcategory.children && subcategory.children.length > 0) {
-          subcategory.children.forEach(child => {
-            flatCategories.push({
-              name: `${category.name} - ${subcategory.name} - ${child}`,
-              value: `${category.name.toLowerCase().replace(/\s+/g, '-')}-${subcategory.name.toLowerCase().replace(/\s+/g, '-')}-${child.toLowerCase().replace(/\s+/g, '-')}`,
-              description: child,
-              parent: subcategory.name,
-              grandParent: category.name
-            });
-          });
-        }
       });
     });
     

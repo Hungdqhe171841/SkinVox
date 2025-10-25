@@ -269,11 +269,27 @@ export default function BlogForm({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Chọn danh mục</option>
-              {categories.map((category, index) => (
-                <option key={index} value={category.name || category}>
-                  {category.name || category}
-                </option>
-              ))}
+              {(() => {
+                // Group categories by parent for optgroups
+                const grouped = categories.reduce((acc, category) => {
+                  const parent = category.parent || 'Khác';
+                  if (!acc[parent]) {
+                    acc[parent] = [];
+                  }
+                  acc[parent].push(category);
+                  return acc;
+                }, {});
+                
+                return Object.keys(grouped).map((parent) => (
+                  <optgroup key={parent} label={parent}>
+                    {grouped[parent].map((category, index) => (
+                      <option key={`${parent}-${index}`} value={category.name || category}>
+                        {category.name || category}
+                      </option>
+                    ))}
+                  </optgroup>
+                ));
+              })()}
             </select>
           </div>
 

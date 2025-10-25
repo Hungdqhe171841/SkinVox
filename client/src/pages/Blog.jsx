@@ -97,7 +97,7 @@ export default function Blog() {
               </p>
             </div>
 
-            {/* Category Filter */}
+            {/* Category Filter - Grouped by parent */}
             <div className="blog-category-filter">
               <button 
                 className={`category-btn ${selectedCategory === 'All' ? 'active' : ''}`}
@@ -105,15 +105,34 @@ export default function Blog() {
               >
                 Tất cả
               </button>
-              {categories && Array.isArray(categories) && categories.map((category) => (
-                <button
-                  key={category.value || category.name}
-                  className={`category-btn ${selectedCategory === (category.value || category.name) ? 'active' : ''}`}
-                  onClick={() => setSelectedCategory(category.value || category.name)}
-                >
-                  {category.name}
-                </button>
-              ))}
+              
+              {/* Group categories by parent */}
+              {categories && Array.isArray(categories) && (() => {
+                // Group categories by parent
+                const grouped = categories.reduce((acc, category) => {
+                  const parent = category.parent || 'Other';
+                  if (!acc[parent]) {
+                    acc[parent] = [];
+                  }
+                  acc[parent].push(category);
+                  return acc;
+                }, {});
+                
+                return Object.keys(grouped).map((parent) => (
+                  <div key={parent} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
+                    {grouped[parent].map((category) => (
+                      <button
+                        key={category.value || category.name}
+                        className={`category-btn ${selectedCategory === (category.value || category.name) ? 'active' : ''}`}
+                        onClick={() => setSelectedCategory(category.value || category.name)}
+                        style={{ fontSize: '14px', padding: '8px 12px' }}
+                      >
+                        {category.name}
+                      </button>
+                    ))}
+                  </div>
+                ));
+              })()}
             </div>
 
             {/* Blog List */}
