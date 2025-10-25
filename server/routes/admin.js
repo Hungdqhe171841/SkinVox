@@ -59,21 +59,27 @@ const simpleUpload = multer({
 router.post('/upload', upload.array('images', 10), async (req, res) => {
   try {
     console.log('📝 Admin Debug - Upload API called');
-    console.log('📝 Admin Debug - Files:', req.files);
     console.log('📝 Admin Debug - Storage type:', cloudStorage.storageType);
+    console.log('📝 Admin Debug - Files:', req.files?.length || 0);
     
     if (!req.files || req.files.length === 0) {
+      console.error('❌ Admin Debug - No files uploaded');
       return res.status(400).json({ message: 'No files uploaded' });
     }
     
     const adminId = req.user?.id || 'admin';
     let uploadedFiles = [];
     
+    console.log('📝 Admin Debug - Processing', req.files.length, 'files');
+    
     // Handle upload based on storage type
     if (cloudStorage.storageType === 'cloudinary') {
+      console.log('📝 Admin Debug - Using Cloudinary storage');
       // Upload to Cloudinary
-      for (const file of req.files) {
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
         try {
+          console.log(`📝 Admin Debug - Uploading file ${i + 1}/${req.files.length}:`, file.originalname);
           const result = await cloudStorage.uploadToCloudinary(file, adminId);
           uploadedFiles.push({
             filename: file.originalname,
@@ -82,12 +88,15 @@ router.post('/upload', upload.array('images', 10), async (req, res) => {
             public_id: result.public_id,
             size: file.size
           });
+          console.log(`✅ Admin Debug - File ${i + 1} uploaded successfully:`, result.url);
         } catch (uploadError) {
-          console.error('❌ Admin Debug - Cloudinary upload error:', uploadError);
-          throw uploadError;
+          console.error(`❌ Admin Debug - Cloudinary upload error for file ${i + 1}:`, uploadError);
+          console.error('❌ Error details:', uploadError.message, uploadError.stack);
+          throw new Error(`Upload failed for ${file.originalname}: ${uploadError.message}`);
         }
       }
     } else {
+      console.log('📝 Admin Debug - Using local storage');
       // Handle local storage upload
       uploadedFiles = req.files.map(file => ({
         filename: file.filename,
@@ -98,7 +107,7 @@ router.post('/upload', upload.array('images', 10), async (req, res) => {
       }));
     }
     
-    console.log('✅ Admin Debug - Files uploaded successfully:', uploadedFiles);
+    console.log('✅ Admin Debug - All files uploaded successfully:', uploadedFiles);
     res.json({ 
       message: 'Files uploaded successfully', 
       files: uploadedFiles,
@@ -106,7 +115,12 @@ router.post('/upload', upload.array('images', 10), async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Admin Debug - Upload error:', error);
-    res.status(500).json({ message: 'Upload error', error: error.message });
+    console.error('❌ Error stack:', error.stack);
+    res.status(500).json({ 
+      message: 'Upload error', 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
