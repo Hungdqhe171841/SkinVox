@@ -20,14 +20,20 @@ export default function Blog() {
     if (selectedCategory === 'All') {
       setFilteredBlogs(blogs)
     } else {
+      // Get the actual category name from the categories list
+      const selectedCat = categories.find(c => (c.value || c.name) === selectedCategory)
+      const categoryName = selectedCat ? selectedCat.name : selectedCategory
+      
+      console.log('Looking for category:', categoryName)
+      
       const filtered = blogs.filter(blog => {
-        console.log('Blog category:', blog.category, 'Selected:', selectedCategory)
-        return blog.category === selectedCategory
+        console.log('Blog category:', blog.category, 'Looking for:', categoryName)
+        return blog.category === categoryName
       })
       console.log('Filtered blogs:', filtered.length)
       setFilteredBlogs(filtered)
     }
-  }, [selectedCategory, blogs])
+  }, [selectedCategory, blogs, categories])
 
   const loadBlogs = async () => {
     try {

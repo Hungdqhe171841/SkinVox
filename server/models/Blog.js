@@ -20,7 +20,10 @@ const blogSchema = new mongoose.Schema({
   }],
   category: {
     type: String,
-    required: [true, 'Blog category is required']
+    required: [true, 'Blog category is required'],
+    // Categories: Main categories (Skincare, Makeup) or Subcategories
+    // Subcategories: "Chăm sóc da", "Điều trị da", "Review & So sánh sản phẩm", 
+    //                "Makeup 101 (nền tảng)", "Eyes Makeup", "Face Makeup", "Lip Makeup", "Makeup Tips"
   },
   formatType: {
     type: Number,

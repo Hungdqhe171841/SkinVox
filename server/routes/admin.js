@@ -684,11 +684,12 @@ router.get('/categories', async (req, res) => {
     const flatCategories = [];
     
     blogCategories.forEach(category => {
-      // Add main category
+      // Add main category with parent reference
       flatCategories.push({
         name: category.name,
         value: category.name.toLowerCase().replace(/\s+/g, '-'),
-        description: category.description
+        description: category.description,
+        parent: category.name // Self-reference for main categories
       });
       
       // Add subcategories only (skip children to keep dropdown compact)
