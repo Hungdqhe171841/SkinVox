@@ -26,10 +26,33 @@ export default function Blog() {
       
       console.log('Looking for category:', categoryName)
       
-      const filtered = blogs.filter(blog => {
-        console.log('Blog category:', blog.category, 'Looking for:', categoryName)
-        return blog.category === categoryName
-      })
+      // Check if it's a main category (has subcategories)
+      const isMainCategory = selectedCat && selectedCat.parent === categoryName
+      
+      let filtered = []
+      
+      if (isMainCategory) {
+        // If it's a main category, get all subcategories
+        const subcategories = categories.filter(c => c.parent === categoryName)
+        const subcategoryNames = subcategories.map(sub => sub.name)
+        
+        console.log('Main category selected:', categoryName)
+        console.log('Subcategories:', subcategoryNames)
+        
+        // Filter blogs that belong to any of the subcategories
+        filtered = blogs.filter(blog => {
+          const matches = subcategoryNames.includes(blog.category)
+          console.log('Blog category:', blog.category, 'Matches:', matches)
+          return matches
+        })
+      } else {
+        // Regular subcategory filter
+        filtered = blogs.filter(blog => {
+          console.log('Blog category:', blog.category, 'Looking for:', categoryName)
+          return blog.category === categoryName
+        })
+      }
+      
       console.log('Filtered blogs:', filtered.length)
       setFilteredBlogs(filtered)
     }
