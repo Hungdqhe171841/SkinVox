@@ -94,7 +94,15 @@ export default function AdminDashboard() {
       })
       const data = await response.json()
       console.log('Admin categories API response:', data)
-      setCategories(data.categories || [])
+      
+      // Handle new API structure with hierarchical and flat categories
+      if (data.flat && Array.isArray(data.flat)) {
+        setCategories(data.flat)
+      } else if (data.categories && Array.isArray(data.categories)) {
+        setCategories(data.categories)
+      } else {
+        setCategories([])
+      }
     } catch (error) {
       console.error('Error loading categories:', error)
       // Fallback to public categories API
@@ -102,7 +110,15 @@ export default function AdminDashboard() {
         const fallbackResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/blog/blog-categories`)
         const fallbackData = await fallbackResponse.json()
         console.log('Fallback categories API response:', fallbackData)
-        setCategories(fallbackData || [])
+        
+        // Handle new API structure
+        if (fallbackData.flat && Array.isArray(fallbackData.flat)) {
+          setCategories(fallbackData.flat)
+        } else if (Array.isArray(fallbackData)) {
+          setCategories(fallbackData)
+        } else {
+          setCategories([])
+        }
       } catch (fallbackError) {
         console.error('Fallback categories API also failed:', fallbackError)
         setCategories([])

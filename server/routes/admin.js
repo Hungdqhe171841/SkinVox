@@ -609,36 +609,154 @@ router.get('/categories', async (req, res) => {
   try {
     console.log('📝 Admin Debug - Categories API called');
     
-    // Use find with projection instead of distinct to avoid timeout
-    const blogs = await Blog.find({}, 'category').limit(100).maxTimeMS(5000);
-    const categories = [...new Set(blogs.map(blog => blog.category).filter(Boolean))];
+    // New hierarchical blog categories structure
+    const blogCategories = [
+      {
+        name: "Skincare",
+        description: "Các bài viết về chăm sóc, điều trị và review sản phẩm chăm sóc da.",
+        subcategories: [
+          {
+            name: "Chăm sóc da",
+            children: [
+              "Da thường",
+              "Da khô",
+              "Da dầu",
+              "Da nhạy cảm",
+              "Da hỗn hợp"
+            ]
+          },
+          {
+            name: "Điều trị da",
+            children: [
+              "Da mụn",
+              "Da Breakout",
+              "Da lão hóa",
+              "Da không đều màu"
+            ]
+          },
+          {
+            name: "Review & So sánh sản phẩm"
+          }
+        ]
+      },
+      {
+        name: "Makeup",
+        description: "Các bài viết hướng dẫn, review và xu hướng về trang điểm.",
+        subcategories: [
+          {
+            name: "Makeup 101 (nền tảng)",
+            children: [
+              "Xác định undertone & chọn tông nền",
+              "Thứ tự các bước base – mắt – má – môi",
+              "Vệ sinh dụng cụ & an toàn da"
+            ]
+          },
+          {
+            name: "Eyes Makeup",
+            children: [
+              "Brown Makeup",
+              "Eyeliner",
+              "Mascara",
+              "Eyes Shadow"
+            ]
+          },
+          {
+            name: "Face Makeup",
+            children: [
+              "Foundation",
+              "Blush",
+              "Highlight - Contour",
+              "Concealer"
+            ]
+          },
+          {
+            name: "Lip Makeup"
+          },
+          {
+            name: "Makeup Tips"
+          }
+        ]
+      }
+    ];
     
-    console.log('📝 Admin Debug - Categories found:', categories);
+    // Flatten categories for dropdown selection
+    const flatCategories = [];
     
-    // Transform to match expected format
-    const formattedCategories = categories.map(category => ({
-      name: category,
-      value: category.toLowerCase().replace(/\s+/g, '-'),
-      description: `Bài viết về ${category}`
-    }));
+    blogCategories.forEach(category => {
+      // Add main category
+      flatCategories.push({
+        name: category.name,
+        value: category.name.toLowerCase().replace(/\s+/g, '-'),
+        description: category.description
+      });
+      
+      // Add subcategories
+      category.subcategories.forEach(subcategory => {
+        flatCategories.push({
+          name: `${category.name} - ${subcategory.name}`,
+          value: `${category.name.toLowerCase().replace(/\s+/g, '-')}-${subcategory.name.toLowerCase().replace(/\s+/g, '-')}`,
+          description: subcategory.description || subcategory.name,
+          parent: category.name,
+          children: subcategory.children || []
+        });
+        
+        // Add children categories
+        if (subcategory.children && subcategory.children.length > 0) {
+          subcategory.children.forEach(child => {
+            flatCategories.push({
+              name: `${category.name} - ${subcategory.name} - ${child}`,
+              value: `${category.name.toLowerCase().replace(/\s+/g, '-')}-${subcategory.name.toLowerCase().replace(/\s+/g, '-')}-${child.toLowerCase().replace(/\s+/g, '-')}`,
+              description: child,
+              parent: subcategory.name,
+              grandParent: category.name
+            });
+          });
+        }
+      });
+    });
     
-    console.log('📝 Admin Debug - Formatted categories:', formattedCategories);
+    console.log('📝 Admin Debug - Categories structure:', JSON.stringify(blogCategories, null, 2));
+    
+    // Return both hierarchical and flat structures
     res.json({
-      categories: formattedCategories
+      hierarchical: blogCategories,
+      flat: flatCategories,
+      categories: flatCategories // Backward compatibility
     });
   } catch (error) {
     console.error('❌ Admin Debug - Get categories error:', error);
-    // Return default categories if database fails
-    const defaultCategories = [
-      { name: 'Makeup Tips', value: 'makeup-tips', description: 'Bài viết về Makeup Tips' },
-      { name: 'Skincare Routine', value: 'skincare-routine', description: 'Bài viết về Skincare Routine' },
-      { name: 'Product Reviews', value: 'product-reviews', description: 'Bài viết về Product Reviews' },
-      { name: 'Trends & Looks', value: 'trends-looks', description: 'Bài viết về Trends & Looks' },
-      { name: 'Behind The Brand', value: 'behind-the-brand', description: 'Bài viết về Behind The Brand' }
-    ];
-    res.json({
-      categories: defaultCategories
-    });
+    
+    // Return hierarchical structure as fallback
+    const defaultCategories = {
+      hierarchical: [
+        {
+          name: "Skincare",
+          description: "Các bài viết về chăm sóc, điều trị và review sản phẩm chăm sóc da.",
+          subcategories: [
+            {
+              name: "Chăm sóc da",
+              children: ["Da thường", "Da khô", "Da dầu", "Da nhạy cảm", "Da hỗn hợp"]
+            },
+            {
+              name: "Review & So sánh sản phẩm"
+            }
+          ]
+        },
+        {
+          name: "Makeup",
+          description: "Các bài viết hướng dẫn, review và xu hướng về trang điểm.",
+          subcategories: [
+            {
+              name: "Makeup Tips"
+            }
+          ]
+        }
+      ],
+      flat: [],
+      categories: []
+    };
+    
+    res.json(defaultCategories);
   }
 });
 

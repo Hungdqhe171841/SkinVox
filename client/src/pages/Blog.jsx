@@ -48,7 +48,16 @@ export default function Blog() {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/blog/blog-categories`)
       const data = await response.json()
       console.log('Categories API response:', data)
-      setCategories(data || [])
+      
+      // Handle new API structure with hierarchical and flat categories
+      if (data.flat && Array.isArray(data.flat)) {
+        setCategories(data.flat)
+      } else if (Array.isArray(data)) {
+        // Backward compatibility with old API structure
+        setCategories(data)
+      } else {
+        setCategories([])
+      }
     } catch (error) {
       console.error('Error loading categories:', error)
       setCategories([])
