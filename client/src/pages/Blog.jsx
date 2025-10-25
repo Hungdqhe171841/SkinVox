@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, User, Tag, ArrowRight, Eye } from 'lucide-react'
+import { Calendar, User, ArrowRight, Eye } from 'lucide-react'
 import '../styles/Blog.css'
 
 export default function Blog() {
@@ -34,8 +34,6 @@ export default function Blog() {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/blog/blogs`)
       const data = await response.json()
       console.log('Blogs API response:', data)
-      console.log('First blog createdAt:', data.blogs?.[0]?.createdAt)
-      console.log('First blog date test:', new Date(data.blogs?.[0]?.createdAt))
       setBlogs(data.blogs || data || [])
     } catch (error) {
       console.error('Error loading blogs:', error)
@@ -49,11 +47,9 @@ export default function Blog() {
       const data = await response.json()
       console.log('Categories API response:', data)
       
-      // Handle new API structure with hierarchical and flat categories
       if (data.flat && Array.isArray(data.flat)) {
         setCategories(data.flat)
       } else if (Array.isArray(data)) {
-        // Backward compatibility with old API structure
         setCategories(data)
       } else {
         setCategories([])
@@ -66,13 +62,6 @@ export default function Blog() {
     }
   }
 
-  const handleSubscribe = (e) => {
-    e.preventDefault()
-    const email = e.target.email.value
-    alert(`Cảm ơn bạn đã đăng ký với email: ${email}`)
-    e.target.reset()
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -81,172 +70,174 @@ export default function Blog() {
     )
   }
 
-  return (
-    <div className="blog-page">
-      {/* Main Content */}
-      <div className="blog-main">
-        <div className="blog-grid">
-          {/* Main Article */}
-          <div>
-            {/* Hero Section */}
-            <div className="blog-hero">
-              <h1 className="blog-hero-title">SkinVox Blog</h1>
-              <p className="blog-hero-subtitle">
-                Khám phá thế giới làm đẹp với những bài viết chuyên sâu, 
-                mẹo hay và xu hướng mới nhất từ các chuyên gia.
-              </p>
-            </div>
+  // Group categories by parent
+  const groupedCategories = categories.reduce((acc, category) => {
+    const parent = category.parent || 'Khác';
+    if (!acc[parent]) {
+      acc[parent] = [];
+    }
+    acc[parent].push(category);
+    return acc;
+  }, {});
 
-            {/* Category Filter - Grouped by parent */}
-            <div className="blog-category-filter">
-              <button 
-                className={`category-btn ${selectedCategory === 'All' ? 'active' : ''}`}
+  return (
+    <div className="blog-page" style={{ display: 'flex', gap: '20px', maxWidth: '1400px', margin: '0 auto', padding: '20px' }}>
+      {/* Left Sidebar - Menu */}
+      <aside className="blog-sidebar-menu" style={{ width: '250px', flexShrink: 0 }}>
+        <nav>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <li style={{ borderBottom: '1px solid #e5e7eb' }}>
+              <button
                 onClick={() => setSelectedCategory('All')}
+                className={`blog-menu-item ${selectedCategory === 'All' ? 'active' : ''}`}
+                style={{
+                  width: '100%',
+                  padding: '15px 0',
+                  textAlign: 'left',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '15px',
+                  fontWeight: selectedCategory === 'All' ? '600' : '400',
+                  color: selectedCategory === 'All' ? '#000' : '#4b5563',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}
               >
                 Tất cả
+                <span style={{ fontSize: '12px' }}>→</span>
               </button>
-              
-              {/* Group categories by parent */}
-              {categories && Array.isArray(categories) && (() => {
-                // Group categories by parent
-                const grouped = categories.reduce((acc, category) => {
-                  const parent = category.parent || 'Other';
-                  if (!acc[parent]) {
-                    acc[parent] = [];
-                  }
-                  acc[parent].push(category);
-                  return acc;
-                }, {});
-                
-                return Object.keys(grouped).map((parent) => (
-                  <div key={parent} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
-                    {grouped[parent].map((category) => (
-                      <button
-                        key={category.value || category.name}
-                        className={`category-btn ${selectedCategory === (category.value || category.name) ? 'active' : ''}`}
-                        onClick={() => setSelectedCategory(category.value || category.name)}
-                        style={{ fontSize: '14px', padding: '8px 12px' }}
-                      >
-                        {category.name}
-                      </button>
-                    ))}
-                  </div>
-                ));
-              })()}
-            </div>
-
-            {/* Blog List */}
-            <div className="blog-list">
-              {filteredBlogs.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-500">Không có bài viết nào trong danh mục này.</p>
+            </li>
+            
+            {/* Grouped categories */}
+            {Object.keys(groupedCategories).map((parent) => (
+              <li key={parent} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                <div style={{ padding: '15px 0', fontSize: '14px', fontWeight: '600', color: '#000' }}>
+                  {parent}
                 </div>
-              ) : (
-                filteredBlogs.map((blog) => (
-                  <article key={blog._id} className="blog-card">
-                    <div className="blog-card-image">
-                      <img 
-                        src={blog.featuredImage || (blog.images && blog.images[0]) || "/assets/Ava.jpg"} 
-                        alt={blog.title}
-                        onError={(e) => {
-                          e.target.src = "/assets/Ava.jpg"
-                        }}
-                      />
-                    </div>
-                    <div className="blog-card-content">
-                      <div className="blog-card-meta">
-                        <span className="blog-category">{blog.category}</span>
-                        <span className="blog-date">
-                          <Calendar size={14} />
-                          {(() => {
-                            console.log('Blog date debug:', blog.title, blog.createdAt, new Date(blog.createdAt));
-                            return new Date(blog.createdAt).toLocaleDateString('vi-VN');
-                          })()}
-                        </span>
-                      </div>
-                      <h2 className="blog-card-title">{blog.title}</h2>
-                      <p className="blog-card-description">{blog.excerpt}</p>
-                      <div className="blog-card-footer">
-                        <div className="blog-card-author">
-                          <User size={14} />
-                          <span>{blog.author?.name || 'Admin'}</span>
-                          <span className="blog-read-time">{Math.ceil(blog.content.length / 500)} phút đọc</span>
-                        </div>
-                        <Link 
-                          to={`/blog/${blog._id}`} 
-                          className="blog-read-more"
-                        >
-                          <Eye size={16} />
-                          Xem chi tiết
-                          <ArrowRight size={14} />
-                        </Link>
-                      </div>
-                    </div>
-                  </article>
-                ))
-              )}
-            </div>
-          </div>
+                {groupedCategories[parent].map((category) => (
+                  <button
+                    key={category.value || category.name}
+                    onClick={() => setSelectedCategory(category.value || category.name)}
+                    className={`blog-menu-item ${selectedCategory === (category.value || category.name) ? 'active' : ''}`}
+                    style={{
+                      width: '100%',
+                      padding: '12px 0',
+                      paddingLeft: '20px',
+                      textAlign: 'left',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: selectedCategory === (category.value || category.name) ? '600' : '400',
+                      color: selectedCategory === (category.value || category.name) ? '#000' : '#6b7280',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    {category.name}
+                    <span style={{ fontSize: '12px' }}>→</span>
+                  </button>
+                ))}
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </aside>
 
-          {/* Sidebar */}
-          <aside className="blog-sidebar">
-            {/* Author Card */}
-            <div className="blog-author-card">
-              <div className="author-avatar">
-                <img src="/assets/Ava.jpg" alt="SkinVox Team" />
-              </div>
-              <h3>SkinVox Team</h3>
-              <p>
-                Đội ngũ chuyên gia làm đẹp với nhiều năm kinh nghiệm, 
-                luôn cập nhật những xu hướng mới nhất và chia sẻ bí quyết làm đẹp hiệu quả.
-              </p>
-            </div>
+      {/* Right Content - Blog Grid */}
+      <main className="blog-content" style={{ flex: 1 }}>
+        {/* Page Header */}
+        <div style={{ marginBottom: '30px' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#000', marginBottom: '10px' }}>
+            {selectedCategory === 'All' 
+              ? 'Tất cả bài viết' 
+              : categories.find(c => (c.value || c.name) === selectedCategory)?.name || selectedCategory}
+          </h1>
+          <hr style={{ border: 'none', borderTop: '1px solid #e5e7eb', margin: 0 }} />
+        </div>
 
-            {/* Latest Articles */}
-            <div className="blog-latest-articles">
-              <h3>Bài viết mới nhất</h3>
-              <div className="latest-articles-list">
-                {blogs.slice(0, 3).map((blog) => (
-                  <div key={blog._id} className="latest-article-item">
+        {/* Blog Grid - 3 columns */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '30px' }}>
+          {filteredBlogs.length === 0 ? (
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 0' }}>
+              <p style={{ color: '#6b7280', fontSize: '16px' }}>Không có bài viết nào trong danh mục này.</p>
+            </div>
+          ) : (
+            filteredBlogs.map((blog) => (
+              <Link 
+                key={blog._id} 
+                to={`/blog/${blog._id}`}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                <article style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  {/* Blog Image */}
+                  <div style={{ 
+                    width: '100%', 
+                    height: '200px', 
+                    overflow: 'hidden',
+                    borderRadius: '8px',
+                    marginBottom: '16px',
+                    backgroundColor: '#f3f4f6'
+                  }}>
                     <img 
                       src={blog.featuredImage || (blog.images && blog.images[0]) || "/assets/Ava.jpg"} 
                       alt={blog.title}
+                      style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        objectFit: 'cover' 
+                      }}
                       onError={(e) => {
                         e.target.src = "/assets/Ava.jpg"
                       }}
                     />
-                    <div>
-                      <h4>{blog.title}</h4>
-                      <span>{(() => {
-                        console.log('Sidebar blog date debug:', blog.title, blog.createdAt, new Date(blog.createdAt));
-                        return new Date(blog.createdAt).toLocaleDateString('vi-VN');
-                      })()}</span>
-                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Newsletter */}
-            <div className="blog-newsletter">
-              <h3>Đăng ký nhận tin</h3>
-              <p>Nhận những bài viết mới nhất và mẹo làm đẹp độc quyền</p>
-              <form onSubmit={handleSubscribe} className="newsletter-form">
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Nhập email của bạn"
-                  required
-                  className="newsletter-input"
-                />
-                <button type="submit" className="newsletter-btn">
-                  Đăng ký
-                </button>
-              </form>
-            </div>
-          </aside>
+                  
+                  {/* Blog Content */}
+                  <h2 style={{ 
+                    fontSize: '18px', 
+                    fontWeight: '600', 
+                    color: '#000',
+                    marginBottom: '8px',
+                    lineHeight: '1.4',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden'
+                  }}>
+                    {blog.title}
+                  </h2>
+                  
+                  {/* Blog Meta */}
+                  <div style={{ 
+                    fontSize: '14px', 
+                    color: '#6b7280',
+                    display: 'flex',
+                    gap: '12px',
+                    marginTop: 'auto'
+                  }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Calendar size={14} />
+                      {new Date(blog.createdAt).toLocaleDateString('vi-VN')}
+                    </span>
+                  </div>
+                </article>
+              </Link>
+            ))
+          )}
         </div>
-      </div>
+      </main>
     </div>
   )
 }
