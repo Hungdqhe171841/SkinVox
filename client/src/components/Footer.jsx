@@ -20,7 +20,7 @@ export default function Footer() {
               Nền tảng làm đẹp thông minh với công nghệ AR tiên tiến, giúp bạn khám phá và thử nghiệm các sản phẩm makeup một cách trực quan và chính xác.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://www.facebook.com/profile.php?id=61581544359179" className="text-gray-400 hover:text-white transition-colors">
                 <Facebook className="w-6 h-6" />
               </a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
@@ -63,9 +63,10 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Liên hệ</h3>
             <ul className="space-y-2 text-gray-300">
-              <li>Email: info@skinvox.com</li>
-              <li>Hotline: 1900-xxxx</li>
-              <li>Địa chỉ: Hà Nội, Việt Nam</li>
+              <li>Email: nhilphs181009@fpt.edu.vn</li>
+              <li>Hotline: 1900-181009</li>
+              <li>Địa chỉ: 
+              FPT university, Hanoi, Vietnam </li>
             </ul>
           </div>
         </div>
