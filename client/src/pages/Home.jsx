@@ -18,7 +18,7 @@ const HomePage = () => {
     try {
       console.log('Loading featured products...')
       const apiUrl = import.meta.env.VITE_API_URL || 'https://skinvox-backend.onrender.com'
-      const response = await fetch(`${apiUrl}/api/beautybar/products?page=1&limit=6&sortBy=createdAt&sortOrder=desc`)
+      const response = await fetch(`${apiUrl}/api/beautybar/products?page=1&limit=3&sortBy=createdAt&sortOrder=desc`)
       console.log('Products response:', response)
       if (response.ok) {
         const data = await response.json()
@@ -38,12 +38,15 @@ const HomePage = () => {
     try {
       console.log('Loading featured blogs...')
       const apiUrl = import.meta.env.VITE_API_URL || 'https://skinvox-backend.onrender.com'
-      const response = await fetch(`${apiUrl}/api/blogs?formatType=nổi bật&limit=3`)
+      const response = await fetch(`${apiUrl}/api/blogs`)
       console.log('Blogs response:', response)
       if (response.ok) {
         const data = await response.json()
         console.log('Blogs data:', data)
-        setBlogs(data.blogs || data || [])
+        // Filter blogs with formatType "nổi bật" on the client side
+        const allBlogs = data.blogs || data || []
+        const featuredBlogs = allBlogs.filter(blog => blog.formatType === 'nổi bật').slice(0, 3)
+        setBlogs(featuredBlogs)
       } else {
         console.error('Blogs response not OK:', response.status, response.statusText)
       }
