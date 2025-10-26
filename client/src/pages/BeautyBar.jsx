@@ -55,6 +55,28 @@ export default function BeautyBar() {
       })
 
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/beautybar/products?${params}`)
+      
+      // Handle different response statuses
+      if (!response.ok) {
+        if (response.status === 429) {
+          console.warn('⚠️ Rate limit reached. Please try again in a moment.')
+          // Wait 2 seconds and retry once
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          const retryResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/beautybar/products?${params}`)
+          if (retryResponse.ok) {
+            const retryData = await retryResponse.json()
+            setProducts(retryData.products || [])
+            setTotalPages(retryData.pagination?.totalPages || 1)
+            setFilters({
+              brands: retryData.filters?.brands || [],
+              categories: retryData.filters?.categories || []
+            })
+            return
+          }
+        }
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
       const data = await response.json()
       
       setProducts(data.products || [])
@@ -65,6 +87,10 @@ export default function BeautyBar() {
       })
     } catch (error) {
       console.error('Error loading products:', error)
+      // Set empty state on error
+      setProducts([])
+      setTotalPages(1)
+      setFilters({ brands: [], categories: [] })
     } finally {
       setLoading(false)
     }
