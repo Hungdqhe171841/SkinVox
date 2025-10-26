@@ -133,35 +133,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Blog Posts Section */}
-      {blogs.length > 0 && (
-        <section className="blog-posts-section">
-          <div className="container">
-            <h2 className="section-title">Keep Updated With Our Beauty blog</h2>
-            
-            <div className="blog-grid">
-              {blogs.map((blog) => (
-                <article key={blog._id} className="blog-card" onClick={() => navigate(`/blog/${blog._id}`)}>
-                  <div className="blog-image">
-                    <img 
-                      src={blog.images?.[0] || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop'} 
-                      alt={blog.title} 
-                    />
-                    <div className="blog-date">
-                      {new Date(blog.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-                    </div>
-                  </div>
-                  <h3 className="blog-title">{blog.title}</h3>
-                  <p className="blog-description">
-                    {blog.description || 'Read more about this featured blog post...'}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* Testimonials Section */}
       <section className="testimonials-section">
         <div className="container">
@@ -236,6 +207,35 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Featured Blogs Section */}
+      {blogs.length > 0 && (
+        <section className="blog-posts-section">
+          <div className="container">
+            <h2 className="section-title">Featured Blogs</h2>
+            
+            <div className="blog-grid">
+              {blogs.map((blog) => (
+                <article key={blog._id} className="blog-card" onClick={() => navigate(`/blog/${blog._id}`)}>
+                  <div className="blog-image">
+                    <img 
+                      src={blog.images?.[0] || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop'} 
+                      alt={blog.title} 
+                    />
+                    <div className="blog-date">
+                      {new Date(blog.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </div>
+                  </div>
+                  <h3 className="blog-title">{blog.title}</h3>
+                  <p className="blog-description">
+                    {blog.description || 'Read more about this featured blog post...'}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Star Ratings Section */}
       <section className="star-ratings-section">
