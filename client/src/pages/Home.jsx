@@ -6,6 +6,7 @@ import { ShoppingCart, Eye, ClipboardCheck, Target, TrendingUp, Link2, Compass }
 const HomePage = () => {
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
+  const [blogs, setBlogs] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -15,10 +16,16 @@ const HomePage = () => {
 
   const loadProducts = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/beautybar/products?page=1&limit=6&sortBy=createdAt&sortOrder=desc`)
+      console.log('Loading featured products...')
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://skinvox-backend.onrender.com'
+      const response = await fetch(`${apiUrl}/api/beautybar/products?page=1&limit=6&sortBy=createdAt&sortOrder=desc`)
+      console.log('Products response:', response)
       if (response.ok) {
         const data = await response.json()
+        console.log('Products data:', data)
         setProducts(data.products || [])
+      } else {
+        console.error('Products response not OK:', response.status, response.statusText)
       }
     } catch (error) {
       console.error('Error loading products:', error)
@@ -28,7 +35,21 @@ const HomePage = () => {
   }
 
   const loadBlogs = async () => {
-    // This will be implemented to fetch recent blogs
+    try {
+      console.log('Loading featured blogs...')
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://skinvox-backend.onrender.com'
+      const response = await fetch(`${apiUrl}/api/blogs?formatType=nổi bật&limit=3`)
+      console.log('Blogs response:', response)
+      if (response.ok) {
+        const data = await response.json()
+        console.log('Blogs data:', data)
+        setBlogs(data.blogs || data || [])
+      } else {
+        console.error('Blogs response not OK:', response.status, response.statusText)
+      }
+    } catch (error) {
+      console.error('Error loading blogs:', error)
+    }
   }
 
   return (
@@ -113,55 +134,33 @@ const HomePage = () => {
       </section>
 
       {/* Blog Posts Section */}
-      <section className="blog-posts-section">
-        <div className="container">
-          <h2 className="section-title">Keep Updated With Our Beauty blog</h2>
-          
-          <div className="blog-grid">
-            <article className="blog-card">
-              <div className="blog-image">
-                <img 
-                  src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop" 
-                  alt="Mirror-Glow Routine" 
-                />
-                <div className="blog-date">29th June, 2025</div>
-              </div>
-              <h3 className="blog-title">Mirror-Glow Routine</h3>
-              <p className="blog-description">
-                Our 3-step, 5-minute morning ritual primer, tone up cream, and soft-focus highlighter.
-              </p>
-            </article>
-
-            <article className="blog-card">
-              <div className="blog-image">
-                <img 
-                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop" 
-                  alt="Peony Dew Cream" 
-                />
-                <div className="blog-date">23rd June, 2025</div>
-              </div>
-              <h3 className="blog-title">Peony Dew Cream Review</h3>
-              <p className="blog-description">
-                After 14 days of use, we gauge how this petal-rich moisturizer delivers bounce.
-              </p>
-            </article>
-
-            <article className="blog-card">
-              <div className="blog-image">
-                <img 
-                  src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop" 
-                  alt="Amber Botanics" 
-                />
-                <div className="blog-date">15th June, 2025</div>
-              </div>
-              <h3 className="blog-title">Amber Botanics Elixirs</h3>
-              <p className="blog-description">
-                We break down the antioxidant blend in these apothecary-style serums to see.
-              </p>
-            </article>
+      {blogs.length > 0 && (
+        <section className="blog-posts-section">
+          <div className="container">
+            <h2 className="section-title">Keep Updated With Our Beauty blog</h2>
+            
+            <div className="blog-grid">
+              {blogs.map((blog) => (
+                <article key={blog._id} className="blog-card" onClick={() => navigate(`/blog/${blog._id}`)}>
+                  <div className="blog-image">
+                    <img 
+                      src={blog.images?.[0] || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop'} 
+                      alt={blog.title} 
+                    />
+                    <div className="blog-date">
+                      {new Date(blog.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </div>
+                  </div>
+                  <h3 className="blog-title">{blog.title}</h3>
+                  <p className="blog-description">
+                    {blog.description || 'Read more about this featured blog post...'}
+                  </p>
+                </article>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Testimonials Section */}
       <section className="testimonials-section">
