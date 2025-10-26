@@ -542,7 +542,12 @@ export default function AdminDashboard() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div className="flex space-x-2">
                               <button 
-                                onClick={() => window.open(`/blog/${blog._id}`, '_blank')}
+                                onClick={() => {
+                                  console.log('Opening blog:', blog._id, blog.title)
+                                  const url = `${window.location.origin}/blog/${blog._id}`
+                                  console.log('Blog URL:', url)
+                                  window.open(url, '_blank')
+                                }}
                                 className="text-blue-600 hover:text-blue-900"
                                 title="Xem bài viết"
                               >
