@@ -372,6 +372,219 @@
   background: #374151;
 }
 
+/* Blog Posts Section */
+.blog-posts-section {
+  background: white;
+  padding: 5rem 2rem;
+}
+
+.blog-posts-section .container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.blog-card {
+  background: white;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.blog-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+}
+
+.blog-image {
+  position: relative;
+  height: 250px;
+  overflow: hidden;
+}
+
+.blog-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.blog-date {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.blog-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 1.5rem 1.5rem 0.75rem;
+}
+
+.blog-description {
+  font-size: 1rem;
+  color: #4b5563;
+  margin: 0 1.5rem 1.5rem;
+  line-height: 1.6;
+}
+
+/* Star Ratings Section */
+.star-ratings-section {
+  background: #f9fafb;
+  padding: 5rem 2rem;
+}
+
+.star-ratings-section .container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.ratings-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 4rem;
+  margin-top: 3rem;
+}
+
+.overall-rating {
+  text-align: center;
+  min-width: 200px;
+}
+
+.rating-number {
+  font-size: 4rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.rating-stars {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.rating-text {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.rating-breakdown {
+  flex: 1;
+}
+
+.rating-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.rating-bar span:first-child {
+  width: 4rem;
+  font-size: 0.875rem;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.bar {
+  flex: 1;
+  height: 0.5rem;
+  background: #e5e7eb;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: #f59e0b;
+  border-radius: 0.25rem;
+  transition: width 0.3s;
+}
+
+.rating-bar span:last-child {
+  width: 3rem;
+  text-align: right;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Appendix Section */
+.appendix-section {
+  background: white;
+  padding: 5rem 2rem;
+}
+
+.appendix-section .container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.appendix-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.appendix-card {
+  background: #f9fafb;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.appendix-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.appendix-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.appendix-list li {
+  padding: 0.5rem 0;
+  color: #4b5563;
+  position: relative;
+  padding-left: 1.5rem;
+  line-height: 1.6;
+}
+
+.appendix-list li::before {
+  content: "•";
+  color: #ec4899;
+  font-weight: bold;
+  font-size: 1.2rem;
+  position: absolute;
+  left: 0;
+  top: 0.3rem;
+}
+
+/* Loading and No Products States */
+.loading-text, .no-products {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+  font-size: 1.125rem;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .hero-title {
@@ -384,6 +597,15 @@
   
   .products-grid {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  .ratings-summary {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .overall-rating {
+    min-width: auto;
   }
 }
 
@@ -411,7 +633,11 @@
   .products-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
-  
+
+  .blog-grid {
+    grid-template-columns: 1fr;
+  }
+
   .testimonial-carousel {
     flex-direction: column;
   }
@@ -426,6 +652,10 @@
   
   .carousel-btn.next {
     right: 0;
+  }
+
+  .appendix-grid {
+    grid-template-columns: 1fr;
   }
 }
 

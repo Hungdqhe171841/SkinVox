@@ -1,8 +1,36 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import '../HomePage.css'
 import { ShoppingCart, Eye, ClipboardCheck, Target, TrendingUp, Link2, Compass } from 'lucide-react'
 
 const HomePage = () => {
+  const navigate = useNavigate()
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadProducts()
+    loadBlogs()
+  }, [])
+
+  const loadProducts = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/beautybar/products?page=1&limit=6&sortBy=createdAt&sortOrder=desc`)
+      if (response.ok) {
+        const data = await response.json()
+        setProducts(data.products || [])
+      }
+    } catch (error) {
+      console.error('Error loading products:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadBlogs = async () => {
+    // This will be implemented to fetch recent blogs
+  }
+
   return (
     <div className="homepage-new">
       {/* Hero Section */}
@@ -15,7 +43,7 @@ const HomePage = () => {
         <div className="hero-overlay">
           <h1 className="hero-title">Just Like Nature Intended</h1>
           <p className="hero-subtitle">Handcrafted Organic Soaps & Candles</p>
-          <button className="hero-cta">
+          <button className="hero-cta" onClick={() => navigate('/beautybar')}>
             Shop now
             <ShoppingCart className="hero-cta-icon" />
           </button>
@@ -84,6 +112,57 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Blog Posts Section */}
+      <section className="blog-posts-section">
+        <div className="container">
+          <h2 className="section-title">Keep Updated With Our Beauty blog</h2>
+          
+          <div className="blog-grid">
+            <article className="blog-card">
+              <div className="blog-image">
+                <img 
+                  src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop" 
+                  alt="Mirror-Glow Routine" 
+                />
+                <div className="blog-date">29th June, 2025</div>
+              </div>
+              <h3 className="blog-title">Mirror-Glow Routine</h3>
+              <p className="blog-description">
+                Our 3-step, 5-minute morning ritual primer, tone up cream, and soft-focus highlighter.
+              </p>
+            </article>
+
+            <article className="blog-card">
+              <div className="blog-image">
+                <img 
+                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop" 
+                  alt="Peony Dew Cream" 
+                />
+                <div className="blog-date">23rd June, 2025</div>
+              </div>
+              <h3 className="blog-title">Peony Dew Cream Review</h3>
+              <p className="blog-description">
+                After 14 days of use, we gauge how this petal-rich moisturizer delivers bounce.
+              </p>
+            </article>
+
+            <article className="blog-card">
+              <div className="blog-image">
+                <img 
+                  src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop" 
+                  alt="Amber Botanics" 
+                />
+                <div className="blog-date">15th June, 2025</div>
+              </div>
+              <h3 className="blog-title">Amber Botanics Elixirs</h3>
+              <p className="blog-description">
+                We break down the antioxidant blend in these apothecary-style serums to see.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials Section */}
       <section className="testimonials-section">
         <div className="container">
@@ -120,136 +199,130 @@ const HomePage = () => {
             dramatic texture improvements. The anti-aging holy grail.
           </p>
           
-          <div className="products-grid">
-            <div className="product-card">
-              <a href="#" className="explore-link">Explore</a>
-              <img 
-                src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&h=300&fit=crop" 
-                alt="Velvet Bloom"
-                className="product-image"
-              />
-              <h3 className="product-name">Velvet Bloom</h3>
-              <p className="product-price">219 000 VND</p>
-              <div className="product-actions">
-                <button className="btn-ar">
-                  <Eye className="btn-icon" />
-                  Try AR
-                </button>
-                <button className="btn-shop">
-                  <ShoppingCart className="btn-icon" />
-                  Shop now
-                </button>
-              </div>
+          {loading ? (
+            <div className="loading-text">Loading products...</div>
+          ) : products.length === 0 ? (
+            <div className="no-products">No products available</div>
+          ) : (
+            <div className="products-grid">
+              {products.map((product) => (
+                <div key={product._id} className="product-card">
+                  <a href="#" className="explore-link">Explore</a>
+                  <img 
+                    src={product.image || 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&h=300&fit=crop'} 
+                    alt={product.name}
+                    className="product-image"
+                  />
+                  <h3 className="product-name">{product.name}</h3>
+                  <p className="product-price">{product.price?.toLocaleString('vi-VN')} VND</p>
+                  <div className="product-actions">
+                    <button className="btn-ar">
+                      <Eye className="btn-icon" />
+                      Try AR
+                    </button>
+                    <button className="btn-shop">
+                      <ShoppingCart className="btn-icon" />
+                      Shop now
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
+          )}
 
-            <div className="product-card">
-              <a href="#" className="explore-link">Explore</a>
-              <img 
-                src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&h=300&fit=crop" 
-                alt="Rose Muse"
-                className="product-image"
-              />
-              <h3 className="product-name">Rose Muse</h3>
-              <p className="product-price">206 000 VND</p>
-              <div className="product-actions">
-                <button className="btn-ar">
-                  <Eye className="btn-icon" />
-                  Try AR
-                </button>
-                <button className="btn-shop">
-                  <ShoppingCart className="btn-icon" />
-                  Shop now
-                </button>
-              </div>
+          <div className="view-all-cta">
+            <button className="btn-view-all" onClick={() => navigate('/beautybar')}>
+              View all skincare product
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Star Ratings Section */}
+      <section className="star-ratings-section">
+        <div className="container">
+          <h2 className="section-title">Customer Ratings</h2>
+          <div className="ratings-summary">
+            <div className="overall-rating">
+              <div className="rating-number">4.8</div>
+              <div className="rating-stars">⭐⭐⭐⭐⭐</div>
+              <div className="rating-text">Based on 1,247 reviews</div>
             </div>
-
-            <div className="product-card">
-              <a href="#" className="explore-link">Explore</a>
-              <img 
-                src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&h=300&fit=crop" 
-                alt="Pink Aura"
-                className="product-image"
-              />
-              <h3 className="product-name">Pink Aura</h3>
-              <p className="product-price">215 000 VND</p>
-              <div className="product-actions">
-                <button className="btn-ar">
-                  <Eye className="btn-icon" />
-                  Try AR
-                </button>
-                <button className="btn-shop">
-                  <ShoppingCart className="btn-icon" />
-                  Shop now
-                </button>
+            <div className="rating-breakdown">
+              <div className="rating-bar">
+                <span>5 stars</span>
+                <div className="bar">
+                  <div className="fill" style={{width: '85%'}}></div>
+                </div>
+                <span>85%</span>
               </div>
-            </div>
-
-            <div className="product-card">
-              <a href="#" className="explore-link">Explore</a>
-              <img 
-                src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&h=300&fit=crop" 
-                alt="Velvet Bloom"
-                className="product-image"
-              />
-              <h3 className="product-name">Velvet Bloom</h3>
-              <p className="product-price">219 000 VND</p>
-              <div className="product-actions">
-                <button className="btn-ar">
-                  <Eye className="btn-icon" />
-                  Try AR
-                </button>
-                <button className="btn-shop">
-                  <ShoppingCart className="btn-icon" />
-                  Shop now
-                </button>
+              <div className="rating-bar">
+                <span>4 stars</span>
+                <div className="bar">
+                  <div className="fill" style={{width: '12%'}}></div>
+                </div>
+                <span>12%</span>
               </div>
-            </div>
-
-            <div className="product-card">
-              <a href="#" className="explore-link">Explore</a>
-              <img 
-                src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&h=300&fit=crop" 
-                alt="Rose Muse"
-                className="product-image"
-              />
-              <h3 className="product-name">Rose Muse</h3>
-              <p className="product-price">205 000 VND</p>
-              <div className="product-actions">
-                <button className="btn-ar">
-                  <Eye className="btn-icon" />
-                  Try AR
-                </button>
-                <button className="btn-shop">
-                  <ShoppingCart className="btn-icon" />
-                  Shop now
-                </button>
+              <div className="rating-bar">
+                <span>3 stars</span>
+                <div className="bar">
+                  <div className="fill" style={{width: '2%'}}></div>
+                </div>
+                <span>2%</span>
               </div>
-            </div>
-
-            <div className="product-card">
-              <a href="#" className="explore-link">Explore</a>
-              <img 
-                src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&h=300&fit=crop" 
-                alt="Berry Pop"
-                className="product-image"
-              />
-              <h3 className="product-name">Berry Pop</h3>
-              <p className="product-price">229 000 VND</p>
-              <div className="product-actions">
-                <button className="btn-ar">
-                  <Eye className="btn-icon" />
-                  Try AR
-                </button>
-                <button className="btn-shop">
-                  <ShoppingCart className="btn-icon" />
-                  Shop now
-                </button>
+              <div className="rating-bar">
+                <span>2 stars</span>
+                <div className="bar">
+                  <div className="fill" style={{width: '1%'}}></div>
+                </div>
+                <span>1%</span>
+              </div>
+              <div className="rating-bar">
+                <span>1 star</span>
+                <div className="bar">
+                  <div className="fill" style={{width: '0%'}}></div>
+                </div>
+                <span>0%</span>
               </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="view-all-cta">
-            <button className="btn-view-all">View all skincare product</button>
+      {/* Appendix Section */}
+      <section className="appendix-section">
+        <div className="container">
+          <h2 className="section-title">Resources & Guides</h2>
+          <div className="appendix-grid">
+            <div className="appendix-card">
+              <h3 className="appendix-title">User Guide</h3>
+              <ul className="appendix-list">
+                <li>How to choose products for your skin type</li>
+                <li>Basic skincare routine</li>
+                <li>Natural makeup tips</li>
+                <li>Beauty product storage</li>
+              </ul>
+            </div>
+
+            <div className="appendix-card">
+              <h3 className="appendix-title">Resources</h3>
+              <ul className="appendix-list">
+                <li>Skincare tutorial videos</li>
+                <li>Skincare routine e-book</li>
+                <li>Product selection checklist</li>
+                <li>Seasonal skincare schedule</li>
+              </ul>
+            </div>
+
+            <div className="appendix-card">
+              <h3 className="appendix-title">Useful Links</h3>
+              <ul className="appendix-list">
+                <li>In-depth beauty blog</li>
+                <li>Community experience sharing</li>
+                <li>Online expert consultation</li>
+                <li>Free beauty courses</li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
