@@ -38,16 +38,18 @@ const HomePage = () => {
     try {
       console.log('Loading featured blogs...')
       const apiUrl = import.meta.env.VITE_API_URL || 'https://skinvox-backend.onrender.com'
-      const response = await fetch(`${apiUrl}/api/blogs`)
+      const response = await fetch(`${apiUrl}/api/blog/blogs`)
       console.log('Blogs response:', response)
       if (response.ok) {
         const data = await response.json()
         console.log('Blogs data:', data)
-        // Filter blogs with formatType "nổi bật" on the client side
+        // Filter blogs with formatType 2 (Nổi bật) on the client side
         const allBlogs = data.blogs || data || []
         console.log('All blogs:', allBlogs)
         console.log('All blogs count:', allBlogs.length)
-        const featuredBlogs = allBlogs.filter(blog => blog.formatType === 'nổi bật').slice(0, 3)
+        console.log('FormatType values:', allBlogs.map(b => ({ title: b.title, formatType: b.formatType })))
+        // formatType: 2 = "Nổi bật" (featured blogs)
+        const featuredBlogs = allBlogs.filter(blog => blog.formatType === 2).slice(0, 3)
         console.log('Featured blogs:', featuredBlogs)
         console.log('Featured blogs count:', featuredBlogs.length)
         setBlogs(featuredBlogs)
