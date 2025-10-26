@@ -233,32 +233,32 @@ const HomePage = () => {
         <div className="container">
           <h2 className="section-title">Keep Updated With Our Beauty blog</h2>
           
-          <div className={`blog-grid ${blogs.length > 0 && blogs.length < 4 ? 'blog-grid-center' : ''}`}>
-            {blogs.length > 0 ? (
-              blogs.map((blog) => (
-                <article key={blog._id} className="blog-card" onClick={() => navigate(`/blog/${blog._id}`)}>
-                  <div className="blog-image">
-                    <img 
-                      src={blog.featuredImage || blog.images?.[0] || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop'} 
-                      alt={blog.title}
-                      onError={(e) => {
-                        e.target.src = 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop'
-                      }}
-                    />
-                    <div className="blog-date">
-                      {new Date(blog.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                    </div>
-                  </div>
-                  <h3 className="blog-title">{blog.title}</h3>
-                  <p className="blog-description">
-                    {blog.description || 'Read more about this featured blog post...'}
-                  </p>
-                </article>
-              ))
-            ) : (
-              <div className="loading-text">Loading featured blogs...</div>
-            )}
-          </div>
+                     <div className="blog-grid">
+             {blogs.length > 0 ? (
+               blogs.map((blog) => (
+                 <article key={blog._id} className="blog-card" onClick={() => navigate(`/blog/${blog._id}`)}>
+                   <div className="blog-image">
+                     <img 
+                       src={blog.featuredImage || blog.images?.[0] || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop'} 
+                       alt={blog.title}
+                       onError={(e) => {
+                         e.target.src = 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop'
+                       }}
+                     />
+                     <div className="blog-date">
+                       {new Date(blog.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                     </div>
+                   </div>
+                   <h3 className="blog-title">{blog.title}</h3>
+                   <p className="blog-description">
+                     {blog.description || 'Read more about this featured blog post...'}
+                   </p>
+                 </article>
+               ))
+             ) : (
+               <div className="loading-text">Loading featured blogs...</div>
+             )}
+           </div>
         </div>
       </section>
 
