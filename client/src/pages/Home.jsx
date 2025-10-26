@@ -1,6 +1,6 @@
 import React from 'react'
 import '../HomePage.css'
-import { ShoppingCart, Eye, ClipboardCheck, Target, TrendingUp, Link2, Compass } from 'lucide-react'
+.import { ShoppingCart, Eye, ClipboardCheck, Target, TrendingUp, Link2, Compass } from 'lucide-react'
 
 const HomePage = () => {
   return (
