@@ -139,6 +139,16 @@ const HomePage = () => {
               </p>
               <a href="#" className="feature-link">Read More</a>
             </div>
+
+            <div className="feature-card">
+              <ShoppingCart className="feature-icon" />
+              <h3 className="feature-title">Expert Recommendations</h3>
+              <p className="feature-description">
+                Our team of skincare experts carefully curates product recommendations based on 
+                extensive research and real-world testing.
+              </p>
+              <a href="#" className="feature-link">Read More</a>
+            </div>
           </div>
         </div>
       </section>
