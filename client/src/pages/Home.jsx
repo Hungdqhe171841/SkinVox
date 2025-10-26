@@ -49,7 +49,8 @@ const HomePage = () => {
         console.log('All blogs count:', allBlogs.length)
         console.log('FormatType values:', allBlogs.map(b => ({ title: b.title, formatType: b.formatType })))
         // formatType: 2 = "Nổi bật" (featured blogs)
-        const featuredBlogs = allBlogs.filter(blog => blog.formatType === 2).slice(0, 3)
+        // Show max 4 blogs
+        const featuredBlogs = allBlogs.filter(blog => blog.formatType === 2).slice(0, 4)
         console.log('Featured blogs:', featuredBlogs)
         console.log('Featured blogs count:', featuredBlogs.length)
         setBlogs(featuredBlogs)
@@ -222,17 +223,20 @@ const HomePage = () => {
         <div className="container">
           <h2 className="section-title">Keep Updated With Our Beauty blog</h2>
           
-          <div className="blog-grid">
+          <div className={`blog-grid ${blogs.length > 0 && blogs.length < 4 ? 'blog-grid-center' : ''}`}>
             {blogs.length > 0 ? (
               blogs.map((blog) => (
                 <article key={blog._id} className="blog-card" onClick={() => navigate(`/blog/${blog._id}`)}>
                   <div className="blog-image">
                     <img 
-                      src={blog.images?.[0] || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop'} 
-                      alt={blog.title} 
+                      src={blog.featuredImage || blog.images?.[0] || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop'} 
+                      alt={blog.title}
+                      onError={(e) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop'
+                      }}
                     />
                     <div className="blog-date">
-                      {new Date(blog.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      {new Date(blog.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                     </div>
                   </div>
                   <h3 className="blog-title">{blog.title}</h3>
