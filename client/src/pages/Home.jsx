@@ -45,7 +45,11 @@ const HomePage = () => {
         console.log('Blogs data:', data)
         // Filter blogs with formatType "nổi bật" on the client side
         const allBlogs = data.blogs || data || []
+        console.log('All blogs:', allBlogs)
+        console.log('All blogs count:', allBlogs.length)
         const featuredBlogs = allBlogs.filter(blog => blog.formatType === 'nổi bật').slice(0, 3)
+        console.log('Featured blogs:', featuredBlogs)
+        console.log('Featured blogs count:', featuredBlogs.length)
         setBlogs(featuredBlogs)
       } else {
         console.error('Blogs response not OK:', response.status, response.statusText)
@@ -212,13 +216,13 @@ const HomePage = () => {
       </section>
 
       {/* Featured Blogs Section */}
-      {blogs.length > 0 && (
-        <section className="blog-posts-section">
-          <div className="container">
-            <h2 className="section-title">Featured Blogs</h2>
-            
-            <div className="blog-grid">
-              {blogs.map((blog) => (
+      <section className="blog-posts-section">
+        <div className="container">
+          <h2 className="section-title">Keep Updated With Our Beauty blog</h2>
+          
+          <div className="blog-grid">
+            {blogs.length > 0 ? (
+              blogs.map((blog) => (
                 <article key={blog._id} className="blog-card" onClick={() => navigate(`/blog/${blog._id}`)}>
                   <div className="blog-image">
                     <img 
@@ -234,11 +238,13 @@ const HomePage = () => {
                     {blog.description || 'Read more about this featured blog post...'}
                   </p>
                 </article>
-              ))}
-            </div>
+              ))
+            ) : (
+              <div className="loading-text">Loading featured blogs...</div>
+            )}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* Star Ratings Section */}
       <section className="star-ratings-section">
