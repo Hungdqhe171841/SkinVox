@@ -15,8 +15,12 @@
       "dest": "/client/public/assets/$1"
     },
     {
-      "src": "/(.*)",
+      "src": "/(.*\\.(js|css|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot))",
       "dest": "/client/dist/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/client/dist/index.html"
     }
   ],
   "env": {
