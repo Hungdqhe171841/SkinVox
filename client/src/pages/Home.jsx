@@ -18,7 +18,7 @@ const HomePage = () => {
     try {
       console.log('Loading featured products...')
       const apiUrl = import.meta.env.VITE_API_URL || 'https://skinvox-backend.onrender.com'
-      const response = await fetch(`${apiUrl}/api/beautybar/products?page=1&limit=3&sortBy=createdAt&sortOrder=desc`)
+      const response = await fetch(`${apiUrl}/api/beautybar/products?page=1&limit=4&sortBy=createdAt&sortOrder=desc`)
       console.log('Products response:', response)
       if (response.ok) {
         const data = await response.json()
@@ -183,9 +183,9 @@ const HomePage = () => {
             <div className="loading-text">Loading products...</div>
           ) : products.length === 0 ? (
             <div className="no-products">No products available</div>
-          ) : (
-            <div className="products-grid">
-              {products.map((product) => (
+                     ) : (
+             <div className={`products-grid ${products.length > 0 && products.length < 4 ? 'products-grid-center' : ''}`}>
+               {products.map((product) => (
                 <div key={product._id} className="product-card">
                   <a href="#" className="explore-link">Explore</a>
                   <img 
