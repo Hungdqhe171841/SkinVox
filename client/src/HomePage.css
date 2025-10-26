@@ -404,7 +404,7 @@
 
 .blog-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, 1fr) !important;
   gap: 1.5rem;
   margin-top: 3rem;
   max-width: 1200px;
@@ -627,7 +627,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 1280px) {
+@media (max-width: 1400px) {
   .features-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -635,10 +635,6 @@
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
-  }
-
-  .blog-grid {
-    grid-template-columns: repeat(2, 1fr);
   }
 }
 
