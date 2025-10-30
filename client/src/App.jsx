@@ -7,8 +7,6 @@ import AdminProtectedRoute from './components/AdminProtectedRoute'
 import Layout from './components/Layout'
 import DebugConsole from './components/DebugConsole'
 import { initGA } from './utils/analytics'
-import { monitorGALoading } from './utils/testGALoading'
-import { testGAConfig, testSkinVoxEvents } from './utils/testGAConfig'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -77,16 +75,13 @@ function App() {
   React.useEffect(() => {
     console.log('🔍 App Debug - Initializing Google Analytics...');
     
-    // Start monitoring Google Analytics loading
-    monitorGALoading();
-    
     // Wait for gtag to be available
     const waitForGtag = () => {
       if (typeof window !== 'undefined' && window.gtag) {
         console.log('✅ App Debug - Google Analytics gtag is available');
         initGA();
         
-        // Test Google Analytics after initialization
+        // Send app initialized event
         setTimeout(() => {
           window.gtag('event', 'app_initialized', {
             event_category: 'App',
@@ -94,12 +89,6 @@ function App() {
             value: 1
           });
           console.log('✅ App Debug - Google Analytics event sent');
-          
-          // Test GA configuration
-          testGAConfig();
-          
-          // Test SkinVox specific events
-          testSkinVoxEvents();
         }, 500);
       } else {
         console.log('⏳ App Debug - Waiting for Google Analytics gtag...');
