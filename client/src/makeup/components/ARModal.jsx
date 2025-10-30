@@ -66,6 +66,15 @@ export default function ARModal({ product, onClose }) {
                 { name: 'Nude Pink', hex: '#FFB6C1', rgba: 'rgba(255,182,193,0.6)' }
               ]
               console.log('✅ AR Debug - Using lipstick fallback shades')
+            } else if (t === 'eyeshadow' || t === 'eyeshadows') {
+              list = [
+                { name: 'Soft Beige', hex: '#E8C9A0', rgba: 'rgba(232,201,160,0.3)' },
+                { name: 'Rose Gold', hex: '#B76E79', rgba: 'rgba(183,110,121,0.3)' },
+                { name: 'Bronze', hex: '#8B5A3C', rgba: 'rgba(139,90,60,0.35)' },
+                { name: 'Deep Brown', hex: '#6B4423', rgba: 'rgba(107,68,35,0.4)' },
+                { name: 'Charcoal', hex: '#4A4A4A', rgba: 'rgba(74,74,74,0.35)' }
+              ]
+              console.log('✅ AR Debug - Using eyeshadow fallback shades')
             } else {
               console.log('⚠️ AR Debug - No fallback shades for type:', t)
             }
