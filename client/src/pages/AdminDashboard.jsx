@@ -34,6 +34,15 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState('')
   const [showBlogForm, setShowBlogForm] = useState(false)
   const [editingBlog, setEditingBlog] = useState(null)
+  const [showCategoryForm, setShowCategoryForm] = useState(false)
+  const [editingCategory, setEditingCategory] = useState(null)
+  const [newCategory, setNewCategory] = useState({
+    name: '',
+    description: '',
+    parent: '',
+    subcategory: '',
+    children: []
+  })
   
   // Google Analytics hooks
   useAnalytics()
@@ -52,6 +61,9 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (activeTab === 'blogs') {
       loadBlogs()
+      loadCategories()
+    }
+    if (activeTab === 'categories') {
       loadCategories()
     }
   }, [activeTab])
@@ -585,18 +597,114 @@ export default function AdminDashboard() {
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Category Management</h2>
-                <p className="text-gray-600">Organize content with categories</p>
+                <p className="text-gray-600">Organize blog content with hierarchical categories</p>
               </div>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+              <button 
+                onClick={() => setShowCategoryForm(true)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 New Category
               </button>
             </div>
-            
-            <div className="bg-white p-8 rounded-lg shadow text-center">
-              <Tag className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Category Management</h3>
-              <p className="text-gray-600">Category management interface will be implemented here.</p>
+
+            {/* Categories List */}
+            {loading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Blog Categories</h3>
+                  
+                  {categories.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Tag className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">No categories found. Create your first category!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {/* Group categories by parent */}
+                      {Array.from(new Set(categories.map(cat => cat.parent))).map(parentName => (
+                        <div key={parentName} className="border rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center">
+                              <Tag className="w-5 h-5 text-blue-600 mr-2" />
+                              <h4 className="font-semibold text-gray-900">{parentName}</h4>
+                            </div>
+                            <span className="text-sm text-gray-500">
+                              {categories.filter(c => c.parent === parentName).length} subcategories
+                            </span>
+                          </div>
+                          
+                          {/* Main category description */}
+                          {categories.find(c => c.name === parentName)?.description && (
+                            <p className="text-sm text-gray-600 mb-3">
+                              {categories.find(c => c.name === parentName).description}
+                            </p>
+                          )}
+                          
+                          {/* Subcategories */}
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {categories
+                              .filter(cat => cat.parent === parentName && cat.name !== parentName)
+                              .map(subcat => (
+                                <span
+                                  key={subcat.value}
+                                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                                >
+                                  {subcat.name}
+                                </span>
+                              ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Category Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Tag className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Total Categories</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {Array.from(new Set(categories.map(cat => cat.parent))).length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <Tag className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Subcategories</p>
+                    <p className="text-2xl font-bold text-gray-900">{categories.length}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <FileText className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Blog Posts</p>
+                    <p className="text-2xl font-bold text-gray-900">{blogs.length}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -629,6 +737,199 @@ export default function AdminDashboard() {
           categories={categories}
           isEditing={!!editingBlog}
         />
+      )}
+
+      {/* Category Form Modal */}
+      {showCategoryForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-semibold text-gray-900">
+                  {editingCategory ? 'Edit Category' : 'Create New Category'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowCategoryForm(false)
+                    setEditingCategory(null)
+                    setNewCategory({
+                      name: '',
+                      description: '',
+                      parent: '',
+                      subcategory: '',
+                      children: []
+                    })
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={(e) => {
+                e.preventDefault()
+                // Handle category creation/update
+                console.log('Creating category:', newCategory)
+                alert('Category creation functionality will be implemented with backend API')
+                setShowCategoryForm(false)
+              }} className="space-y-6">
+                {/* Category Type Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category Type
+                  </label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="categoryType"
+                        value="main"
+                        checked={newCategory.parent === ''}
+                        onChange={() => setNewCategory({ ...newCategory, parent: '', subcategory: '' })}
+                        className="mr-2"
+                      />
+                      Main Category
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="categoryType"
+                        value="sub"
+                        checked={newCategory.parent !== ''}
+                        onChange={() => setNewCategory({ ...newCategory, parent: 'select' })}
+                        className="mr-2"
+                      />
+                      Subcategory
+                    </label>
+                  </div>
+                </div>
+
+                {/* Parent Category Selection (if subcategory) */}
+                {newCategory.parent !== '' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Parent Category
+                    </label>
+                    <select
+                      value={newCategory.parent}
+                      onChange={(e) => setNewCategory({ ...newCategory, parent: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    >
+                      <option value="select">Select parent category...</option>
+                      {Array.from(new Set(categories.map(cat => cat.parent))).map(parentName => (
+                        <option key={parentName} value={parentName}>{parentName}</option>
+                      ))}
+                      <option value="Skincare">Skincare</option>
+                      <option value="Makeup">Makeup</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Category Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={newCategory.name}
+                    onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                    placeholder="e.g., Skincare, Makeup Tips"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Category Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    value={newCategory.description}
+                    onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                    placeholder="Brief description of this category..."
+                    rows="3"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Children (comma-separated) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Child Categories (optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g., Da thường, Da khô, Da dầu (comma-separated)"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    onChange={(e) => {
+                      const children = e.target.value.split(',').map(c => c.trim()).filter(c => c)
+                      setNewCategory({ ...newCategory, children })
+                    }}
+                  />
+                  <p className="text-sm text-gray-500 mt-1">Separate multiple children with commas</p>
+                </div>
+
+                {/* Preview */}
+                {newCategory.name && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
+                    <div className="flex items-center">
+                      <Tag className="w-4 h-4 text-blue-600 mr-2" />
+                      <span className="font-medium">
+                        {newCategory.parent && newCategory.parent !== 'select' && `${newCategory.parent} > `}
+                        {newCategory.name}
+                      </span>
+                    </div>
+                    {newCategory.description && (
+                      <p className="text-sm text-gray-600 mt-2">{newCategory.description}</p>
+                    )}
+                    {newCategory.children.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {newCategory.children.map((child, idx) => (
+                          <span key={idx} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            {child}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-3 pt-4 border-t">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCategoryForm(false)
+                      setEditingCategory(null)
+                      setNewCategory({
+                        name: '',
+                        description: '',
+                        parent: '',
+                        subcategory: '',
+                        children: []
+                      })
+                    }}
+                    className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    {editingCategory ? 'Update Category' : 'Create Category'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
