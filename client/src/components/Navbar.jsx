@@ -1,12 +1,41 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { User, LogOut, Menu, X } from 'lucide-react'
-import { useState } from 'react'
+import { User, LogOut, Menu, X, Crown } from 'lucide-react'
+import { useState, useEffect } from 'react'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isPremium, setIsPremium] = useState(false)
+
+  useEffect(() => {
+    const fetchPremiumStatus = async () => {
+      if (!user) {
+        setIsPremium(false)
+        return
+      }
+
+      const token = localStorage.getItem('token')
+      if (!token) {
+        setIsPremium(false)
+        return
+      }
+
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/premium/status`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        const data = await response.json()
+        setIsPremium(data.isPremium || false)
+      } catch (error) {
+        console.error('Error fetching premium status:', error)
+        setIsPremium(false)
+      }
+    }
+
+    fetchPremiumStatus()
+  }, [user])
 
   const handleLogout = () => {
     logout()
@@ -49,6 +78,15 @@ export default function Navbar() {
             >
               Blog
             </Link>
+            {!isPremium && user && (
+              <Link
+                to="/premium"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:from-purple-700 hover:to-pink-700 transition-all flex items-center gap-1"
+              >
+                <Crown className="w-4 h-4" />
+                Upgrade to Premium
+              </Link>
+            )}
             <Link
               to="/makeup-ar"
               className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
@@ -78,15 +116,21 @@ export default function Navbar() {
                        >
                          Profile
                        </Link>
-                       <div className="flex items-center space-x-2">
-                         <User className="w-4 h-4 text-gray-500" />
-                         <span className="text-sm text-gray-700">{user.username}</span>
-                         {user.role === 'admin' && (
-                           <span className="text-xs bg-primary-100 text-primary-800 px-2 py-1 rounded-full">
-                             Admin
-                           </span>
-                         )}
-                       </div>
+                      <div className="flex items-center space-x-2">
+                        <User className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-gray-700">{user.username}</span>
+                        {isPremium && (
+                          <span className="text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 px-2 py-1 rounded-full flex items-center gap-1">
+                            <Crown className="w-3 h-3" />
+                            Premium
+                          </span>
+                        )}
+                        {user.role === 'admin' && (
+                          <span className="text-xs bg-primary-100 text-primary-800 px-2 py-1 rounded-full">
+                            Admin
+                          </span>
+                        )}
+                      </div>
                        <button
                          onClick={handleLogout}
                          className="flex items-center space-x-1 text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"

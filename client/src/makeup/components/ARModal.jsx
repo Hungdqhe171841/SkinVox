@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react'
+import { Crown } from 'lucide-react'
 import CameraView from './CameraView'
 import { MakeupModel } from '../models/MakeupModel'
 import { CameraPresenter } from '../presenters/CameraPresenter'
@@ -7,6 +8,8 @@ export default function ARModal({ product, onClose }) {
   const [shades, setShades] = useState([])
   const [selectedShade, setSelectedShade] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [isPremium, setIsPremium] = useState(false)
+  const [premiumStatus, setPremiumStatus] = useState(null)
 
   // Map UI product types to API route categories
   const toCategory = (t) => {
@@ -27,6 +30,31 @@ export default function ARModal({ product, onClose }) {
         return (t || '').toLowerCase()
     }
   }
+
+  // Fetch premium status
+  useEffect(() => {
+    const fetchPremiumStatus = async () => {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        setIsPremium(false)
+        return
+      }
+
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/premium/status`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        const data = await response.json()
+        setIsPremium(data.isPremium || false)
+        setPremiumStatus(data)
+      } catch (error) {
+        console.error('Error fetching premium status:', error)
+        setIsPremium(false)
+      }
+    }
+
+    fetchPremiumStatus()
+  }, [])
 
   // Fetch product shades from MongoDB
   useEffect(() => {
@@ -80,10 +108,15 @@ export default function ARModal({ product, onClose }) {
             }
           }
           console.log('✅ AR shades loaded:', list.length, 'shades')
-          setShades(list)
+          
+          // Free users only get first 2 shades
+          const limitedShades = isPremium ? list : list.slice(0, 2)
+          console.log(`🔒 AR Debug - Premium status: ${isPremium}, showing ${limitedShades.length}/${list.length} shades`)
+          
+          setShades(limitedShades)
           // Set first shade as default
-          if (list.length > 0) {
-            setSelectedShade(list[0])
+          if (limitedShades.length > 0) {
+            setSelectedShade(limitedShades[0])
           }
         }
       } catch (error) {
@@ -269,6 +302,27 @@ export default function ARModal({ product, onClose }) {
                       </button>
                     ))}
                   </div>
+                  
+                  {/* Premium Upgrade Message */}
+                  {!isPremium && shades.length === 2 && (
+                    <div className="mt-3 px-3 py-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Crown className="w-4 h-4 text-purple-600" />
+                          <span className="text-sm text-gray-700">
+                            <strong>Free users:</strong> Only 2 shades available. Upgrade to Premium for unlimited colors!
+                          </span>
+                        </div>
+                        <a
+                          href="/premium"
+                          target="_blank"
+                          className="shrink-0 px-3 py-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-medium rounded-full hover:from-purple-700 hover:to-pink-700 transition-all"
+                        >
+                          Upgrade
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
