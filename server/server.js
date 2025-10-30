@@ -33,22 +33,43 @@ const PORT = process.env.PORT || 5000;
 app.use(helmet());
 app.use(morgan('combined'));
 
-// CORS Configuration
+// CORS Configuration - Dynamic origin checking
+const allowedOrigins = [
+  'https://ddaa7.vercel.app',
+  'https://skinvox-client.vercel.app',
+  'https://skinvox.vercel.app', 
+  'https://skin-vox.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:3002', 
+  'http://localhost:5173'
+];
+
 const corsOptions = {
-  origin: [
-    'https://ddaa7.vercel.app',
-    'https://skinvox-client.vercel.app',
-    'https://skinvox.vercel.app', 
-    'https://skin-vox.vercel.app',
-    'https://*.vercel.app',
-    'http://localhost:3000',
-    'http://localhost:3002', 
-    'http://localhost:5173'
-  ],
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, Postman, or curl)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Allow all .vercel.app domains
+    if (origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+    
+    // Reject other origins
+    console.log('❌ CORS blocked origin:', origin);
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
-console.log('🌐 Server Debug - CORS origins:', corsOptions.origin);
+console.log('🌐 Server Debug - CORS origins:', allowedOrigins);
+console.log('🌐 Server Debug - Also allowing all *.vercel.app domains');
 app.use(cors(corsOptions));
 
 // CORS Debug middleware
