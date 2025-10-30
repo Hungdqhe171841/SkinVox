@@ -781,7 +781,7 @@ export class CameraPresenter {
         : {};
     const baseColor =
       eyeshadow.color || blush.color || "rgba(198,120,110,0.28)";
-    const intensity = eyeshadow.intensity ?? blush.intensity ?? 0.55; // Increased from 0.35 to 0.55 for darker eyeshadow
+    const intensity = eyeshadow.intensity ?? blush.intensity ?? 0.42; // Reduced from 0.55 to 0.42 for softer, more natural look
 
     // Offscreen canvas for blending
     const off = document.createElement("canvas");
@@ -800,9 +800,9 @@ export class CameraPresenter {
     const R_DOWN = [263, 382, 381, 380, 374, 373, 390, 249, 362];
 
     const softness = Math.max(
-      2,
-      (((eyeshadow.softness ?? 5) * Math.max(w, h)) / 900) * 1.5
-    );
+      3,
+      (((eyeshadow.softness ?? 6) * Math.max(w, h)) / 900) * 2.0
+    ); // Increased blur for softer, more diffused look
 
     // Orient by corner
     const orientByCorner = (pts, innerIdx, outerIdx) => {
@@ -853,17 +853,17 @@ export class CameraPresenter {
       let cx = up.reduce((s, p) => s + p.x, 0) / up.length;
       let cy = up.reduce((s, p) => s + p.y, 0) / up.length;
 
-      const cat = Math.max(1, eyeshadow.catFactor ?? 1.15);
+      const cat = Math.max(1, eyeshadow.catFactor ?? 1.05); // Reduced from 1.15 for softer wing
       const upperBase = Math.max(
         3,
-        (eyeshadow.upperWidthFactor ?? 0.35) * base
+        (eyeshadow.upperWidthFactor ?? 0.28) * base // Reduced from 0.35 for smaller area
       );
-      const growBase = (eyeshadow.extendFactor ?? 0.12) * base;
+      const growBase = (eyeshadow.extendFactor ?? 0.08) * base; // Reduced from 0.12 for less spread
 
-      const upperInner = upperBase * (eyeshadow.upperInnerScale ?? 0.2);
-      const upperOuter = upperBase * (eyeshadow.upperOuterScale ?? 1.35 * cat);
-      const growInner = growBase * (eyeshadow.innerExtendScale ?? 0.3);
-      const growOuter = growBase * (eyeshadow.outerExtendScale ?? 1.5 * cat);
+      const upperInner = upperBase * (eyeshadow.upperInnerScale ?? 0.15); // Reduced from 0.2
+      const upperOuter = upperBase * (eyeshadow.upperOuterScale ?? 1.15 * cat); // Reduced from 1.35
+      const growInner = growBase * (eyeshadow.innerExtendScale ?? 0.2); // Reduced from 0.3
+      const growOuter = growBase * (eyeshadow.outerExtendScale ?? 1.2 * cat); // Reduced from 1.5
 
       const liftFactor = isEyeClosed ? 0.05 : 0.1;
       const liftInner = upperBase * (eyeshadow.liftInnerScale ?? liftFactor);
@@ -984,7 +984,7 @@ export class CameraPresenter {
     // Composite onto skin
     ctx.save();
     ctx.globalCompositeOperation = eyeshadow.blendMode || "soft-light";
-    ctx.globalAlpha = eyeshadow.opacity ?? 0.95; // Increased from 0.85 to 0.95 for darker overall eyeshadow
+    ctx.globalAlpha = eyeshadow.opacity ?? 0.75; // Reduced from 0.95 to 0.75 for softer, more natural look
     ctx.drawImage(off, 0, 0);
     ctx.restore();
   }
