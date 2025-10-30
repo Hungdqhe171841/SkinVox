@@ -348,25 +348,18 @@ const PremiumSubscription = () => {
                     Scan QR Code to Pay
                   </h3>
                   <div className="bg-white p-4 rounded-lg inline-block mx-auto block">
-                    {/* Replace this with your actual QR code */}
-                    <div className="w-64 h-64 bg-gray-200 flex items-center justify-center rounded-lg">
-                      <p className="text-gray-500 text-center px-4">
-                        QR Code will appear here<br/>
-                        <span className="text-sm">
-                          Amount: {selectedPlan?.amountFormatted}
-                        </span>
-                      </p>
-                    </div>
+                    <img
+                      src="/assets/qr-code.jpg"
+                      alt="QR Code for payment"
+                      className="w-64 h-64 rounded-lg object-contain"
+                    />
                   </div>
                   <div className="mt-4 text-center">
                     <p className="text-sm text-gray-600">
-                      Bank: <strong>MB Bank</strong>
+                      Amount: <strong>{selectedPlan?.amountFormatted}</strong>
                     </p>
                     <p className="text-sm text-gray-600">
-                      Account: <strong>0123456789</strong>
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Name: <strong>SKINVOX COMPANY</strong>
+                      After payment, please upload screenshot below
                     </p>
                   </div>
                 </div>
