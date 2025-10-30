@@ -337,7 +337,7 @@ export class CameraPresenter {
       const isUpper = position === "upper";
       const lengthMultiplier = eyelash.length * (isUpper ? 15 : 8);
       const curlFactor = eyelash.curl;
-
+      
       // Different curl directions for upper/lower lashes
       const baseAngle = isUpper ? -Math.PI / 2 : Math.PI / 2;
       const curlAngle = baseAngle + curlFactor * (side === "left" ? -0.5 : 0.5);
@@ -575,7 +575,7 @@ export class CameraPresenter {
         const curl = (side === "left" ? -1 : 1) * (0.6 + Math.random() * 0.6);
         const ex = sx + dirX * len + perpX * curl * (hairLineW * 2);
         const ey = sy + dirY * len + perpY * curl * (hairLineW * 2);
-        oc.beginPath();
+      oc.beginPath();
         oc.moveTo(sx, sy);
         oc.quadraticCurveTo(
           sx + (ex - sx) * 0.45 + perpX * (Math.random() - 0.5) * 2,
@@ -614,7 +614,7 @@ export class CameraPresenter {
     ctx.globalCompositeOperation = eyebrow.blendMode || "multiply";
     ctx.globalAlpha = 0.8;
     ctx.drawImage(off, 0, 0);
-    ctx.restore();
+      ctx.restore();
   }
 
   drawBlush(ctx, landmarks, canvas) {
@@ -940,33 +940,8 @@ export class CameraPresenter {
       oc.stroke();
       oc.restore();
 
-      // 4) Outer-V at tail
-      const outer = upLifted[upLifted.length - 1];
-      const prev = upLifted[upLifted.length - 2];
-      let tx = outer.x - prev.x,
-        ty = outer.y - prev.y;
-      const len = Math.hypot(tx, ty) || 1;
-      tx /= len;
-      ty /= len;
-      let nx = -ty,
-        ny = tx;
-      if ((outer.x - cx) * nx + (outer.y - cy) * ny < 0) {
-        nx = -nx;
-        ny = -ny;
-      }
-      const spotX = outer.x + nx * (upperBase * 0.65) + tx * (upperBase * 0.5);
-      const spotY = outer.y + ny * (upperBase * 0.65) + ty * (upperBase * 0.5);
-      this._softSpot(
-        oc,
-        spotX,
-        spotY,
-        upperBase * 0.8,
-        baseColor,
-        Math.min(0.95, intensity * 1.3), // Increased from 0.85 and 1.1 to 0.95 and 1.3 for darker outer-V
-        Math.max(5, softness * 0.7),
-        "multiply"
-      );
-
+      // 4) Removed outer-V spot for cleaner horizontal wing shape
+      
       oc.restore();
     };
 
