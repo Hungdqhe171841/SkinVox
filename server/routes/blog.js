@@ -34,6 +34,7 @@ router.get('/blogs', async (req, res) => {
       _id: blog._id,
       title: blog.title,
       content: blog.content,
+      description: blog.description,
       excerpt: blog.description || (blog.content ? blog.content.substring(0, 200) + '...' : ''),
       featuredImage: blog.images && blog.images[0] && blog.images[0].startsWith('http') ? blog.images[0] : '/assets/Ava.jpg',
       images: blog.images ? blog.images.filter(img => img && img.startsWith('http')) : [],
@@ -45,7 +46,11 @@ router.get('/blogs', async (req, res) => {
       createdAt: blog.createdAt || blog._id.getTimestamp() || new Date(),
       updatedAt: blog.updatedAt || blog._id.getTimestamp() || new Date(),
       viewCount: blog.viewCount || 0,
-      likes: blog.likes || []
+      likes: blog.likes || [],
+      // Include comment and rating stats
+      commentCount: blog.commentCount || 0,
+      rating: blog.rating || 0,
+      ratingCount: blog.ratingCount || 0
     }));
     
     res.json({
@@ -291,7 +296,11 @@ router.get('/blogs/:id', async (req, res) => {
       updatedAt: blog.updatedAt || blog._id.getTimestamp() || new Date(),
       viewCount: blog.viewCount,
       likes: blog.likes || [],
-      status: blog.status
+      status: blog.status,
+      // Include comment and rating stats
+      commentCount: blog.commentCount || 0,
+      rating: blog.rating || 0,
+      ratingCount: blog.ratingCount || 0
     };
     
     res.json(formattedBlog);
