@@ -97,7 +97,7 @@ export default function BeautyBar() {
   }
 
   const handleOpenAR = (product) => {
-    const supported = ['lipstick', 'eyeliner', 'eyebrows', 'blush']
+    const supported = ['lipstick', 'eyeliner', 'eyebrows', 'blush', 'eyeshadow']
     const type = (product?.productType || '').toLowerCase()
     if (!supported.includes(type)) {
       alert('AR is not supported for this product type yet.')
