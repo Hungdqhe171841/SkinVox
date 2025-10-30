@@ -181,53 +181,94 @@ const PremiumSubscription = () => {
           </div>
         )}
 
-        {/* Premium Plans */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        {/* Single Premium Plan */}
+        <div className="max-w-md mx-auto mb-12">
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-2 border-transparent hover:border-purple-500"
+              className="bg-white rounded-2xl shadow-2xl p-8 border-4 border-purple-500 relative overflow-hidden"
             >
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {plan.name}
-              </h3>
-              <div className="mb-4">
-                <span className="text-3xl font-bold text-purple-600">
-                  {plan.amountFormatted}
-                </span>
-                <span className="text-gray-600 ml-2">
-                  / {plan.duration} days
-                </span>
+              {/* Popular Badge */}
+              <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1 text-xs font-bold rounded-bl-lg">
+                MOST POPULAR
               </div>
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-700">Unlimited AR makeup colors</span>
+              
+              <div className="text-center mb-6">
+                <Crown className="w-16 h-16 mx-auto text-purple-600 mb-4" />
+                <h3 className="text-3xl font-bold text-gray-900 mb-2">
+                  Premium Monthly
+                </h3>
+                <div className="mb-4">
+                  <span className="text-5xl font-bold text-purple-600">
+                    25,000₫
+                  </span>
+                  <span className="text-gray-600 text-xl ml-2">
+                    / tháng
+                  </span>
+                </div>
+                <p className="text-gray-600">Chỉ 833₫ mỗi ngày!</p>
+              </div>
+
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-start gap-3">
+                  <div className="rounded-full bg-green-100 p-1">
+                    <Check className="w-5 h-5 text-green-600" />
+                  </div>
+                  <span className="text-gray-700 flex-1">
+                    <strong>Unlimited AR Colors</strong> - Try all makeup shades
+                  </span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-700">Full ChatBot access</span>
+                <li className="flex items-start gap-3">
+                  <div className="rounded-full bg-green-100 p-1">
+                    <Check className="w-5 h-5 text-green-600" />
+                  </div>
+                  <span className="text-gray-700 flex-1">
+                    <strong>AI ChatBot</strong> - 24/7 beauty consultation
+                  </span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-700">Priority support</span>
+                <li className="flex items-start gap-3">
+                  <div className="rounded-full bg-green-100 p-1">
+                    <Check className="w-5 h-5 text-green-600" />
+                  </div>
+                  <span className="text-gray-700 flex-1">
+                    <strong>Priority Support</strong> - Fast response time
+                  </span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-700">Exclusive features</span>
+                <li className="flex items-start gap-3">
+                  <div className="rounded-full bg-green-100 p-1">
+                    <Check className="w-5 h-5 text-green-600" />
+                  </div>
+                  <span className="text-gray-700 flex-1">
+                    <strong>Ad-Free Experience</strong> - Enjoy without interruption
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="rounded-full bg-green-100 p-1">
+                    <Check className="w-5 h-5 text-green-600" />
+                  </div>
+                  <span className="text-gray-700 flex-1">
+                    <strong>Exclusive Content</strong> - Early access to new features
+                  </span>
                 </li>
               </ul>
+
               <button
                 onClick={() => handleSelectPlan(plan)}
                 disabled={premiumStatus?.isPremium}
-                className={`w-full py-3 rounded-lg font-semibold transition-colors ${
+                className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
                   premiumStatus?.isPremium
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                    : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:-translate-y-1'
                 }`}
               >
-                {premiumStatus?.isPremium ? 'Already Premium' : 'Choose Plan'}
+                {premiumStatus?.isPremium ? '✓ Already Premium' : 'Upgrade Now'}
               </button>
+              
+              {!premiumStatus?.isPremium && (
+                <p className="text-center text-sm text-gray-500 mt-4">
+                  🔒 Cancel anytime • No hidden fees
+                </p>
+              )}
             </div>
           ))}
         </div>

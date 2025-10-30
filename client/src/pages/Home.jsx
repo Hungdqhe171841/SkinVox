@@ -273,6 +273,8 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Website Reviews Section - What Our Customer Said */}
+      <WebsiteReviews />
 
       {/* Appendix Section */}
       <section className="appendix-section">
@@ -311,9 +313,6 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-
-      {/* Website Reviews Section */}
-      <WebsiteReviews />
     </div>
   )
 }

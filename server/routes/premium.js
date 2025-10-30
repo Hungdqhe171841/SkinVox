@@ -50,12 +50,9 @@ const uploadToCloudinary = (buffer, folder = 'premium-payments') => {
   });
 };
 
-// Premium plan pricing
+// Premium plan pricing - Single plan only
 const PREMIUM_PLANS = {
-  '1-month': { duration: 30, amount: 99000 },
-  '3-months': { duration: 90, amount: 249000 },
-  '6-months': { duration: 180, amount: 449000 },
-  '1-year': { duration: 365, amount: 799000 }
+  '1-month': { duration: 30, amount: 25000 }
 };
 
 // @route   POST /api/premium/subscribe
