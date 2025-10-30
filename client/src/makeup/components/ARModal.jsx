@@ -90,6 +90,7 @@ export default function ARModal({ product, onClose }) {
     m.setFeatureActive('eyelash', false)
     m.setFeatureActive('eyebrow', false)
     m.setFeatureActive('blush', false)
+    m.setFeatureActive('eyeshadow', false)
 
     const type = (product?.productType || '').toLowerCase()
 
@@ -129,6 +130,18 @@ export default function ARModal({ product, onClose }) {
         intensity: 0.35
       }
       m.setBlush(blushPreset)
+    } else if (type === 'eyeshadow' || type === 'eyeshadows') {
+      m.setFeatureActive('eyeshadow', true)
+      // Create eyeshadow preset from product data
+      const eyeshadowPreset = {
+        name: product?.name || 'Eyeshadow',
+        color: selectedShade?.rgba || selectedShade?.hex || product?.color || 'rgba(198, 120, 110, 0.28)',
+        intensity: 0.35,
+        softness: 5,
+        blendMode: 'soft-light',
+        opacity: 0.85
+      }
+      m.setEyeshadow(eyeshadowPreset)
     } else {
       // Default to lipstick demo
       m.setFeatureActive('lipstick', true)
@@ -175,6 +188,16 @@ export default function ARModal({ product, onClose }) {
         intensity: model.getBlush()?.intensity || 0.35
       }
       model.setBlush(preset)
+    } else if (type === 'eyeshadow' || type === 'eyeshadows') {
+      const preset = {
+        name: product?.name || 'Eyeshadow',
+        color: shade?.rgba || shade?.hex || 'rgba(198,120,110,0.28)',
+        intensity: model.getEyeshadow()?.intensity || 0.35,
+        softness: model.getEyeshadow()?.softness || 5,
+        blendMode: model.getEyeshadow()?.blendMode || 'soft-light',
+        opacity: model.getEyeshadow()?.opacity || 0.85
+      }
+      model.setEyeshadow(preset)
     }
   }
 
