@@ -18,7 +18,11 @@ import {
   Tag,
   Calendar,
   Search,
-  Filter
+  Filter,
+  Crown,
+  CheckCircle,
+  XCircle,
+  Clock
 } from 'lucide-react'
 import BlogForm from '../components/BlogForm'
 import { useAnalytics, useTrackAdminAction } from '../hooks/useAnalytics'
@@ -43,6 +47,9 @@ export default function AdminDashboard() {
     subcategory: '',
     children: []
   })
+  const [subscriptions, setSubscriptions] = useState([])
+  const [subscriptionStats, setSubscriptionStats] = useState({})
+  const [subscriptionFilter, setSubscriptionFilter] = useState('pending')
   const [dashboardStats, setDashboardStats] = useState({
     overview: {
       totalUsers: 0,
@@ -95,7 +102,11 @@ export default function AdminDashboard() {
     if (activeTab === 'categories') {
       loadCategories()
     }
-  }, [activeTab])
+    if (activeTab === 'premium') {
+      loadSubscriptions()
+      loadSubscriptionStats()
+    }
+  }, [activeTab, subscriptionFilter])
 
   const loadDashboardStats = async () => {
     try {
@@ -178,6 +189,95 @@ export default function AdminDashboard() {
       } catch (fallbackError) {
         console.error('Fallback categories API also failed:', fallbackError)
         setCategories([])
+      }
+    }
+  }
+
+  const loadSubscriptions = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/premium/admin/subscriptions?status=${subscriptionFilter}`,
+        {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        }
+      )
+      const data = await response.json()
+      console.log('Subscriptions loaded:', data)
+      setSubscriptions(data.subscriptions || [])
+    } catch (error) {
+      console.error('Error loading subscriptions:', error)
+      setSubscriptions([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadSubscriptionStats = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/premium/admin/stats`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      })
+      const data = await response.json()
+      console.log('Subscription stats loaded:', data)
+      setSubscriptionStats(data.stats || {})
+    } catch (error) {
+      console.error('Error loading subscription stats:', error)
+      setSubscriptionStats({})
+    }
+  }
+
+  const handleApproveSubscription = async (subscriptionId) => {
+    if (window.confirm('Approve this premium subscription?')) {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/premium/admin/approve/${subscriptionId}`,
+          {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          }
+        )
+        
+        if (response.ok) {
+          alert('Subscription approved successfully!')
+          loadSubscriptions()
+          loadSubscriptionStats()
+        } else {
+          alert('Error approving subscription!')
+        }
+      } catch (error) {
+        console.error('Error approving subscription:', error)
+        alert('Error approving subscription!')
+      }
+    }
+  }
+
+  const handleRejectSubscription = async (subscriptionId) => {
+    const reason = prompt('Enter rejection reason:')
+    if (reason) {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/premium/admin/reject/${subscriptionId}`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ reason })
+          }
+        )
+        
+        if (response.ok) {
+          alert('Subscription rejected')
+          loadSubscriptions()
+          loadSubscriptionStats()
+        } else {
+          alert('Error rejecting subscription!')
+        }
+      } catch (error) {
+        console.error('Error rejecting subscription:', error)
+        alert('Error rejecting subscription!')
       }
     }
   }
@@ -330,6 +430,19 @@ export default function AdminDashboard() {
               <div className="flex items-center">
                 <Users className="w-4 h-4 mr-2" />
                 Users
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('premium')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'premium'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center">
+                <Crown className="w-4 h-4 mr-2" />
+                Premium
               </div>
             </button>
           </nav>
@@ -786,6 +899,202 @@ export default function AdminDashboard() {
               <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">User Management</h3>
               <p className="text-gray-600">User management interface will be implemented here.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Premium Subscriptions Tab */}
+        {activeTab === 'premium' && (
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Premium Subscriptions</h2>
+                <p className="text-gray-600">Manage and approve premium subscription requests</p>
+              </div>
+            </div>
+
+            {/* Stats Grid */}
+            {subscriptionStats && Object.keys(subscriptionStats).length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg shadow p-6 text-white">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-purple-100">Total Subscriptions</p>
+                      <p className="text-3xl font-bold">{subscriptionStats.totalSubscriptions || 0}</p>
+                    </div>
+                    <Crown className="w-10 h-10 text-purple-200" />
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-600">Pending</p>
+                      <p className="text-3xl font-bold text-yellow-600">{subscriptionStats.pendingCount || 0}</p>
+                    </div>
+                    <Clock className="w-10 h-10 text-yellow-400" />
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-600">Approved</p>
+                      <p className="text-3xl font-bold text-green-600">{subscriptionStats.approvedCount || 0}</p>
+                    </div>
+                    <CheckCircle className="w-10 h-10 text-green-400" />
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-600">Active Users</p>
+                      <p className="text-3xl font-bold text-blue-600">{subscriptionStats.activePremiumUsers || 0}</p>
+                    </div>
+                    <UserCheck className="w-10 h-10 text-blue-400" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Filter Tabs */}
+            <div className="bg-white rounded-lg shadow">
+              <div className="border-b border-gray-200">
+                <nav className="flex space-x-4 px-6 pt-4">
+                  {['pending', 'approved', 'rejected', 'all'].map(status => (
+                    <button
+                      key={status}
+                      onClick={() => setSubscriptionFilter(status)}
+                      className={`pb-4 px-2 border-b-2 font-medium text-sm ${
+                        subscriptionFilter === status
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+
+              {/* Subscriptions List */}
+              <div className="p-6">
+                {loading ? (
+                  <div className="text-center py-8 text-gray-500">Loading subscriptions...</div>
+                ) : subscriptions.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Crown className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">No {subscriptionFilter !== 'all' ? subscriptionFilter : ''} subscriptions found</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {subscriptions.map((sub) => (
+                      <div
+                        key={sub._id}
+                        className="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold">
+                                {sub.username?.charAt(0).toUpperCase() || 'U'}
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900">{sub.username}</h3>
+                                <p className="text-sm text-gray-600">{sub.email}</p>
+                              </div>
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                sub.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                sub.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                {sub.status}
+                              </span>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-3">
+                              <div>
+                                <p className="text-gray-500">Plan</p>
+                                <p className="font-medium">{sub.plan.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-500">Amount</p>
+                                <p className="font-medium">
+                                  {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(sub.amount)}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-gray-500">Duration</p>
+                                <p className="font-medium">{sub.duration} days</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-500">Submitted</p>
+                                <p className="font-medium">{new Date(sub.createdAt).toLocaleDateString('vi-VN')}</p>
+                              </div>
+                            </div>
+
+                            {sub.transactionId && (
+                              <p className="text-sm text-gray-600 mb-2">
+                                <span className="font-medium">Transaction ID:</span> {sub.transactionId}
+                              </p>
+                            )}
+
+                            {sub.notes && (
+                              <p className="text-sm text-gray-600 mb-2">
+                                <span className="font-medium">Notes:</span> {sub.notes}
+                              </p>
+                            )}
+
+                            {sub.rejectionReason && (
+                              <p className="text-sm text-red-600 mb-2">
+                                <span className="font-medium">Rejection Reason:</span> {sub.rejectionReason}
+                              </p>
+                            )}
+
+                            {/* Payment Proof */}
+                            {sub.paymentProof && (
+                              <div className="mt-3">
+                                <p className="text-sm font-medium text-gray-700 mb-2">Payment Proof:</p>
+                                <a 
+                                  href={sub.paymentProof} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="inline-block"
+                                >
+                                  <img 
+                                    src={sub.paymentProof} 
+                                    alt="Payment proof" 
+                                    className="max-h-48 rounded border border-gray-300 hover:border-purple-500 transition-colors cursor-pointer"
+                                  />
+                                </a>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Actions */}
+                          {sub.status === 'pending' && (
+                            <div className="flex gap-2 ml-4">
+                              <button
+                                onClick={() => handleApproveSubscription(sub._id)}
+                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleRejectSubscription(sub._id)}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                              >
+                                <XCircle className="w-4 h-4" />
+                                Reject
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

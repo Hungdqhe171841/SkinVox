@@ -36,6 +36,18 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  isPremium: {
+    type: Boolean,
+    default: false
+  },
+  premiumExpiresAt: {
+    type: Date,
+    default: null
+  },
+  premiumActivatedAt: {
+    type: Date,
+    default: null
+  },
   lastLogin: {
     type: Date,
     default: null

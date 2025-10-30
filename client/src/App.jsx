@@ -17,6 +17,7 @@ import BeautyBar from './pages/BeautyBar'
 import Blog from './pages/Blog'
 import BlogDetail from './pages/BlogDetail'
 import MakeupAR from './pages/MakeupAR'
+import PremiumSubscription from './pages/PremiumSubscription'
 import NotFound from './pages/NotFound'
 
 // Create router with future flags
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
       { path: "blog", element: <Blog /> },
       { path: "blog/:id", element: <BlogDetail /> },
       { path: "makeup-ar", element: <MakeupAR /> },
+      { path: "premium", element: <PremiumSubscription /> },
       { 
         path: "dashboard", 
         element: (
