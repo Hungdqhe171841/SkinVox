@@ -46,22 +46,31 @@ export default function ARModal({ product, onClose }) {
         
         if (data.success) {
           let list = Array.isArray(data.shades) ? data.shades : []
+          console.log('📝 AR Debug - Product:', product?.name, 'Type:', product?.productType)
+          console.log('📝 AR Debug - API Response:', data)
+          console.log('📝 AR Debug - Shades from API:', list.length, list)
+          
           if (list.length === 0) {
             const t = (product?.productType || '').toLowerCase()
+            console.log('⚠️ AR Debug - No shades found, product type:', t)
             if (t === 'eyeliner') {
               list = [
                 { name: 'Deep Black', hex: '#000000', rgba: 'rgba(0,0,0,0.95)' },
                 { name: 'Brown', hex: '#6B4423', rgba: 'rgba(107,68,35,0.9)' },
                 { name: 'Charcoal', hex: '#36454F', rgba: 'rgba(54,69,79,0.9)' }
               ]
+              console.log('✅ AR Debug - Using eyeliner fallback shades')
             } else if (t === 'lipstick') {
               list = [
                 { name: 'Classic Red', hex: '#D32F2A', rgba: 'rgba(211,47,42,0.7)' },
                 { name: 'Nude Pink', hex: '#FFB6C1', rgba: 'rgba(255,182,193,0.6)' }
               ]
+              console.log('✅ AR Debug - Using lipstick fallback shades')
+            } else {
+              console.log('⚠️ AR Debug - No fallback shades for type:', t)
             }
           }
-          console.log('AR shades loaded:', list)
+          console.log('✅ AR shades loaded:', list.length, 'shades')
           setShades(list)
           // Set first shade as default
           if (list.length > 0) {
@@ -227,31 +236,41 @@ export default function ARModal({ product, onClose }) {
         </div>
 
         {/* Bottom shades tray */}
-        {shades.length > 0 && (
+        {!loading && (
           <div className="absolute left-0 right-0 bottom-3 md:bottom-4 px-3">
-            <div className="mx-auto max-w-[920px] rounded-2xl bg-white/90 backdrop-blur shadow-xl border border-gray-200">
-              <div className="p-3">
-                <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                  {shades.map((shade, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleShadeSelect(shade)}
-                      className={`shrink-0 flex flex-col items-center justify-center w-24 rounded-xl border transition-all px-2 py-2 ${
-                        selectedShade === shade ? 'border-pink-500 bg-pink-50' : 'border-gray-200 hover:border-pink-300'
-                      }`}
-                    >
-                      <span
-                        className="block w-10 h-10 rounded-full border"
-                        style={{ backgroundColor: shade.hex || shade.rgba }}
-                      />
-                      <span className="mt-2 text-xs font-medium text-gray-700 text-center line-clamp-2">
-                        {shade.name || `Shade ${index + 1}`}
-                      </span>
-                    </button>
-                  ))}
+            {shades.length > 0 ? (
+              <div className="mx-auto max-w-[920px] rounded-2xl bg-white/90 backdrop-blur shadow-xl border border-gray-200">
+                <div className="p-3">
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                    {shades.map((shade, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleShadeSelect(shade)}
+                        className={`shrink-0 flex flex-col items-center justify-center w-24 rounded-xl border transition-all px-2 py-2 ${
+                          selectedShade === shade ? 'border-pink-500 bg-pink-50' : 'border-gray-200 hover:border-pink-300'
+                        }`}
+                      >
+                        <span
+                          className="block w-10 h-10 rounded-full border"
+                          style={{ backgroundColor: shade.hex || shade.rgba }}
+                        />
+                        <span className="mt-2 text-xs font-medium text-gray-700 text-center line-clamp-2">
+                          {shade.name || `Shade ${index + 1}`}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="mx-auto max-w-[920px] rounded-2xl bg-white/90 backdrop-blur shadow-xl border border-gray-200">
+                <div className="p-3 text-center">
+                  <p className="text-sm text-gray-500">
+                    This product doesn't have color variations in our database yet.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
