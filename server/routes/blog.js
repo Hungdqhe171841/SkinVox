@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Blog = require('../models/Blog');
 const BlogComment = require('../models/BlogComment');
-const auth = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 
 // Get all published blogs
 router.get('/blogs', async (req, res) => {
