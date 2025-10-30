@@ -20,11 +20,20 @@ export class MakeupModel {
       color: "rgba(255, 218, 185, 0.4)",
       intensity: 0.35
     };
+    this.selectedEyeshadow = {
+      name: "Default",
+      color: "rgba(198, 120, 110, 0.28)",
+      intensity: 0.35,
+      softness: 5,
+      blendMode: "soft-light",
+      opacity: 0.85
+    };
     this.activeFeatures = {
       lipstick: true,
       eyelash: false,
       eyebrow: false,
-      blush: false
+      blush: false,
+      eyeshadow: false
     };
   }
 
@@ -96,6 +105,19 @@ export class MakeupModel {
   }
 
   getBlushPresets() {
+    return {}; // No longer using static presets
+  }
+
+  // Eyeshadow methods
+  getEyeshadow() {
+    return this.selectedEyeshadow;
+  }
+
+  setEyeshadow(eyeshadow) {
+    this.selectedEyeshadow = eyeshadow;
+  }
+
+  getEyeshadowPresets() {
     return {}; // No longer using static presets
   }
 
