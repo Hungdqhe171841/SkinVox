@@ -36,11 +36,11 @@ export default function ARModal({ product, onClose }) {
       try {
         setLoading(true)
         // Prefer BeautyBar shades endpoint for items coming from BeautyBar
-        let response = await fetch(`${import.meta.env.VITE_API_URL}/beautybar/products/${product.productType}/${product._id}/shades`)
+        let response = await fetch(`${import.meta.env.VITE_API_URL}/api/beautybar/products/${product.productType}/${product._id}/shades`)
         // Fallback to generic products route if needed
         if (!response.ok) {
           const category = toCategory(product?.productType)
-          response = await fetch(`${import.meta.env.VITE_API_URL}/products/${category}/${product._id}/shades`)
+          response = await fetch(`${import.meta.env.VITE_API_URL}/api/products/${category}/${product._id}/shades`)
         }
         const data = await response.json()
         
