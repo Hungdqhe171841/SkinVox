@@ -246,9 +246,14 @@ router.get('/products/:type/:id/shades', async (req, res) => {
     const shades = [];
     
     console.log('🔍 Shades Debug - Product:', product.name, 'Type:', type);
+    console.log('🔍 Shades Debug - Product._id:', product._id);
     console.log('🔍 Shades Debug - Has colors array:', !!product.colors);
+    console.log('🔍 Shades Debug - colors value:', product.colors);
     console.log('🔍 Shades Debug - Has shades:', !!product.shades);
+    console.log('🔍 Shades Debug - shades value:', product.shades);
     console.log('🔍 Shades Debug - Shades type:', typeof product.shades);
+    console.log('🔍 Shades Debug - Is Map?:', product.shades instanceof Map);
+    console.log('🔍 Shades Debug - Is Array?:', Array.isArray(product.shades));
     
     // For Eyeshadow: use colors array first
     if (type === 'eyeshadow' && product.colors && Array.isArray(product.colors) && product.colors.length > 0) {
