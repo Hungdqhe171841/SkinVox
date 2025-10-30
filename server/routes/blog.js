@@ -68,6 +68,8 @@ router.get('/blogs', async (req, res) => {
 // @access  Public
 router.get('/blogs/:id/comments', async (req, res) => {
   try {
+    console.log('📝 Comment Debug - GET /blogs/:id/comments called for blogId:', req.params.id);
+    
     const comments = await BlogComment.find({ 
       blog: req.params.id,
       isApproved: true 
@@ -75,6 +77,8 @@ router.get('/blogs/:id/comments', async (req, res) => {
       .populate('user', 'username')
       .populate('replies.user', 'username')
       .sort({ createdAt: -1 });
+    
+    console.log('📝 Comment Debug - Found comments:', comments.length);
     
     res.json({ success: true, comments });
   } catch (error) {
@@ -88,6 +92,10 @@ router.get('/blogs/:id/comments', async (req, res) => {
 // @access  Private (requires authentication)
 router.post('/blogs/:id/comments', auth, async (req, res) => {
   try {
+    console.log('📝 Comment Debug - POST /blogs/:id/comments called for blogId:', req.params.id);
+    console.log('📝 Comment Debug - User:', req.user);
+    console.log('📝 Comment Debug - Request body:', req.body);
+    
     const { comment, rating } = req.body;
     
     // Validate input
