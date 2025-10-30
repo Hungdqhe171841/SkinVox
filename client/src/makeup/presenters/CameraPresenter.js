@@ -994,6 +994,13 @@ export class CameraPresenter {
         nx = -nx;
         ny = -ny;
       }
+      
+      // LIMIT: only allow upward offset (negative Y direction) to prevent downward spikes
+      // If normal points downward (ny > 0), reduce or neutralize the offset
+      if (ny > 0) {
+        ny = Math.min(0, ny * 0.3); // Heavily dampen downward movement
+      }
+      
       const t = i / (n - 1);
       const dist = innerDist + t * (outerDist - innerDist);
       out.push({ x: p.x + nx * dist, y: p.y + ny * dist });
@@ -1008,11 +1015,21 @@ export class CameraPresenter {
       const t = i / (n - 1);
       const grow = growI + t * (growO - growI);
       const p = inner[i];
-      const dx = outer[i].x - p.x,
+      let dx = outer[i].x - p.x,
         dy = outer[i].y - p.y;
       const dlen = Math.hypot(dx, dy) || 1;
-      outer[i].x += (dx / dlen) * grow;
-      outer[i].y += (dy / dlen) * grow;
+      
+      // LIMIT: prevent downward growth, only allow upward or horizontal
+      let growX = (dx / dlen) * grow;
+      let growY = (dy / dlen) * grow;
+      
+      // If growth is downward (positive Y), clamp it
+      if (growY > 0) {
+        growY = 0; // No downward growth
+      }
+      
+      outer[i].x += growX;
+      outer[i].y += growY;
     }
     return { inner, outer };
   }
