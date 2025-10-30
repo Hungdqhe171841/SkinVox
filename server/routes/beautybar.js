@@ -240,11 +240,24 @@ router.get('/products/:type/:id/shades', async (req, res) => {
         return res.status(400).json({ message: 'Invalid product type' });
     }
 
-    const product = await Product.findById(id).select('name brand type category color shades');
+    const product = await Product.findById(id).select('name brand type category color shades colors');
     if (!product) return res.status(404).json({ message: 'Product not found' });
 
     const shades = [];
-    if (product.shades && product.shades.size > 0) {
+    
+    // For Eyeshadow: use colors array
+    if (type === 'eyeshadow' && product.colors && Array.isArray(product.colors) && product.colors.length > 0) {
+      product.colors.forEach((color) => {
+        shades.push({ 
+          name: color.name || 'Shade', 
+          hex: color.hex, 
+          rgba: color.hex, // Convert hex to rgba if needed
+          finish: color.finish 
+        });
+      });
+    }
+    // For other products: use shades Map or color field
+    else if (product.shades && product.shades.size > 0) {
       product.shades.forEach((value, key) => {
         shades.push({ name: key, hex: value, rgba: value.includes('rgba') ? value : value });
       });
