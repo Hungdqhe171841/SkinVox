@@ -245,26 +245,47 @@ router.get('/products/:type/:id/shades', async (req, res) => {
 
     const shades = [];
     
-    // For Eyeshadow: use colors array
+    console.log('🔍 Shades Debug - Product:', product.name, 'Type:', type);
+    console.log('🔍 Shades Debug - Has colors array:', !!product.colors);
+    console.log('🔍 Shades Debug - Has shades:', !!product.shades);
+    console.log('🔍 Shades Debug - Shades type:', typeof product.shades);
+    
+    // For Eyeshadow: use colors array first
     if (type === 'eyeshadow' && product.colors && Array.isArray(product.colors) && product.colors.length > 0) {
       product.colors.forEach((color) => {
         shades.push({ 
           name: color.name || 'Shade', 
           hex: color.hex, 
-          rgba: color.hex, // Convert hex to rgba if needed
+          rgba: color.hex,
           finish: color.finish 
         });
       });
+      console.log('✅ Shades Debug - Using colors array:', shades.length);
     }
-    // For other products: use shades Map or color field
-    else if (product.shades && product.shades.size > 0) {
-      product.shades.forEach((value, key) => {
-        shades.push({ name: key, hex: value, rgba: value.includes('rgba') ? value : value });
-      });
-    } else if (product.color) {
+    // For shades as Object (plain object with key-value pairs)
+    else if (product.shades && typeof product.shades === 'object' && !Array.isArray(product.shades)) {
+      // Handle both Map and plain Object
+      if (product.shades instanceof Map) {
+        product.shades.forEach((value, key) => {
+          shades.push({ name: key, hex: value, rgba: value.includes('rgba') ? value : value });
+        });
+      } else {
+        // Plain object
+        Object.entries(product.shades).forEach(([key, value]) => {
+          if (key !== '_id') { // Skip MongoDB internal fields
+            shades.push({ name: key, hex: value, rgba: value.includes('rgba') ? value : value });
+          }
+        });
+      }
+      console.log('✅ Shades Debug - Using shades object:', shades.length);
+    } 
+    // Fallback to color field
+    else if (product.color) {
       shades.push({ name: product.color, hex: product.color, rgba: product.color });
+      console.log('✅ Shades Debug - Using color field:', shades.length);
     }
 
+    console.log('✅ Shades Debug - Final shades:', shades);
     res.json({ success: true, shades });
   } catch (error) {
     console.error('❌ BeautyBar Debug - Get shades error:', error);
