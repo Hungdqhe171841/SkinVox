@@ -280,8 +280,8 @@ export class CameraPresenter {
       // Độ dày eyeliner
       let nx = -ty, ny = tx;
       if (side === 'left') { nx = -nx; ny = -ny; }
-      const thicknessBase = Math.max(0.8, (eyelash.thickness || 1) * 0.8 * scale);
-      const thicknessTail = thicknessBase * 2.5;
+      const thicknessBase = Math.max(1.2, (eyelash.thickness || 1) * 1.2 * scale); // Increased from 0.8 to 1.2
+      const thicknessTail = thicknessBase * 2.8; // Increased from 2.5 to 2.8
 
       ctx.beginPath();
       for (let i = 0; i < upper.length; i++) {
