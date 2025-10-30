@@ -959,7 +959,7 @@ export class CameraPresenter {
     // Composite onto skin
     ctx.save();
     ctx.globalCompositeOperation = eyeshadow.blendMode || "soft-light";
-    ctx.globalAlpha = eyeshadow.opacity ?? 0.75; // Reduced from 0.95 to 0.75 for softer, more natural look
+    ctx.globalAlpha = eyeshadow.opacity ?? 5; // Reduced from 0.95 to 0.75 for softer, more natural look
     ctx.drawImage(off, 0, 0);
     ctx.restore();
   }
