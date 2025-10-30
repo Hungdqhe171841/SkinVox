@@ -14,18 +14,33 @@ export default function BlogComments({ blogId }) {
   const [replyText, setReplyText] = useState('')
 
   useEffect(() => {
-    loadComments()
+    if (blogId) {
+      loadComments()
+    }
   }, [blogId])
 
   const loadComments = async () => {
+    if (!blogId) {
+      setLoading(false)
+      return
+    }
+    
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/blog/blogs/${blogId}/comments`)
+      
+      if (!response.ok) {
+        console.error('Error loading comments:', response.status, response.statusText)
+        setComments([])
+        return
+      }
+      
       const data = await response.json()
       if (data.success) {
-        setComments(data.comments)
+        setComments(data.comments || [])
       }
     } catch (error) {
       console.error('Error loading comments:', error)
+      setComments([])
     } finally {
       setLoading(false)
     }

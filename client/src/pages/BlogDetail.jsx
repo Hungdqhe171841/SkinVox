@@ -343,9 +343,11 @@ export default function BlogDetail() {
         </div>
 
         {/* Comments & Ratings Section */}
-        <div className="max-w-4xl mx-auto mt-8 px-4">
-          <BlogComments blogId={blog._id} />
-        </div>
+        {blog && blog._id && (
+          <div className="max-w-4xl mx-auto mt-8 px-4">
+            <BlogComments blogId={blog._id} />
+          </div>
+        )}
       </div>
     </div>
   )
