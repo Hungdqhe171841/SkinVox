@@ -21,7 +21,14 @@ const auth = async (req, res, next) => {
       return res.status(401).json({ message: 'Account is deactivated' });
     }
 
-    req.user = user;
+    // Attach user info to request
+    req.user = {
+      id: user._id.toString(),
+      userId: user._id.toString(),
+      username: user.username,
+      email: user.email,
+      role: user.role
+    };
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
