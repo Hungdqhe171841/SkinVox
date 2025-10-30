@@ -2,94 +2,226 @@ export class CameraPresenter {
   constructor(model, presets) {
     this.model = model;
     this.presets = presets;
+    this.compareSide = null; // 'left' or 'right' or null
+    this.compareOffsetPx = 0;
+  }
+
+  setCompareSide(side) {
+    this.compareSide = side === "left" || side === "right" ? side : null;
+  }
+
+  setCompareOffset(px) {
+    this.compareOffsetPx = Number.isFinite(+px) ? +px : 0;
   }
 
   createCallback() {
     return async (video, canvas, ctx) => {
       await this.model.loadFaceMesh(video, (results) => {
-        const landmarks = results.multiFaceLandmarks?.[0];
-        if (landmarks) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          
-          if (this.model.isFeatureActive('eyeshadow')) {
-            this.drawEyeshadow(ctx, landmarks, canvas);
-          }
-          if (this.model.isFeatureActive('blush')) {
-            this.drawBlush(ctx, landmarks, canvas);
-          }
-          if (this.model.isFeatureActive('eyebrow')) {
-            this.drawEyebrows(ctx, landmarks, canvas);
-          }
-          if (this.model.isFeatureActive('eyelash')) {
-            this.drawEyelashes(ctx, landmarks, canvas);
-          }
-          if (this.model.isFeatureActive('lipstick')) {
-            this.drawLips(ctx, landmarks, canvas);
-          }
+        const lms = results.multiFaceLandmarks?.[0];
+        if (!lms) return;
+
+        // 1) Đồng bộ DPR + reset
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        const cssW = Math.max(1, Math.round(rect.width));
+        const cssH = Math.max(1, Math.round(rect.height));
+        if (canvas.width !== cssW * dpr || canvas.height !== cssH * dpr) {
+          canvas.width = cssW * dpr;
+          canvas.height = cssH * dpr;
+        }
+
+        const w = canvas.width,
+          h = canvas.height;
+
+        // Reset mọi state trước khi vẽ
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.filter = "none";
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = "source-over";
+        ctx.clearRect(0, 0, w, h);
+
+        // 2) Render makeup vào offscreen cùng kích thước
+        const fx =
+          this._fxCanvas || (this._fxCanvas = document.createElement("canvas"));
+        if (fx.width !== w || fx.height !== h) {
+          fx.width = w;
+          fx.height = h;
+        }
+        const fxCtx = fx.getContext("2d");
+        fxCtx.setTransform(1, 0, 0, 1, 0, 0);
+        fxCtx.filter = "none";
+        fxCtx.globalAlpha = 1;
+        fxCtx.globalCompositeOperation = "source-over";
+        fxCtx.clearRect(0, 0, w, h);
+
+        // Vẽ các feature
+        if (this.model.isFeatureActive("blush"))
+          this.drawBlush(fxCtx, lms, canvas);
+        if (this.model.isFeatureActive("eyebrow"))
+          this.drawEyebrows(fxCtx, lms, canvas);
+        if (this.model.isFeatureActive("eyelash"))
+          this.drawEyelashes(fxCtx, lms, canvas);
+        if (this.model.isFeatureActive("eyeshadow"))
+          this.drawEyeshadow(fxCtx, lms, canvas);
+        if (this.model.isFeatureActive("lipstick"))
+          this.drawLips(fxCtx, lms, canvas);
+
+        // 3) Ghép nửa khung theo kích thước HIỂN THỊ
+        const mid = Math.round((cssW / 2 + (this.compareOffsetPx || 0)) * dpr);
+
+        if (!this.compareSide) {
+          ctx.drawImage(fx, 0, 0);
+        } else {
+          ctx.save();
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.filter = "none";
+          ctx.beginPath();
+          if (this.compareSide === "right") ctx.rect(mid, 0, w - mid, h);
+          else ctx.rect(0, 0, mid, h);
+          ctx.clip();
+          ctx.drawImage(fx, 0, 0);
+          ctx.restore();
+
+          this._drawCompareDivider(ctx, w, h, mid);
         }
       });
     };
   }
 
-  drawLips(ctx, landmarks, canvas) {
-    const upperLip = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291];
-    const lowerLip = [291, 375, 321, 405, 314, 17, 84, 181, 91, 146, 61];
-    const innerMouth = [78, 95, 88, 178, 87, 14, 317, 402, 318, 324, 78];
+  _drawCompareDivider(ctx, w, h, x) {
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.filter = "none";
+    ctx.globalCompositeOperation = "source-over";
+    ctx.strokeStyle = "rgba(255,255,255,0.9)";
+    ctx.lineWidth = Math.max(1, Math.round(Math.min(w, h) * 0.0035));
+    const xPx = Math.round(x) + 0.5;
+    ctx.beginPath();
+    ctx.moveTo(xPx, 0);
+    ctx.lineTo(xPx, h);
+    ctx.stroke();
+    ctx.restore();
+  }
 
+  drawLips(ctx, landmarks, canvas) {
     const w = canvas.width;
     const h = canvas.height;
 
-    ctx.save();
-    ctx.clearRect(0, 0, w, h);
+    // --- Các nhóm landmark môi ---
+    const upperLipIdx = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291];
+    const lowerLipIdx = [291, 375, 321, 405, 314, 17, 84, 181, 91, 146, 61];
+    const innerMouthIdx = [
+      78, 95, 88, 178, 87, 14, 317, 402, 318, 324, 308, 78,
+    ];
 
-    ctx.beginPath();
+    // --- Hàm chuyển landmark thành toạ độ canvas ---
+    const mapPts = (idxs) =>
+      idxs
+        .map((i) => landmarks[i])
+        .filter((p) => p && Number.isFinite(p.x) && Number.isFinite(p.y))
+        .map((p) => ({ x: p.x * w, y: p.y * h }));
 
-    upperLip.forEach((i, idx) => {
-      const pt = landmarks[i];
-      const x = pt.x * w;
-      const y = pt.y * h;
-      if (idx === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
+    const outerPts = mapPts([...upperLipIdx, ...lowerLipIdx]);
+    const innerPts = mapPts(innerMouthIdx);
 
-    for (let i = lowerLip.length - 1; i >= 0; i--) {
-      const pt = landmarks[lowerLip[i]];
-      ctx.lineTo(pt.x * w, pt.y * h);
+    if (outerPts.length < 3 || innerPts.length < 3) return;
+
+    // --- Khi há miệng, mở rộng vùng trong để không bị che răng ---
+    const topInner = landmarks[13];
+    const bottomInner = landmarks[14];
+    if (topInner && bottomInner) {
+      const mouthOpen = Math.abs(bottomInner.y - topInner.y);
+      if (mouthOpen > 0.03) {
+        const cy = innerPts.reduce((s, p) => s + p.y, 0) / innerPts.length;
+        const scale = 1 + (mouthOpen - 0.12) * 2.2; // độ giãn khi há miệng
+        innerPts.forEach((p) => (p.y = cy + (p.y - cy) * scale));
+      }
     }
 
+    // --- Hàm sắp xếp quanh tâm để tránh polygon tự cắt ---
+    const sortAroundCentroid = (pts) => {
+      const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+      const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+      return pts
+        .slice()
+        .sort(
+          (a, b) =>
+            Math.atan2(a.y - cy, a.x - cx) - Math.atan2(b.y - cy, b.x - cx)
+        );
+    };
+
+    const outerSorted = sortAroundCentroid(outerPts);
+    const innerSorted = sortAroundCentroid(innerPts);
+
+    // --- Vẽ vùng môi (outer - inner) ---
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(outerSorted[0].x, outerSorted[0].y);
+    for (let i = 1; i < outerSorted.length; i++)
+      ctx.lineTo(outerSorted[i].x, outerSorted[i].y);
     ctx.closePath();
 
-    ctx.moveTo(landmarks[innerMouth[0]].x * w, landmarks[innerMouth[0]].y * h);
-    for (let i = innerMouth.length - 1; i >= 0; i--) {
-      const pt = landmarks[innerMouth[i]];
-      ctx.lineTo(pt.x * w, pt.y * h);
+    ctx.moveTo(innerSorted[0].x, innerSorted[0].y);
+    for (let i = 1; i < innerSorted.length; i++)
+      ctx.lineTo(innerSorted[i].x, innerSorted[i].y);
+    ctx.closePath();
+
+    // --- Tô màu môi ---
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = this.model.getColor();
+    try {
+      ctx.fill("evenodd");
+    } catch {
+      ctx.save();
+      ctx.clip("evenodd");
+      ctx.fill();
+      ctx.restore();
     }
+    ctx.globalAlpha = 1.0;
+
+    // --- Thêm bóng sáng highlight môi ---
+    const center = outerSorted.reduce(
+      (s, p) => ({ x: s.x + p.x, y: s.y + p.y }),
+      { x: 0, y: 0 }
+    );
+    const cnt = outerSorted.length;
+    const cx = center.x / cnt;
+    const cy = center.y / cnt;
+
+    const rad = Math.max(18, Math.min(w, h) * 0.04);
+    const g = ctx.createRadialGradient(cx, cy, 1, cx, cy, rad);
+    g.addColorStop(0, "rgba(255,255,255,0.34)");
+    g.addColorStop(0.5, "rgba(255,255,255,0.12)");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+
+    ctx.save();
+    ctx.globalCompositeOperation = "source-over";
+    ctx.globalAlpha = 0.55;
+    ctx.filter = "blur(6px)";
+    ctx.beginPath();
+    ctx.moveTo(outerSorted[0].x, outerSorted[0].y);
+    for (let i = 1; i < outerSorted.length; i++)
+      ctx.lineTo(outerSorted[i].x, outerSorted[i].y);
+    ctx.closePath();
+
+    ctx.moveTo(innerSorted[0].x, innerSorted[0].y);
+    for (let i = 1; i < innerSorted.length; i++)
+      ctx.lineTo(innerSorted[i].x, innerSorted[i].y);
     ctx.closePath();
 
     try {
+      ctx.fillStyle = g;
+      ctx.fill("evenodd");
+    } catch {
+      ctx.save();
       ctx.clip("evenodd");
-    } catch (e) {
-      ctx.clip();
+      ctx.fillStyle = g;
+      ctx.fillRect(cx - rad, cy - rad, rad * 2, rad * 2);
+      ctx.restore();
     }
-
-    ctx.globalAlpha = 0.85; // tăng độ đậm
-    ctx.fillStyle = this.model.getColor();
-    ctx.fill();
+    ctx.filter = "none";
     ctx.globalAlpha = 1.0;
-
-    // Highlight vùng giữa môi
-    const pt = landmarks[13];
-    const hx = pt.x * w;
-    const hy = pt.y * h;
-    const gradient = ctx.createRadialGradient(hx, hy, 2, hx, hy, 30);
-    gradient.addColorStop(0, "rgba(255,255,255,0.3)");
-    gradient.addColorStop(1, "rgba(255,255,255,0)");
-
-    ctx.beginPath();
-    ctx.arc(hx, hy, 30, 0, Math.PI * 2);
-    ctx.fillStyle = gradient;
-    ctx.fill();
-
+    ctx.restore();
     ctx.restore();
   }
 
@@ -182,28 +314,67 @@ export class CameraPresenter {
   }
 
   drawEyelashSet(ctx, landmarks, eyePoints, w, h, eyelash, position, side) {
+    // Initialize storage for previous lash positions if not exists
+    if (!this._prevLashes) this._prevLashes = {};
+    if (!this._prevLashes[side]) this._prevLashes[side] = {};
+    if (!this._prevLashes[side][position])
+      this._prevLashes[side][position] = [];
+
+    // Smoothing factor for lash animation
+    const smoothingFactor = 0.65; // Higher = more smoothing (0-1)
+
+    // Array to store current lash end points for next frame
+    const currentLashes = [];
+
     for (let i = 0; i < eyePoints.length - 1; i++) {
       const pt = landmarks[eyePoints[i]];
+      if (!pt) continue;
+
       const x = pt.x * w;
       const y = pt.y * h;
 
       // Calculate lash direction and length
-      const isUpper = position === 'upper';
+      const isUpper = position === "upper";
       const lengthMultiplier = eyelash.length * (isUpper ? 15 : 8);
       const curlFactor = eyelash.curl;
-      
-      // Different curl directions for upper/lower lashes
-      const baseAngle = isUpper ? -Math.PI/2 : Math.PI/2;
-      const curlAngle = baseAngle + (curlFactor * (side === 'left' ? -0.5 : 0.5));
-      
-      const endX = x + Math.cos(curlAngle) * lengthMultiplier;
-      const endY = y + Math.sin(curlAngle) * lengthMultiplier;
 
+      // Different curl directions for upper/lower lashes
+      const baseAngle = isUpper ? -Math.PI / 2 : Math.PI / 2;
+      const curlAngle = baseAngle + curlFactor * (side === "left" ? -0.5 : 0.5);
+
+      // Calculate raw end point
+      const rawEndX = x + Math.cos(curlAngle) * lengthMultiplier;
+      const rawEndY = y + Math.sin(curlAngle) * lengthMultiplier;
+
+      // Get previous lash end point if available
+      const prevLash = this._prevLashes[side][position][i];
+
+      // Apply smoothing if we have previous data
+      let endX = rawEndX;
+      let endY = rawEndY;
+
+      if (prevLash) {
+        endX = prevLash.x * smoothingFactor + rawEndX * (1 - smoothingFactor);
+        endY = prevLash.y * smoothingFactor + rawEndY * (1 - smoothingFactor);
+      }
+
+      // Store current end point for next frame
+      currentLashes[i] = { x: endX, y: endY };
+
+      // Draw the lash with a slight curve for more natural look
       ctx.beginPath();
       ctx.moveTo(x, y);
-      ctx.lineTo(endX, endY);
+
+      // Use quadratic curve instead of straight line for more natural lashes
+      const controlX = x + (endX - x) * 0.5 + (Math.random() - 0.5) * 2;
+      const controlY = y + (endY - y) * 0.4;
+
+      ctx.quadraticCurveTo(controlX, controlY, endX, endY);
       ctx.stroke();
     }
+
+    // Store current lashes for next frame
+    this._prevLashes[side][position] = currentLashes;
   }
 
   drawEyebrows(ctx, landmarks, canvas) {
@@ -211,160 +382,239 @@ export class CameraPresenter {
     const w = canvas.width;
     const h = canvas.height;
 
-    // Left eyebrow landmarks
-    const leftBrow = [46, 53, 52, 51, 48, 115, 131, 134, 102, 49, 220, 305, 292, 334, 293, 300, 276, 283, 282, 295, 285, 336, 296, 334];
-    // Right eyebrow landmarks
-    const rightBrow = [276, 283, 282, 295, 285, 336, 296, 334, 293, 300, 276, 283, 282, 295, 285, 336, 296, 334];
+    const leftTop = [70, 63, 105, 66, 107];
+    const leftBottom = [46, 53, 52, 65, 55];
+    const rightTop = [336, 296, 334, 293, 300];
+    const rightBottom = [285, 295, 282, 283, 276];
 
-    ctx.save();
-    ctx.fillStyle = eyebrow.color;
-    ctx.strokeStyle = eyebrow.color;
-    ctx.lineWidth = eyebrow.thickness;
-
-    // Simplified eyebrow drawing using key landmarks
-    const leftBrowPoints = [70, 63, 105, 66, 107, 55, 65, 52, 53, 46];
-    const rightBrowPoints = [296, 334, 293, 300, 276, 283, 282, 295, 285, 336];
-
-    this.drawEyebrowShape(ctx, landmarks, leftBrowPoints, w, h, eyebrow, 'left');
-    this.drawEyebrowShape(ctx, landmarks, rightBrowPoints, w, h, eyebrow, 'right');
-
-    ctx.restore();
+    this.drawEyebrowShape(
+      ctx,
+      landmarks,
+      leftTop,
+      leftBottom,
+      w,
+      h,
+      eyebrow,
+      "left"
+    );
+    this.drawEyebrowShape(
+      ctx,
+      landmarks,
+      rightTop,
+      rightBottom,
+      w,
+      h,
+      eyebrow,
+      "right"
+    );
   }
 
-  drawEyebrowShape(ctx, landmarks, browPoints, w, h, eyebrow, side) {
-    if (browPoints.length < 3) return;
-
-    // Build a smooth filled shape across the brow points and fill with a soft gradient
-    ctx.save();
-    // Convert browPoints to pixel coordinates
-    const pts = browPoints.map((i) => {
-      const p = landmarks[i];
-      return { x: p.x * w, y: p.y * h };
-    });
-
-    // Calculate a simple offset path below the brow to give thickness
-    const downOffset = Math.max(6, eyebrow.thickness * 3);
-    const lowerPts = pts.map((p, idx) => {
-      // approximate normal by using previous and next point
-      const prev = pts[Math.max(0, idx - 1)];
-      const next = pts[Math.min(pts.length - 1, idx + 1)];
-      const vx = next.x - prev.x;
-      const vy = next.y - prev.y;
-      const len = Math.hypot(vx, vy) || 1;
-      // normal pointing roughly downward relative to brow curve
-      const nx = -vy / len;
-      const ny = vx / len;
-      return { x: p.x + nx * downOffset * 0.6, y: p.y + ny * downOffset * 1.2 };
-    });
-
-    // Create path: top curve (pts) then bottom curve (lowerPts reversed)
-    ctx.beginPath();
-    pts.forEach((p, i) => {
-      if (i === 0) ctx.moveTo(p.x, p.y);
-      else ctx.lineTo(p.x, p.y);
-    });
-    // smooth join to lower points
-    for (let i = lowerPts.length - 1; i >= 0; i--) {
-      const p = lowerPts[i];
-      ctx.lineTo(p.x, p.y);
-    }
-    ctx.closePath();
-
-    // Gradient fill to simulate makeup shading (lighter at top, denser at center)
-    const bboxMinX = Math.min(...pts.map(p => p.x));
-    const bboxMaxX = Math.max(...pts.map(p => p.x));
-    const bboxMinY = Math.min(...pts.map(p => p.y));
-    const bboxMaxY = Math.max(...lowerPts.map(p => p.y));
-
-    // safe helper to set alpha on rgba/hex-ish strings
-    const setAlpha = (rgba, a) => {
-      const m = rgba && rgba.match && rgba.match(/rgba?\((\d+), ?(\d+), ?(\d+)(?:, ?([\d.]+))?\)/);
-      if (m) return `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${a})`;
-      return rgba;
+  drawEyebrowShape(ctx, landmarks, topIdx, bottomIdx, w, h, eyebrow, side) {
+    const parseColorWithAlpha = (c, a) => {
+      if (!c) return `rgba(94,52,24,${a})`;
+      if (c.startsWith("rgba("))
+        return c.replace(/rgba\(([^)]+), ?[\d.]+\)/, `rgba($1, ${a})`);
+      if (c.startsWith("rgb("))
+        return c.replace("rgb(", "rgba(").replace(")", `, ${a})`);
+      if (c.startsWith("#")) {
+        const hex = c.slice(1);
+        const full =
+          hex.length === 3
+            ? hex
+                .split("")
+                .map((x) => x + x)
+                .join("")
+            : hex;
+        const n = parseInt(full, 16);
+        const r = (n >> 16) & 255,
+          g = (n >> 8) & 255,
+          b = n & 255;
+        return `rgba(${r}, ${g}, ${b}, ${a})`;
+      }
+      return c; // fallback
     };
 
-    // Validate bbox values before using them in createLinearGradient
-    if (!Number.isFinite(bboxMinX) || !Number.isFinite(bboxMaxX) || !Number.isFinite(bboxMinY) || !Number.isFinite(bboxMaxY)) {
-      // Fallback: simple filled shape with semi-opaque color
-      ctx.fillStyle = setAlpha(eyebrow.color, 0.8);
-      ctx.fill();
-      ctx.restore();
-      return;
+    const mapIdx = (idxs) =>
+      idxs
+        .map((i) => landmarks[i])
+        .filter((p) => p && Number.isFinite(p.x) && Number.isFinite(p.y))
+        .map((p) => ({ x: p.x * w, y: p.y * h }));
+
+    const top = mapIdx(topIdx);
+    const bottom = mapIdx(bottomIdx);
+    if (top.length < 3 || bottom.length < 3) return;
+
+    // Làm dày nhẹ theo tham số thickness
+    const thickness =
+      (Math.max(0, eyebrow.thickness ?? 3) * Math.max(w, h)) / 900;
+    const minLen = Math.min(top.length, bottom.length);
+    const bottomInflated = bottom.slice(0, minLen).map((b, i) => {
+      const t = top[i];
+      const nx = b.x - t.x;
+      const ny = b.y - t.y;
+      const len = Math.hypot(nx, ny) || 1;
+      const ox = (nx / len) * thickness;
+      const oy = (ny / len) * thickness;
+      return { x: b.x + ox, y: b.y + oy };
+    });
+    if (bottom.length > minLen) {
+      for (let i = minLen; i < bottom.length; i++)
+        bottomInflated.push(bottom[i]);
     }
 
-    const grad = ctx.createLinearGradient(bboxMinX, bboxMinY, bboxMaxX, bboxMaxY);
-    // top lighter
-    grad.addColorStop(0, setAlpha(eyebrow.color, 0.35));
-    // center more opaque
-    grad.addColorStop(0.5, setAlpha(eyebrow.color, 0.85));
-    // edge fade
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    const allPts = [...top, ...bottomInflated];
+    const minX = Math.min(...allPts.map((p) => p.x));
+    const maxX = Math.max(...allPts.map((p) => p.x));
+    const minY = Math.min(...allPts.map((p) => p.y));
+    const maxY = Math.max(...allPts.map((p) => p.y));
+    if (![minX, maxX, minY, maxY].every(Number.isFinite)) return;
 
-    // Soft shadow to blend into skin
-    ctx.shadowColor = setAlpha(eyebrow.color, 0.25);
-    ctx.shadowBlur = Math.max(4, Math.round(downOffset / 4));
+    // Offscreen để blur mềm và blend
+    const off = document.createElement("canvas");
+    off.width = w;
+    off.height = h;
+    const oc = off.getContext("2d");
 
-    // Attempt to draw the eyebrow into an offscreen canvas and blur its edges for a soft makeup look
-    try {
-      const off = document.createElement('canvas');
-      off.width = w;
-      off.height = h;
-      const oc = off.getContext('2d');
+    // Tweak: hỗ trợ nâng cong lông mày nhẹ
+    const liftParam = typeof eyebrow.lift === "number" ? eyebrow.lift : 0.15;
+    const liftPx = Math.max(2, liftParam * Math.max(8, thickness * 1.6));
 
-      // create same gradient on offscreen context
-      const ograd = oc.createLinearGradient(bboxMinX, bboxMinY, bboxMaxX, bboxMaxY);
-      ograd.addColorStop(0, setAlpha(eyebrow.color, 0.35));
-      ograd.addColorStop(0.5, setAlpha(eyebrow.color, 0.85));
-      ograd.addColorStop(1, 'rgba(0,0,0,0)');
-
-      // draw shape on offscreen
-      oc.beginPath();
-      pts.forEach((p, i) => {
-        if (i === 0) oc.moveTo(p.x, p.y);
-        else oc.lineTo(p.x, p.y);
-      });
-      for (let i = lowerPts.length - 1; i >= 0; i--) {
-        const p = lowerPts[i];
-        oc.lineTo(p.x, p.y);
-      }
-      oc.closePath();
-
-      // apply blur on offscreen before filling
-      const blurRadius = Math.max(2, Math.round(downOffset / 3));
-      // Some browsers support context.filter
-      if (oc.filter !== undefined) {
-        oc.filter = `blur(${blurRadius}px)`;
-        oc.fillStyle = ograd;
-        oc.fill();
-        oc.filter = 'none';
-        // composite back to main canvas with optional softening
-        ctx.save();
-        ctx.globalAlpha = 1;
-        ctx.drawImage(off, 0, 0);
-        ctx.restore();
-      } else {
-        // fallback: fill directly with gradient and small shadow
-        ctx.fillStyle = grad;
-        ctx.fill();
+    // Đường lông mày mượt (dùng quadraticCurve giữa các midpoint)
+    const drawSmoothShape = (c) => {
+      c.beginPath();
+      // cung trên (với cp được dịch lên theo liftPx, tập trung ở giữa cung)
+      if (top.length > 1) {
+        c.moveTo(top[0].x, top[0].y);
+        const midIndex = (top.length - 1) / 2;
+        for (let i = 1; i < top.length - 1; i++) {
+          const cp = top[i];
+          const mp = {
+            x: (top[i].x + top[i + 1].x) / 2,
+            y: (top[i].y + top[i + 1].y) / 2,
+          };
+          const weight =
+            midIndex > 0 ? 1 - Math.abs(i - midIndex) / midIndex : 1;
+          const cpY = cp.y - liftPx * Math.max(0, weight);
+          c.quadraticCurveTo(cp.x, cpY, mp.x, mp.y);
+        }
+        c.lineTo(top[top.length - 1].x, top[top.length - 1].y);
       }
 
-      // subtle inner highlight for depth (on main ctx)
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.globalAlpha = 0.08;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.globalCompositeOperation = 'source-over';
+      // quay lại theo cung dưới (đảo chiều)
+      const lb = bottomInflated;
+      if (lb.length > 1) {
+        c.lineTo(lb[lb.length - 1].x, lb[lb.length - 1].y);
+        for (let i = lb.length - 2; i > 0; i--) {
+          const cp = lb[i];
+          const mp = {
+            x: (lb[i].x + lb[i - 1].x) / 2,
+            y: (lb[i].y + lb[i - 1].y) / 2,
+          };
+          c.quadraticCurveTo(cp.x, cp.y, mp.x, mp.y);
+        }
+        c.lineTo(lb[0].x, lb[0].y);
+      }
+      c.closePath();
+    };
 
-      // reset shadows
-      ctx.shadowBlur = 0;
-      ctx.restore();
-    } catch (e) {
-      // fallback if anything fails: draw directly
-      ctx.fillStyle = grad;
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.restore();
+    // Gradient theo trục dọc
+    const baseOpacity = eyebrow.opacity ?? 0.45;
+    const grad = oc.createLinearGradient(0, minY, 0, maxY);
+    grad.addColorStop(
+      0.0,
+      parseColorWithAlpha(eyebrow.color || "#5E3418", baseOpacity * 0.35)
+    );
+    grad.addColorStop(
+      0.5,
+      parseColorWithAlpha(eyebrow.color || "#5E3418", baseOpacity)
+    );
+    grad.addColorStop(
+      1.0,
+      parseColorWithAlpha(eyebrow.color || "#5E3418", baseOpacity * 0.45)
+    );
+
+    // Vẽ chính trên offscreen (base shape)
+    const softness = Math.max(1, (eyebrow.softness ?? 2) * 1.5);
+    oc.save();
+    oc.filter = `blur(${softness}px)`;
+    oc.globalCompositeOperation = "source-over";
+    drawSmoothShape(oc);
+    oc.fillStyle = grad;
+    oc.fill();
+    oc.restore();
+
+    // ---------- Thêm hiệu ứng "nhuộm" (dyed) và sợi lông mày ----------
+    const dyeColor = eyebrow.dyeColor || eyebrow.color || "#5E3418";
+    const dyeStrength = Math.max(0, Math.min(1, eyebrow.dyeStrength ?? 0.35));
+    const hairStrokeOpacity = eyebrow.hairStrokeOpacity ?? 0.6;
+
+    // Vẽ sợi lông mày (micro hair strokes) lên offscreen
+    oc.save();
+    oc.lineCap = "round";
+    oc.lineJoin = "round";
+    oc.globalAlpha = hairStrokeOpacity;
+    oc.strokeStyle = parseColorWithAlpha(dyeColor, 0.7);
+    const hairLineW = Math.max(0.8, thickness * 0.18);
+    oc.lineWidth = hairLineW;
+
+    // Tạo sợi dọc theo đường top
+    for (let i = 0; i < top.length - 1; i++) {
+      const p0 = top[i];
+      const p1 = top[i + 1];
+      const segLen = Math.hypot(p1.x - p0.x, p1.y - p0.y) || 1;
+      const dirX = (p1.x - p0.x) / segLen;
+      const dirY = (p1.y - p0.y) / segLen;
+      const strokes = 1 + Math.floor(Math.random() * 2);
+      for (let s = 0; s < strokes; s++) {
+        const t = Math.random();
+        const sx = p0.x + dirX * segLen * t + (Math.random() - 0.5) * 2;
+        const sy = p0.y + dirY * segLen * t + (Math.random() - 0.5) * 2;
+        const len = segLen * (0.18 + Math.random() * 0.25);
+        const perpX = -dirY;
+        const perpY = dirX;
+        const curl = (side === "left" ? -1 : 1) * (0.6 + Math.random() * 0.6);
+        const ex = sx + dirX * len + perpX * curl * (hairLineW * 2);
+        const ey = sy + dirY * len + perpY * curl * (hairLineW * 2);
+        oc.beginPath();
+        oc.moveTo(sx, sy);
+        oc.quadraticCurveTo(
+          sx + (ex - sx) * 0.45 + perpX * (Math.random() - 0.5) * 2,
+          sy + (ey - sy) * 0.45 + perpY * (Math.random() - 0.5) * 2,
+          ex,
+          ey
+        );
+        oc.stroke();
+      }
     }
+    oc.restore();
+
+    // Áp tint màu (dye)
+    oc.save();
+    oc.globalCompositeOperation = "source-atop";
+    oc.fillStyle = parseColorWithAlpha(dyeColor, dyeStrength);
+    oc.fillRect(0, 0, w, h);
+    oc.restore();
+
+    // Merge blur
+    const mergeBlur = Math.max(0, (eyebrow.mergeSoftness ?? 1) * 1.2);
+    if (mergeBlur > 0.5) {
+      const tmp = document.createElement("canvas");
+      tmp.width = w;
+      tmp.height = h;
+      const tc = tmp.getContext("2d");
+      tc.clearRect(0, 0, w, h);
+      tc.filter = `blur(${mergeBlur}px)`;
+      tc.drawImage(off, 0, 0);
+      oc.clearRect(0, 0, w, h);
+      oc.drawImage(tmp, 0, 0);
+    }
+
+    // Blend vào da
+    ctx.save();
+    ctx.globalCompositeOperation = eyebrow.blendMode || "multiply";
+    ctx.globalAlpha = 0.8;
+    ctx.drawImage(off, 0, 0);
+    ctx.restore();
   }
 
   drawBlush(ctx, landmarks, canvas) {
