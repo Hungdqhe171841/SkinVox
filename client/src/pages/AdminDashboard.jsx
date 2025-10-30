@@ -43,6 +43,28 @@ export default function AdminDashboard() {
     subcategory: '',
     children: []
   })
+  const [dashboardStats, setDashboardStats] = useState({
+    overview: {
+      totalUsers: 0,
+      totalBlogs: 0,
+      totalReviews: 0,
+      totalCategories: 0,
+      newUsersThisMonth: 0
+    },
+    products: {
+      total: 0,
+      lipsticks: 0,
+      eyeshadows: 0,
+      blush: 0,
+      eyebrows: 0,
+      eyeliners: 0
+    },
+    recentActivity: {
+      users: [],
+      blogs: [],
+      reviews: []
+    }
+  })
   
   // Google Analytics hooks
   useAnalytics()
@@ -57,6 +79,13 @@ export default function AdminDashboard() {
     }
   }, [user, navigate, trackAdminLogin])
 
+  // Load dashboard stats on mount
+  useEffect(() => {
+    if (user && user.role === 'admin') {
+      loadDashboardStats()
+    }
+  }, [user])
+
   // Load blogs when blog management tab is active
   useEffect(() => {
     if (activeTab === 'blogs') {
@@ -67,6 +96,21 @@ export default function AdminDashboard() {
       loadCategories()
     }
   }, [activeTab])
+
+  const loadDashboardStats = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/dashboard`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      const data = await response.json()
+      console.log('Dashboard stats loaded:', data)
+      setDashboardStats(data)
+    } catch (error) {
+      console.error('Error loading dashboard stats:', error)
+    }
+  }
 
   const loadBlogs = async () => {
     setLoading(true)
@@ -316,7 +360,9 @@ export default function AdminDashboard() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Total Users</p>
-                    <p className="text-2xl font-bold text-gray-900">1,247</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {dashboardStats.overview.totalUsers.toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -328,7 +374,9 @@ export default function AdminDashboard() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Total Blogs</p>
-                    <p className="text-2xl font-bold text-gray-900">156</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {dashboardStats.overview.totalBlogs.toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -339,20 +387,24 @@ export default function AdminDashboard() {
                     <TrendingUp className="w-6 h-6 text-yellow-600" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Published</p>
-                    <p className="text-2xl font-bold text-gray-900">89</p>
+                    <p className="text-sm font-medium text-gray-600">Total Products</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {dashboardStats.products.total.toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center">
-                  <div className="p-2 bg-red-100 rounded-lg">
-                    <AlertCircle className="w-6 h-6 text-red-600" />
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <Activity className="w-6 h-6 text-purple-600" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Drafts</p>
-                    <p className="text-2xl font-bold text-gray-900">67</p>
+                    <p className="text-sm font-medium text-gray-600">Total Reviews</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {dashboardStats.overview.totalReviews.toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -393,21 +445,32 @@ export default function AdminDashboard() {
                 <div className="p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
                   <div className="space-y-3">
-                    <div className="flex items-center text-sm">
-                      <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
-                      <span className="text-gray-600">New blog published</span>
-                      <span className="text-gray-400 ml-auto">2 min ago</span>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-                      <span className="text-gray-600">User registered</span>
-                      <span className="text-gray-400 ml-auto">1 hour ago</span>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <div className="w-2 h-2 bg-yellow-400 rounded-full mr-3"></div>
-                      <span className="text-gray-600">Category updated</span>
-                      <span className="text-gray-400 ml-auto">3 hours ago</span>
-                    </div>
+                    {dashboardStats.recentActivity.blogs.slice(0, 3).map((blog, idx) => (
+                      <div key={blog._id} className="flex items-center text-sm">
+                        <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                        <span className="text-gray-600 truncate flex-1">
+                          Blog: {blog.title}
+                        </span>
+                        <span className="text-gray-400 ml-2">
+                          {new Date(blog.createdAt).toLocaleDateString('vi-VN')}
+                        </span>
+                      </div>
+                    ))}
+                    {dashboardStats.recentActivity.users.slice(0, 2).map((user, idx) => (
+                      <div key={user._id} className="flex items-center text-sm">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
+                        <span className="text-gray-600 truncate flex-1">
+                          User: {user.username} registered
+                        </span>
+                        <span className="text-gray-400 ml-2">
+                          {new Date(user.createdAt).toLocaleDateString('vi-VN')}
+                        </span>
+                      </div>
+                    ))}
+                    {dashboardStats.recentActivity.blogs.length === 0 && 
+                     dashboardStats.recentActivity.users.length === 0 && (
+                      <p className="text-sm text-gray-500 text-center py-4">No recent activity</p>
+                    )}
                   </div>
                 </div>
               </div>
