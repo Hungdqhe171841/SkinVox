@@ -781,7 +781,7 @@ export class CameraPresenter {
         : {};
     const baseColor =
       eyeshadow.color || blush.color || "rgba(198,120,110,0.28)";
-    const intensity = eyeshadow.intensity ?? blush.intensity ?? 0.35;
+    const intensity = eyeshadow.intensity ?? blush.intensity ?? 0.55; // Increased from 0.35 to 0.55 for darker eyeshadow
 
     // Offscreen canvas for blending
     const off = document.createElement("canvas");
@@ -928,7 +928,7 @@ export class CameraPresenter {
       this._traceBandFromGeom(oc, tight);
       oc.clip();
       if (filterOK) oc.filter = `blur(${Math.max(1, softness * 0.4)}px)`;
-      oc.globalAlpha = Math.min(1, intensity * 1.05);
+      oc.globalAlpha = Math.min(1, intensity * 1.2); // Increased from 1.05 to 1.2 for darker lash line
       oc.strokeStyle = baseColor;
       oc.lineCap = "round";
       oc.lineJoin = "round";
@@ -962,7 +962,7 @@ export class CameraPresenter {
         spotY,
         upperBase * 0.8,
         baseColor,
-        Math.min(0.85, intensity * 1.1),
+        Math.min(0.95, intensity * 1.3), // Increased from 0.85 and 1.1 to 0.95 and 1.3 for darker outer-V
         Math.max(5, softness * 0.7),
         "multiply"
       );
@@ -984,7 +984,7 @@ export class CameraPresenter {
     // Composite onto skin
     ctx.save();
     ctx.globalCompositeOperation = eyeshadow.blendMode || "soft-light";
-    ctx.globalAlpha = eyeshadow.opacity ?? 0.85;
+    ctx.globalAlpha = eyeshadow.opacity ?? 0.95; // Increased from 0.85 to 0.95 for darker overall eyeshadow
     ctx.drawImage(off, 0, 0);
     ctx.restore();
   }
