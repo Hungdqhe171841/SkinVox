@@ -112,6 +112,8 @@ app.use('/api/beautybar', require('./routes/beautybar'));
 console.log('🛣️ Server Debug - BeautyBar routes mounted at /api/beautybar');
 app.use('/api/blog', require('./routes/blog'));
 console.log('🛣️ Server Debug - Blog routes mounted at /api/blog');
+app.use('/api/reviews', require('./routes/reviews'));
+console.log('🛣️ Server Debug - Reviews routes mounted at /api/reviews');
 // app.use('/api/users', require('./routes/users'));
 
 // Error handling middleware

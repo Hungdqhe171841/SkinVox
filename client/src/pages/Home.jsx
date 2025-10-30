@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../HomePage.css'
-import { ShoppingCart, Eye, ClipboardCheck, Target, TrendingUp, Link2, Compass } from 'lucide-react'
+import { ShoppingCart, Eye, ClipboardCheck, Target, TrendingUp, Link2, Compass, MessageSquare, Star } from 'lucide-react'
+import WebsiteReviews from '../components/WebsiteReviews'
 
 const HomePage = () => {
   const navigate = useNavigate()
@@ -253,6 +254,16 @@ const HomePage = () => {
                    <p className="blog-description">
                      {blog.description || 'Read more about this featured blog post...'}
                    </p>
+                   <div className="blog-stats" style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '14px', color: '#666' }}>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                       <MessageSquare size={16} />
+                       <span>{blog.commentCount || 0} comments</span>
+                     </div>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                       <Star size={16} className={blog.rating > 0 ? 'fill-yellow-400 text-yellow-400' : ''} />
+                       <span>{blog.rating ? blog.rating.toFixed(1) : '0.0'} ({blog.ratingCount || 0})</span>
+                     </div>
+                   </div>
                  </article>
                ))
              ) : (
@@ -262,56 +273,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Star Ratings Section */}
-      <section className="star-ratings-section">
-        <div className="container">
-          <h2 className="section-title">Customer Ratings</h2>
-          <div className="ratings-summary">
-            <div className="overall-rating">
-              <div className="rating-number">4.8</div>
-              <div className="rating-stars">⭐⭐⭐⭐⭐</div>
-              <div className="rating-text">Based on 1,247 reviews</div>
-            </div>
-            <div className="rating-breakdown">
-              <div className="rating-bar">
-                <span>5 stars</span>
-                <div className="bar">
-                  <div className="fill" style={{width: '85%'}}></div>
-                </div>
-                <span>85%</span>
-              </div>
-              <div className="rating-bar">
-                <span>4 stars</span>
-                <div className="bar">
-                  <div className="fill" style={{width: '12%'}}></div>
-                </div>
-                <span>12%</span>
-              </div>
-              <div className="rating-bar">
-                <span>3 stars</span>
-                <div className="bar">
-                  <div className="fill" style={{width: '2%'}}></div>
-                </div>
-                <span>2%</span>
-              </div>
-              <div className="rating-bar">
-                <span>2 stars</span>
-                <div className="bar">
-                  <div className="fill" style={{width: '1%'}}></div>
-                </div>
-                <span>1%</span>
-              </div>
-              <div className="rating-bar">
-                <span>1 star</span>
-                <div className="bar">
-                  <div className="fill" style={{width: '0%'}}></div>
-                </div>
-                <span>0%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Appendix Section */}
       <section className="appendix-section">
@@ -350,6 +311,9 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Website Reviews Section */}
+      <WebsiteReviews />
     </div>
   )
 }

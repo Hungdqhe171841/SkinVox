@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, User, ArrowRight, Eye } from 'lucide-react'
+import { Calendar, User, ArrowRight, Eye, MessageSquare, Star } from 'lucide-react'
 import '../styles/Blog.css'
 
 export default function Blog() {
@@ -257,11 +257,20 @@ export default function Blog() {
                     color: '#6b7280',
                     display: 'flex',
                     gap: '12px',
-                    marginTop: 'auto'
+                    marginTop: 'auto',
+                    flexWrap: 'wrap'
                   }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <Calendar size={14} />
                       {new Date(blog.createdAt).toLocaleDateString('vi-VN')}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <MessageSquare size={14} />
+                      {blog.commentCount || 0}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Star size={14} style={{ fill: blog.rating > 0 ? '#facc15' : 'none', color: blog.rating > 0 ? '#facc15' : '#6b7280' }} />
+                      {blog.rating ? blog.rating.toFixed(1) : '0.0'} ({blog.ratingCount || 0})
                     </span>
                   </div>
                 </article>
