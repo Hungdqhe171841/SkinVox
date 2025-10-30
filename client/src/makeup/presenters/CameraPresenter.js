@@ -781,7 +781,7 @@ export class CameraPresenter {
         : {};
     const baseColor =
       eyeshadow.color || blush.color || "rgba(198,120,110,0.28)";
-    const intensity = eyeshadow.intensity ?? blush.intensity ?? 0.42; // Reduced from 0.55 to 0.42 for softer, more natural look
+    const intensity = eyeshadow.intensity ?? blush.intensity ?? 1; // Reduced from 0.55 to 0.42 for softer, more natural look
 
     // Offscreen canvas for blending
     const off = document.createElement("canvas");
