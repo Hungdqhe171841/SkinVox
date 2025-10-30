@@ -365,150 +365,77 @@ export class CameraPresenter {
   }
 
   drawBlush(ctx, landmarks, canvas) {
+    const blush = this.model.getBlush();
     const w = canvas.width;
     const h = canvas.height;
 
-    const raw =
-      typeof this.model.getBlush === "function"
-        ? this.model.getBlush() || {}
-        : {};
-    const blush = {
-      color: raw.color || "rgba(255,120,120,0.25)",
-      intensity: raw.intensity ?? 0.35,
-    };
+    // Cheek landmarks for blush placement
+    const leftCheek = [116, 117, 118, 119, 120, 121, 126, 142, 36, 205, 206, 207, 213, 192, 147, 187, 207, 213, 192, 147];
+    const rightCheek = [345, 346, 347, 348, 349, 350, 355, 371, 266, 425, 426, 427, 436, 416, 376, 411, 427, 436, 416, 376];
 
-    this.drawBlushArea(ctx, landmarks, null, w, h, blush, "left");
-    this.drawBlushArea(ctx, landmarks, null, w, h, blush, "right");
+    ctx.save();
+    ctx.globalAlpha = blush.intensity;
+
+    // Draw left cheek blush
+    this.drawBlushArea(ctx, landmarks, leftCheek, w, h, blush, 'left');
+    
+    // Draw right cheek blush
+    this.drawBlushArea(ctx, landmarks, rightCheek, w, h, blush, 'right');
+
+    ctx.restore();
   }
 
   drawBlushArea(ctx, landmarks, cheekPoints, w, h, blush, side) {
-    const cheekCenter = side === "left" ? landmarks[116] : landmarks[345];
+    // Use key cheek landmarks for blush placement
+    const cheekCenter = side === 'left' ? landmarks[116] : landmarks[345];
     let centerX = cheekCenter.x * w;
     let centerY = cheekCenter.y * h;
 
-    const cheekLower = side === "left" ? landmarks[205] : landmarks[425];
-    const cheekOuter = side === "left" ? landmarks[234] : landmarks[454];
-
+    // Nudge blush slightly toward the nose for more natural placement
     const nose = landmarks[1] || landmarks[4];
     if (nose && nose.x != null && nose.y != null) {
       const noseX = nose.x * w;
       const noseY = nose.y * h;
-      const lerp = 0.15;
+      // lerp factor toward nose (0.0 = original, 1.0 = fully at nose)
+      const lerp = 0.2; // small shift toward nose (increased per request)
       const nudgedX = centerX * (1 - lerp) + noseX * lerp;
       const nudgedY = centerY * (1 - lerp) + noseY * lerp;
       centerX = nudgedX;
       centerY = nudgedY;
     }
 
+    // Also nudge the blush slightly downward (closer to eyes) by a fraction of face height
     const forehead = landmarks[10];
     const chin = landmarks[152];
     let faceHeight = h * 0.4;
-
-    if (
-      forehead &&
-      chin &&
-      typeof forehead.y === "number" &&
-      typeof chin.y === "number"
-    ) {
+    if (forehead && chin && typeof forehead.y === 'number' && typeof chin.y === 'number') {
       faceHeight = Math.abs((chin.y - forehead.y) * h);
     }
-
-    const shiftDown = faceHeight * 0.04;
+    const shiftDown = faceHeight * 0.06; // ~6% of face height (moved further down)
     centerY = centerY + shiftDown;
 
-    const baseRadius = Math.max(30, Math.round(faceHeight * 0.1));
-    const radiusX = baseRadius * 1.8;
-    const radiusY = baseRadius * 0.8;
+    // Create radial gradient for natural blush effect (bigger and softer)
+    const radius = Math.max(50, Math.round(faceHeight * 0.12));
+    const gradient = ctx.createRadialGradient(
+      centerX, centerY, 0,
+      centerX, centerY, radius
+    );
 
-    let angle = 0;
-    if (cheekOuter && cheekLower) {
-      const dx = (cheekOuter.x - cheekLower.x) * w;
-      const dy = (cheekOuter.y - cheekLower.y) * h;
-      angle = Math.atan2(dy, dx);
-      angle += side === "left" ? -0.2 : 0.2;
-    }
-
-    const offCanvas = document.createElement("canvas");
-    offCanvas.width = w;
-    offCanvas.height = h;
-    const offCtx = offCanvas.getContext("2d");
-
-    offCtx.save();
-    offCtx.translate(centerX, centerY);
-    offCtx.rotate(angle);
-
-    const gradient = offCtx.createRadialGradient(0, 0, 0, 0, 0, radiusX);
     gradient.addColorStop(0, blush.color);
-    gradient.addColorStop(0.4, blush.color.replace(/[\d.]+\)$/g, "0.2)"));
-    gradient.addColorStop(0.7, blush.color.replace(/[\d.]+\)$/g, "0.1)"));
-    gradient.addColorStop(1, "rgba(0,0,0,0)");
+    gradient.addColorStop(0.75, blush.color.replace(/[\d\.]+\)$/g, '0.08)'));
+    gradient.addColorStop(1, 'rgba(0,0,0,0)');
 
-    offCtx.fillStyle = gradient;
-    offCtx.beginPath();
-    offCtx.ellipse(0, 0, radiusX, radiusY, 0, 0, Math.PI * 2);
-    offCtx.fill();
-
-    const secondGradient = offCtx.createRadialGradient(
-      0,
-      0,
-      0,
-      0,
-      0,
-      radiusX * 1.2
-    );
-    secondGradient.addColorStop(0, blush.color.replace(/[\d.]+\)$/g, "0.1)"));
-    secondGradient.addColorStop(
-      0.5,
-      blush.color.replace(/[\d.]+\)$/g, "0.05)")
-    );
-    secondGradient.addColorStop(1, "rgba(0,0,0,0)");
-
-    offCtx.fillStyle = secondGradient;
-    offCtx.beginPath();
-    offCtx.ellipse(0, 0, radiusX * 1.2, radiusY * 1.1, 0, 0, Math.PI * 2);
-    offCtx.fill();
-
-    offCtx.restore();
-
-    offCtx.save();
-    offCtx.globalCompositeOperation = "destination-in";
-
-    if (cheekCenter && cheekOuter && cheekLower) {
-      const cheekCenterPx = { x: cheekCenter.x * w, y: cheekCenter.y * h };
-
-      const boundaryRadius = Math.max(radiusX * 1.3, radiusY * 1.5);
-      const boundaryGradient = offCtx.createRadialGradient(
-        cheekCenterPx.x,
-        cheekCenterPx.y,
-        0,
-        cheekCenterPx.x,
-        cheekCenterPx.y,
-        boundaryRadius
-      );
-      boundaryGradient.addColorStop(0, "rgba(255,255,255,1)");
-      boundaryGradient.addColorStop(0.8, "rgba(255,255,255,0.8)");
-      boundaryGradient.addColorStop(1, "rgba(255,255,255,0)");
-
-      offCtx.fillStyle = boundaryGradient;
-      offCtx.beginPath();
-      offCtx.arc(
-        cheekCenterPx.x,
-        cheekCenterPx.y,
-        boundaryRadius,
-        0,
-        Math.PI * 2
-      );
-      offCtx.fill();
-    }
-
-    offCtx.restore();
-
-    const blurAmount = Math.max(8, Math.round(baseRadius / 4));
-
+    // Use a soft shadow to blur the outer edge for a diffused makeup look
     ctx.save();
-    ctx.filter = `blur(${blurAmount}px)`;
+    ctx.shadowColor = blush.color.replace(/[\d\.]+\)$/g, ', 0.35)');
+    ctx.shadowBlur = Math.max(12, Math.round(radius / 6));
     ctx.globalAlpha = blush.intensity || 0.35;
-    ctx.drawImage(offCanvas, 0, 0);
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
     ctx.restore();
   }
 }
