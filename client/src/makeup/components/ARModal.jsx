@@ -154,10 +154,10 @@ export default function ARModal({ product, onClose }) {
       const eyeshadowPreset = {
         name: product?.name || 'Eyeshadow',
         color: selectedShade?.rgba || selectedShade?.hex || product?.color || 'rgba(198, 120, 110, 0.28)',
-        intensity: 0.42, // Reduced for softer, more natural look like professional makeup
-        softness: 6, // Increased for more diffused edges
+        intensity: 0.65, // Increased for more visible color
+        softness: 6, // Soft diffused edges
         blendMode: 'soft-light',
-        opacity: 0.75 // Reduced for lighter, buildable coverage
+        opacity: 0.88 // Increased for clearer color
       }
       m.setEyeshadow(eyeshadowPreset)
     } else {
@@ -210,10 +210,10 @@ export default function ARModal({ product, onClose }) {
       const preset = {
         name: product?.name || 'Eyeshadow',
         color: shade?.rgba || shade?.hex || 'rgba(198,120,110,0.28)',
-        intensity: model.getEyeshadow()?.intensity || 0.42, // Reduced for softer look
-        softness: model.getEyeshadow()?.softness || 6, // Increased for more diffused
+        intensity: model.getEyeshadow()?.intensity || 0.65, // Increased for more visible color
+        softness: model.getEyeshadow()?.softness || 6, // Soft diffused edges
         blendMode: model.getEyeshadow()?.blendMode || 'soft-light',
-        opacity: model.getEyeshadow()?.opacity || 0.75 // Reduced for lighter coverage
+        opacity: model.getEyeshadow()?.opacity || 0.88 // Increased for clearer color
       }
       model.setEyeshadow(preset)
     }

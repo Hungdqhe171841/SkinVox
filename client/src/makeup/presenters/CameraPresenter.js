@@ -781,7 +781,7 @@ export class CameraPresenter {
         : {};
     const baseColor =
       eyeshadow.color || blush.color || "rgba(198,120,110,0.28)";
-    const intensity = eyeshadow.intensity ?? blush.intensity ?? 1; // Reduced from 0.55 to 0.42 for softer, more natural look
+    const intensity = eyeshadow.intensity ?? blush.intensity ?? 0.65; // Increased for more visible color
 
     // Offscreen canvas for blending
     const off = document.createElement("canvas");
@@ -959,7 +959,7 @@ export class CameraPresenter {
     // Composite onto skin
     ctx.save();
     ctx.globalCompositeOperation = eyeshadow.blendMode || "soft-light";
-    ctx.globalAlpha = eyeshadow.opacity ?? 5; // Reduced from 0.95 to 0.75 for softer, more natural look
+    ctx.globalAlpha = eyeshadow.opacity ?? 0.88; // Increased for more visible color
     ctx.drawImage(off, 0, 0);
     ctx.restore();
   }
