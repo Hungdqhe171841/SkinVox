@@ -60,6 +60,195 @@ router.get('/blogs', async (req, res) => {
   }
 });
 
+// ==================== BLOG COMMENTS & RATINGS ====================
+// NOTE: These routes MUST come BEFORE '/blogs/:id' to avoid route conflicts
+
+// @route   GET /api/blog/blogs/:id/comments
+// @desc    Get all comments for a blog
+// @access  Public
+router.get('/blogs/:id/comments', async (req, res) => {
+  try {
+    const comments = await BlogComment.find({ 
+      blog: req.params.id,
+      isApproved: true 
+    })
+      .populate('user', 'username')
+      .populate('replies.user', 'username')
+      .sort({ createdAt: -1 });
+    
+    res.json({ success: true, comments });
+  } catch (error) {
+    console.error('❌ Blog Debug - Get comments error:', error);
+    res.status(500).json({ message: 'Error fetching comments', error: error.message });
+  }
+});
+
+// @route   POST /api/blog/blogs/:id/comments
+// @desc    Add a comment to a blog
+// @access  Private (requires authentication)
+router.post('/blogs/:id/comments', auth, async (req, res) => {
+  try {
+    const { comment, rating } = req.body;
+    
+    // Validate input
+    if (!comment || comment.trim().length < 3) {
+      return res.status(400).json({ message: 'Comment must be at least 3 characters' });
+    }
+    
+    if (rating && (rating < 1 || rating > 5)) {
+      return res.status(400).json({ message: 'Rating must be between 1 and 5' });
+    }
+    
+    // Check if blog exists
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+    
+    // Create new comment
+    const newComment = new BlogComment({
+      blog: req.params.id,
+      user: req.user.id,
+      username: req.user.username,
+      comment: comment.trim(),
+      rating: rating || null
+    });
+    
+    await newComment.save();
+    
+    // Update blog comment count
+    blog.commentCount = (blog.commentCount || 0) + 1;
+    
+    // Update blog rating if rating provided
+    if (rating) {
+      const currentRating = blog.rating || 0;
+      const currentCount = blog.ratingCount || 0;
+      const totalRating = currentRating * currentCount + rating;
+      blog.ratingCount = currentCount + 1;
+      blog.rating = totalRating / blog.ratingCount;
+    }
+    
+    await blog.save();
+    
+    // Populate user info before sending response
+    await newComment.populate('user', 'username');
+    
+    res.status(201).json({ 
+      success: true, 
+      message: 'Comment added successfully',
+      comment: newComment,
+      blog: {
+        commentCount: blog.commentCount,
+        rating: blog.rating,
+        ratingCount: blog.ratingCount
+      }
+    });
+  } catch (error) {
+    console.error('❌ Blog Debug - Add comment error:', error);
+    res.status(500).json({ message: 'Error adding comment', error: error.message });
+  }
+});
+
+// @route   POST /api/blog/blogs/:id/comments/:commentId/reply
+// @desc    Reply to a comment
+// @access  Private (requires authentication)
+router.post('/blogs/:id/comments/:commentId/reply', auth, async (req, res) => {
+  try {
+    const { comment } = req.body;
+    
+    if (!comment || comment.trim().length < 3) {
+      return res.status(400).json({ message: 'Reply must be at least 3 characters' });
+    }
+    
+    const blogComment = await BlogComment.findById(req.params.commentId);
+    if (!blogComment) {
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+    
+    blogComment.replies.push({
+      user: req.user.id,
+      username: req.user.username,
+      comment: comment.trim()
+    });
+    
+    await blogComment.save();
+    await blogComment.populate('replies.user', 'username');
+    
+    res.json({ 
+      success: true, 
+      message: 'Reply added successfully',
+      comment: blogComment
+    });
+  } catch (error) {
+    console.error('❌ Blog Debug - Add reply error:', error);
+    res.status(500).json({ message: 'Error adding reply', error: error.message });
+  }
+});
+
+// @route   POST /api/blog/blogs/:id/comments/:commentId/helpful
+// @desc    Mark comment as helpful
+// @access  Private (requires authentication)
+router.post('/blogs/:id/comments/:commentId/helpful', auth, async (req, res) => {
+  try {
+    const comment = await BlogComment.findById(req.params.commentId);
+    if (!comment) {
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+    
+    const helpfulIndex = comment.helpful.indexOf(req.user.id);
+    
+    if (helpfulIndex > -1) {
+      comment.helpful.splice(helpfulIndex, 1);
+    } else {
+      comment.helpful.push(req.user.id);
+    }
+    
+    await comment.save();
+    
+    res.json({ 
+      success: true,
+      helpful: helpfulIndex === -1,
+      helpfulCount: comment.helpful.length 
+    });
+  } catch (error) {
+    console.error('❌ Blog Debug - Mark helpful error:', error);
+    res.status(500).json({ message: 'Error marking helpful', error: error.message });
+  }
+});
+
+// @route   DELETE /api/blog/blogs/:id/comments/:commentId
+// @desc    Delete a comment (user can only delete their own)
+// @access  Private (requires authentication)
+router.delete('/blogs/:id/comments/:commentId', auth, async (req, res) => {
+  try {
+    const comment = await BlogComment.findById(req.params.commentId);
+    if (!comment) {
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+    
+    // Check if user owns the comment or is admin
+    if (comment.user.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Not authorized to delete this comment' });
+    }
+    
+    await BlogComment.findByIdAndDelete(req.params.commentId);
+    
+    // Update blog comment count
+    const blog = await Blog.findById(req.params.id);
+    if (blog) {
+      blog.commentCount = Math.max(0, (blog.commentCount || 0) - 1);
+      await blog.save();
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Comment deleted successfully' 
+    });
+  } catch (error) {
+    console.error('❌ Blog Debug - Delete comment error:', error);
+    res.status(500).json({ message: 'Error deleting comment', error: error.message });
+  }
+});
 
 // Get single blog by ID
 router.get('/blogs/:id', async (req, res) => {
@@ -273,195 +462,6 @@ router.post('/blogs/:id/like', async (req, res) => {
   } catch (error) {
     console.error('❌ Blog Debug - Like blog error:', error);
     res.status(500).json({ message: 'Error updating like', error: error.message });
-  }
-});
-
-// ==================== BLOG COMMENTS & RATINGS ====================
-
-// @route   GET /api/blog/blogs/:id/comments
-// @desc    Get all comments for a blog
-// @access  Public
-router.get('/blogs/:id/comments', async (req, res) => {
-  try {
-    const comments = await BlogComment.find({ 
-      blog: req.params.id,
-      isApproved: true 
-    })
-      .populate('user', 'username')
-      .populate('replies.user', 'username')
-      .sort({ createdAt: -1 });
-    
-    res.json({ success: true, comments });
-  } catch (error) {
-    console.error('❌ Blog Debug - Get comments error:', error);
-    res.status(500).json({ message: 'Error fetching comments', error: error.message });
-  }
-});
-
-// @route   POST /api/blog/blogs/:id/comments
-// @desc    Add a comment to a blog
-// @access  Private (requires authentication)
-router.post('/blogs/:id/comments', auth, async (req, res) => {
-  try {
-    const { comment, rating } = req.body;
-    
-    // Validate input
-    if (!comment || comment.trim().length < 3) {
-      return res.status(400).json({ message: 'Comment must be at least 3 characters' });
-    }
-    
-    if (rating && (rating < 1 || rating > 5)) {
-      return res.status(400).json({ message: 'Rating must be between 1 and 5' });
-    }
-    
-    // Check if blog exists
-    const blog = await Blog.findById(req.params.id);
-    if (!blog) {
-      return res.status(404).json({ message: 'Blog not found' });
-    }
-    
-    // Create new comment
-    const newComment = new BlogComment({
-      blog: req.params.id,
-      user: req.user.id,
-      username: req.user.username,
-      comment: comment.trim(),
-      rating: rating || null
-    });
-    
-    await newComment.save();
-    
-    // Update blog comment count
-    blog.commentCount = (blog.commentCount || 0) + 1;
-    
-    // Update blog rating if rating provided
-    if (rating) {
-      const currentRating = blog.rating || 0;
-      const currentCount = blog.ratingCount || 0;
-      const totalRating = currentRating * currentCount + rating;
-      blog.ratingCount = currentCount + 1;
-      blog.rating = totalRating / blog.ratingCount;
-    }
-    
-    await blog.save();
-    
-    // Populate user info before sending response
-    await newComment.populate('user', 'username');
-    
-    res.status(201).json({ 
-      success: true, 
-      message: 'Comment added successfully',
-      comment: newComment,
-      blog: {
-        commentCount: blog.commentCount,
-        rating: blog.rating,
-        ratingCount: blog.ratingCount
-      }
-    });
-  } catch (error) {
-    console.error('❌ Blog Debug - Add comment error:', error);
-    res.status(500).json({ message: 'Error adding comment', error: error.message });
-  }
-});
-
-// @route   POST /api/blog/blogs/:id/comments/:commentId/reply
-// @desc    Reply to a comment
-// @access  Private (requires authentication)
-router.post('/blogs/:id/comments/:commentId/reply', auth, async (req, res) => {
-  try {
-    const { comment } = req.body;
-    
-    if (!comment || comment.trim().length < 3) {
-      return res.status(400).json({ message: 'Reply must be at least 3 characters' });
-    }
-    
-    const blogComment = await BlogComment.findById(req.params.commentId);
-    if (!blogComment) {
-      return res.status(404).json({ message: 'Comment not found' });
-    }
-    
-    blogComment.replies.push({
-      user: req.user.id,
-      username: req.user.username,
-      comment: comment.trim()
-    });
-    
-    await blogComment.save();
-    await blogComment.populate('replies.user', 'username');
-    
-    res.json({ 
-      success: true, 
-      message: 'Reply added successfully',
-      comment: blogComment
-    });
-  } catch (error) {
-    console.error('❌ Blog Debug - Add reply error:', error);
-    res.status(500).json({ message: 'Error adding reply', error: error.message });
-  }
-});
-
-// @route   POST /api/blog/blogs/:id/comments/:commentId/helpful
-// @desc    Mark comment as helpful
-// @access  Private (requires authentication)
-router.post('/blogs/:id/comments/:commentId/helpful', auth, async (req, res) => {
-  try {
-    const comment = await BlogComment.findById(req.params.commentId);
-    if (!comment) {
-      return res.status(404).json({ message: 'Comment not found' });
-    }
-    
-    const helpfulIndex = comment.helpful.indexOf(req.user.id);
-    
-    if (helpfulIndex > -1) {
-      comment.helpful.splice(helpfulIndex, 1);
-    } else {
-      comment.helpful.push(req.user.id);
-    }
-    
-    await comment.save();
-    
-    res.json({ 
-      success: true,
-      helpful: helpfulIndex === -1,
-      helpfulCount: comment.helpful.length 
-    });
-  } catch (error) {
-    console.error('❌ Blog Debug - Mark helpful error:', error);
-    res.status(500).json({ message: 'Error marking helpful', error: error.message });
-  }
-});
-
-// @route   DELETE /api/blog/blogs/:id/comments/:commentId
-// @desc    Delete a comment (user can only delete their own)
-// @access  Private (requires authentication)
-router.delete('/blogs/:id/comments/:commentId', auth, async (req, res) => {
-  try {
-    const comment = await BlogComment.findById(req.params.commentId);
-    if (!comment) {
-      return res.status(404).json({ message: 'Comment not found' });
-    }
-    
-    // Check if user owns the comment or is admin
-    if (comment.user.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Not authorized to delete this comment' });
-    }
-    
-    await BlogComment.findByIdAndDelete(req.params.commentId);
-    
-    // Update blog comment count
-    const blog = await Blog.findById(req.params.id);
-    if (blog) {
-      blog.commentCount = Math.max(0, (blog.commentCount || 0) - 1);
-      await blog.save();
-    }
-    
-    res.json({ 
-      success: true, 
-      message: 'Comment deleted successfully' 
-    });
-  } catch (error) {
-    console.error('❌ Blog Debug - Delete comment error:', error);
-    res.status(500).json({ message: 'Error deleting comment', error: error.message });
   }
 });
 
