@@ -646,7 +646,7 @@ export class CameraPresenter {
     if (nose && nose.x != null && nose.y != null) {
       const noseX = nose.x * w;
       const noseY = nose.y * h;
-      const lerp = 0.15;
+      const lerp = 0.12; // Reduced from 0.15 to 0.12 for tighter placement
       const nudgedX = centerX * (1 - lerp) + noseX * lerp;
       const nudgedY = centerY * (1 - lerp) + noseY * lerp;
       centerX = nudgedX;
@@ -666,19 +666,19 @@ export class CameraPresenter {
       faceHeight = Math.abs((chin.y - forehead.y) * h);
     }
 
-    const shiftDown = faceHeight * 0.04;
+    const shiftDown = faceHeight * 0.03; // Reduced from 0.04 to 0.03
     centerY = centerY + shiftDown;
 
-    const baseRadius = Math.max(30, Math.round(faceHeight * 0.1));
-    const radiusX = baseRadius * 1.8;
-    const radiusY = baseRadius * 0.8;
+    const baseRadius = Math.max(25, Math.round(faceHeight * 0.08)); // Reduced from 0.1 to 0.08, min 30 to 25
+    const radiusX = baseRadius * 1.5; // Reduced from 1.8 to 1.5
+    const radiusY = baseRadius * 0.7; // Reduced from 0.8 to 0.7
 
     let angle = 0;
     if (cheekOuter && cheekLower) {
       const dx = (cheekOuter.x - cheekLower.x) * w;
       const dy = (cheekOuter.y - cheekLower.y) * h;
       angle = Math.atan2(dy, dx);
-      angle += side === "left" ? -0.2 : 0.2;
+      angle += side === "left" ? -0.15 : 0.15; // Reduced from 0.2 to 0.15
     }
 
     const offCanvas = document.createElement("canvas");
@@ -692,8 +692,9 @@ export class CameraPresenter {
 
     const gradient = offCtx.createRadialGradient(0, 0, 0, 0, 0, radiusX);
     gradient.addColorStop(0, blush.color);
-    gradient.addColorStop(0.4, blush.color.replace(/[\d.]+\)$/g, "0.2)"));
-    gradient.addColorStop(0.7, blush.color.replace(/[\d.]+\)$/g, "0.1)"));
+    gradient.addColorStop(0.3, blush.color.replace(/[\d.]+\)$/g, "0.25)")); // More concentrated center
+    gradient.addColorStop(0.6, blush.color.replace(/[\d.]+\)$/g, "0.12)")); // Softer middle
+    gradient.addColorStop(0.85, blush.color.replace(/[\d.]+\)$/g, "0.05)")); // Very soft edge
     gradient.addColorStop(1, "rgba(0,0,0,0)");
 
     offCtx.fillStyle = gradient;
@@ -707,18 +708,18 @@ export class CameraPresenter {
       0,
       0,
       0,
-      radiusX * 1.2
+      radiusX * 1.15 // Reduced from 1.2 to 1.15
     );
-    secondGradient.addColorStop(0, blush.color.replace(/[\d.]+\)$/g, "0.1)"));
+    secondGradient.addColorStop(0, blush.color.replace(/[\d.]+\)$/g, "0.08)")); // Very subtle center
     secondGradient.addColorStop(
       0.5,
-      blush.color.replace(/[\d.]+\)$/g, "0.05)")
+      blush.color.replace(/[\d.]+\)$/g, "0.03)") // Almost transparent
     );
     secondGradient.addColorStop(1, "rgba(0,0,0,0)");
 
     offCtx.fillStyle = secondGradient;
     offCtx.beginPath();
-    offCtx.ellipse(0, 0, radiusX * 1.2, radiusY * 1.1, 0, 0, Math.PI * 2);
+    offCtx.ellipse(0, 0, radiusX * 1.15, radiusY * 1.08, 0, 0, Math.PI * 2); // Slightly smaller
     offCtx.fill();
 
     offCtx.restore();
@@ -729,7 +730,7 @@ export class CameraPresenter {
     if (cheekCenter && cheekOuter && cheekLower) {
       const cheekCenterPx = { x: cheekCenter.x * w, y: cheekCenter.y * h };
 
-      const boundaryRadius = Math.max(radiusX * 1.3, radiusY * 1.5);
+      const boundaryRadius = Math.max(radiusX * 1.2, radiusY * 1.3); // Reduced from 1.3/1.5 for tighter containment
       const boundaryGradient = offCtx.createRadialGradient(
         cheekCenterPx.x,
         cheekCenterPx.y,
@@ -739,7 +740,8 @@ export class CameraPresenter {
         boundaryRadius
       );
       boundaryGradient.addColorStop(0, "rgba(255,255,255,1)");
-      boundaryGradient.addColorStop(0.8, "rgba(255,255,255,0.8)");
+      boundaryGradient.addColorStop(0.7, "rgba(255,255,255,0.9)"); // Tighter falloff
+      boundaryGradient.addColorStop(0.9, "rgba(255,255,255,0.5)"); // Softer edge
       boundaryGradient.addColorStop(1, "rgba(255,255,255,0)");
 
       offCtx.fillStyle = boundaryGradient;
@@ -756,11 +758,11 @@ export class CameraPresenter {
 
     offCtx.restore();
 
-    const blurAmount = Math.max(8, Math.round(baseRadius / 4));
+    const blurAmount = Math.max(10, Math.round(baseRadius / 3)); // Increased blur for softer look
 
     ctx.save();
     ctx.filter = `blur(${blurAmount}px)`;
-    ctx.globalAlpha = blush.intensity || 0.35;
+    ctx.globalAlpha = (blush.intensity || 0.35) * 0.9; // Slightly reduce overall intensity
     ctx.drawImage(offCanvas, 0, 0);
     ctx.restore();
   }
