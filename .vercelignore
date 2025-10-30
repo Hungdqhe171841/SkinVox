@@ -1,7 +1,4 @@
-server
-node_modules
+server/
 *.md
-.env
-.env.*
-.git
+!README.md
 

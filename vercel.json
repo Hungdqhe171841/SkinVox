@@ -1,8 +1,8 @@
 {
-  "buildCommand": "cd client && npm install && npm run build",
+  "version": 2,
+  "buildCommand": "cd client && npm ci && npm run build",
   "outputDirectory": "client/dist",
-  "installCommand": "cd client && npm install",
-  "framework": "vite",
+  "installCommand": "npm install --prefix client",
   "rewrites": [
     {
       "source": "/(.*)",
