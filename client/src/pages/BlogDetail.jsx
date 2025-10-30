@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { Calendar, User, Tag, ArrowLeft, Share2, Heart, ExternalLink } from 'lucide-react'
+import { Calendar, User, Tag, ArrowLeft, Share2, Heart, ExternalLink, Star } from 'lucide-react'
 import { useAnalytics, useTrackBlogInteraction } from '../hooks/useAnalytics'
+import BlogComments from '../components/BlogComments'
 import '../styles/Blog.css'
 
 export default function BlogDetail() {
@@ -339,6 +340,11 @@ export default function BlogDetail() {
               </form>
             </div>
           </aside>
+        </div>
+
+        {/* Comments & Ratings Section */}
+        <div className="max-w-4xl mx-auto mt-8 px-4">
+          <BlogComments blogId={blog._id} />
         </div>
       </div>
     </div>
