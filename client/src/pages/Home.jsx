@@ -180,7 +180,7 @@ const HomePage = () => {
         <div className="container">
           <h2 className="section-title">Most Popular Product</h2>
           <p className="section-description">
-            Serum Retinol Renewal là sản phẩm liên kết bán chạy số 1 tháng này! Ổn định, mạnh mẽ và mang lại cải thiện đáng kể về kết cấu da. Chén thánh chống lão hóa.
+          “Bộ sưu tập sản phẩm nổi bật tháng này mang đến trải nghiệm làm đẹp toàn diện — từ serum dưỡng da, kẻ mắt chống trôi đến son dưỡng mềm mịn, giúp bạn tự tin tỏa sáng mỗi ngày.”
           </p>
           
           {loading ? (
