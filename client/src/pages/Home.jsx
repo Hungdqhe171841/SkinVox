@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../HomePage.css'
-import { ShoppingCart, Eye, ClipboardCheck, Target, TrendingUp, Link2, Compass, MessageSquare, Star } from 'lucide-react'
+import { ShoppingCart, Eye, ClipboardCheck, Target, TrendingUp, Link2, Compass, MessageSquare, Star, Sparkles } from 'lucide-react'
 import WebsiteReviews from '../components/WebsiteReviews'
 
 const HomePage = () => {
@@ -87,68 +87,62 @@ const HomePage = () => {
         <div className="container">
           <h2 className="section-title">Why Choose Us</h2>
           <p className="section-description">
-            We understand that when you're looking for Skincare products, you're faced with thousands of options and tons of hype.
+            Chúng tôi hiểu rằng khi bạn tìm kiếm sản phẩm Skincare, bạn phải đối mặt với hàng ngàn lựa chọn và vô số lời quảng cáo.
           </p>
           
           <div className="features-grid">
             <div className="feature-card">
               <ClipboardCheck className="feature-icon" />
-              <h3 className="feature-title">Science-Backed Analysis</h3>
+              <h3 className="feature-title">Phân tích Dựa trên Khoa học</h3>
               <p className="feature-description">
-                We deep-dive into the INCI List, analyzing active ingredients, stability, and potential irritants. 
-                You know exactly what you're putting on your skin.
+                SkinVox đi sâu vào bảng thành phần (INCI), phân tích hoạt chất, độ ổn định và yếu tố có thể gây kích ứng — để bạn biết chính xác mình đang thoa gì lên da.
               </p>
-              <a href="#" className="feature-link">Read More</a>
+              <a href="#" className="feature-link">Tìm hiểu thêm</a>
             </div>
 
             <div className="feature-card">
               <Target className="feature-icon" />
-              <h3 className="feature-title">Targeted Solutions</h3>
+              <h3 className="feature-title">Giải pháp Theo Mục Tiêu</h3>
               <p className="feature-description">
-                We categorize products by skin type, condition (acne, aging, sensitivity), and budget. 
-                Buy only what truly works for your needs.
+                Chúng tôi phân loại sản phẩm theo loại da, tình trạng (mụn, lão hóa, nhạy cảm…) và ngân sách — giúp bạn chỉ mua thứ thật sự hiệu quả cho nhu cầu của mình.
               </p>
-              <a href="#" className="feature-link">Read More</a>
+              <a href="#" className="feature-link">Tìm hiểu thêm</a>
             </div>
 
             <div className="feature-card">
               <TrendingUp className="feature-icon" />
-              <h3 className="feature-title">Trend & Dermatology Updates</h3>
+              <h3 className="feature-title">Cập nhật Xu hướng & Da liễu</h3>
               <p className="feature-description">
-                Our team tracks the latest dermatology research and global skincare technology. 
-                You get current, expert insights on breakthroughs.
+                Đội ngũ SkinVox theo dõi liên tục nghiên cứu da liễu và công nghệ skincare toàn cầu, mang đến góc nhìn chuyên gia và những đột phá mới nhất.
               </p>
-              <a href="#" className="feature-link">Read More</a>
+              <a href="#" className="feature-link">Tìm hiểu thêm</a>
             </div>
 
             <div className="feature-card">
               <Link2 className="feature-icon" />
-              <h3 className="feature-title">Unbiased Affiliate Reviews</h3>
+              <h3 className="feature-title">Đánh giá Affiliate Minh bạch</h3>
               <p className="feature-description">
-                Our reviews are truthful and non-sponsored. We disclose affiliate links upfront, 
-                ensuring commission never influences product quality ratings.
+                Bài đánh giá trung thực, không tài trợ. SkinVox luôn ghi rõ liên kết affiliate (nếu có), đảm bảo hoa hồng không ảnh hưởng đến xếp hạng chất lượng sản phẩm.
               </p>
-              <a href="#" className="feature-link">Read More</a>
+              <a href="#" className="feature-link">Tìm hiểu thêm</a>
             </div>
 
             <div className="feature-card">
               <Compass className="feature-icon" />
-              <h3 className="feature-title">Value for Money</h3>
+              <h3 className="feature-title">Giá trị Xứng đáng</h3>
               <p className="feature-description">
-                We help you determine a product's true cost-effectiveness. Know which items are worth 
-                the long-term investment versus pure marketing hype.
+                Chúng tôi giúp bạn đánh giá hiệu quả–chi phí thực sự, chỉ ra đâu là khoản "đầu tư dài hạn" đáng tiền và đâu chỉ là lời quảng cáo.
               </p>
-              <a href="#" className="feature-link">Read More</a>
+              <a href="#" className="feature-link">Tìm hiểu thêm</a>
             </div>
 
             <div className="feature-card">
-              <ShoppingCart className="feature-icon" />
-              <h3 className="feature-title">Expert Recommendations</h3>
+              <Sparkles className="feature-icon" />
+              <h3 className="feature-title">Công nghệ tối ưu</h3>
               <p className="feature-description">
-                Our team of skincare experts carefully curates product recommendations based on 
-                extensive research and real-world testing.
+                Đội ngũ vận hành chuyên môn của SkinVox nâng cấp tối ưu, tích hợp AR và công nghệ Chatbox để mang lại trải nghiệm "cá nhân hóa" tốt nhất cho khách hàng.
               </p>
-              <a href="#" className="feature-link">Read More</a>
+              <a href="#" className="feature-link">Tìm hiểu thêm</a>
             </div>
           </div>
         </div>
