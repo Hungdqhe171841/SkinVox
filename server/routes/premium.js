@@ -205,7 +205,7 @@ router.get('/plans', (req, res) => {
 // @route   GET /api/premium/admin/subscriptions
 // @desc    Get all subscription requests (admin)
 // @access  Admin
-router.get('/admin/subscriptions', adminAuth, async (req, res) => {
+router.get('/admin/subscriptions', auth, adminAuth, async (req, res) => {
   try {
     const { status = 'all', page = 1, limit = 20 } = req.query;
     
@@ -284,7 +284,7 @@ router.get('/admin/subscriptions', adminAuth, async (req, res) => {
 // @route   POST /api/premium/admin/approve/:id
 // @desc    Approve a subscription request
 // @access  Admin
-router.post('/admin/approve/:id', adminAuth, async (req, res) => {
+router.post('/admin/approve/:id', auth, adminAuth, async (req, res) => {
   try {
     const subscription = await PremiumSubscription.findById(req.params.id);
     
@@ -339,7 +339,7 @@ router.post('/admin/approve/:id', adminAuth, async (req, res) => {
 // @route   POST /api/premium/admin/reject/:id
 // @desc    Reject a subscription request
 // @access  Admin
-router.post('/admin/reject/:id', adminAuth, async (req, res) => {
+router.post('/admin/reject/:id', auth, adminAuth, async (req, res) => {
   try {
     const { reason } = req.body;
     
@@ -376,7 +376,7 @@ router.post('/admin/reject/:id', adminAuth, async (req, res) => {
 // @route   GET /api/premium/admin/stats
 // @desc    Get premium subscription statistics
 // @access  Admin
-router.get('/admin/stats', adminAuth, async (req, res) => {
+router.get('/admin/stats', auth, adminAuth, async (req, res) => {
   try {
     const totalSubscriptions = await PremiumSubscription.countDocuments();
     const pendingCount = await PremiumSubscription.countDocuments({ status: 'pending' });
