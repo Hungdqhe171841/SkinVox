@@ -56,6 +56,9 @@ export default function ARModal({ product, onClose }) {
     fetchPremiumStatus()
   }, [])
 
+  // Store all shades separately from displayed shades
+  const [allShades, setAllShades] = useState([])
+
   // Fetch product shades from MongoDB
   useEffect(() => {
     const fetchShades = async () => {
@@ -109,13 +112,16 @@ export default function ARModal({ product, onClose }) {
           }
           console.log('✅ AR shades loaded:', list.length, 'shades')
           
-          // Free users only get first 2 shades
+          // Store all shades
+          setAllShades(list)
+          
+          // Free users only get first 2 shades, premium users get all
           const limitedShades = isPremium ? list : list.slice(0, 2)
           console.log(`🔒 AR Debug - Premium status: ${isPremium}, showing ${limitedShades.length}/${list.length} shades`)
           
           setShades(limitedShades)
           // Set first shade as default
-          if (limitedShades.length > 0) {
+          if (limitedShades.length > 0 && !selectedShade) {
             setSelectedShade(limitedShades[0])
           }
         }
@@ -123,8 +129,10 @@ export default function ARModal({ product, onClose }) {
         console.error('Error fetching shades:', error)
         // Fallback to product color if available
         if (product?.color) {
-          setShades([{ name: product.color, hex: product.color, rgba: product.color }])
-          setSelectedShade({ name: product.color, hex: product.color, rgba: product.color })
+          const fallbackShade = { name: product.color, hex: product.color, rgba: product.color }
+          setAllShades([fallbackShade])
+          setShades([fallbackShade])
+          setSelectedShade(fallbackShade)
         }
       } finally {
         setLoading(false)
@@ -133,6 +141,19 @@ export default function ARModal({ product, onClose }) {
 
     fetchShades()
   }, [product])
+
+  // Update shades when premium status changes
+  useEffect(() => {
+    if (allShades.length > 0) {
+      const limitedShades = isPremium ? allShades : allShades.slice(0, 2)
+      console.log(`🔒 AR Debug - Premium status changed: ${isPremium}, updating to show ${limitedShades.length}/${allShades.length} shades`)
+      setShades(limitedShades)
+      // Update selected shade if current one is not in the new list
+      if (selectedShade && !limitedShades.find(s => s.name === selectedShade.name)) {
+        setSelectedShade(limitedShades[0])
+      }
+    }
+  }, [isPremium, allShades])
 
   const { model, presenter } = useMemo(() => {
     const m = new MakeupModel()
