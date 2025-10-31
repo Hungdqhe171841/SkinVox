@@ -209,25 +209,70 @@ router.get('/admin/subscriptions', adminAuth, async (req, res) => {
   try {
     const { status = 'all', page = 1, limit = 20 } = req.query;
     
+    console.log('💎 Premium Debug - Admin fetching subscriptions:', { status, page, limit });
+    
     let query = {};
     if (status !== 'all') {
       query.status = status;
     }
     
+    console.log('💎 Premium Debug - Query:', query);
+    
+    // First, check how many subscriptions match the query
+    const total = await PremiumSubscription.countDocuments(query);
+    console.log('💎 Premium Debug - Total subscriptions found:', total);
+    
     const subscriptions = await PremiumSubscription.find(query)
       .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .populate('user', 'username email avatar')
-      .populate('reviewedBy', 'username');
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit))
+      .lean(); // Use lean() for better performance and to avoid populate issues
     
-    const total = await PremiumSubscription.countDocuments(query);
+    // Manually populate user info (use stored username/email as fallback)
+    const subscriptionsWithUser = await Promise.all(
+      subscriptions.map(async (sub) => {
+        try {
+          const user = await User.findById(sub.user).select('username email avatar').lean();
+          const reviewedBy = sub.reviewedBy 
+            ? await User.findById(sub.reviewedBy).select('username').lean() 
+            : null;
+          
+          return {
+            ...sub,
+            user: user || { 
+              username: sub.username, 
+              email: sub.email,
+              avatar: null 
+            },
+            username: sub.username, // Keep username in root for compatibility
+            email: sub.email, // Keep email in root for compatibility
+            reviewedBy: reviewedBy || null
+          };
+        } catch (err) {
+          console.error('❌ Premium Debug - Error populating user for subscription:', sub._id, err);
+          // Return subscription with stored username/email if populate fails
+          return {
+            ...sub,
+            user: { 
+              username: sub.username, 
+              email: sub.email,
+              avatar: null 
+            },
+            username: sub.username,
+            email: sub.email,
+            reviewedBy: null
+          };
+        }
+      })
+    );
+    
+    console.log('💎 Premium Debug - Returning subscriptions:', subscriptionsWithUser.length);
     
     res.json({
       success: true,
-      subscriptions,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
+      subscriptions: subscriptionsWithUser,
+      totalPages: Math.ceil(total / parseInt(limit)),
+      currentPage: parseInt(page),
       total
     });
   } catch (error) {

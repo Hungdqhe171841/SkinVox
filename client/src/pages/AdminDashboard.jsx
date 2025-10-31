@@ -50,6 +50,7 @@ export default function AdminDashboard() {
   const [subscriptions, setSubscriptions] = useState([])
   const [subscriptionStats, setSubscriptionStats] = useState({})
   const [subscriptionFilter, setSubscriptionFilter] = useState('pending')
+  const [subscriptionsError, setSubscriptionsError] = useState('')
   const [users, setUsers] = useState([])
   const [usersPagination, setUsersPagination] = useState({
     currentPage: 1,
@@ -218,19 +219,37 @@ export default function AdminDashboard() {
     setLoading(true)
     try {
       const statusParam = subscriptionFilter === 'all' ? 'all' : subscriptionFilter
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/premium/admin/subscriptions?status=${statusParam}`,
-        {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        }
-      )
+      const url = `${import.meta.env.VITE_API_URL}/api/premium/admin/subscriptions?status=${statusParam}`
+      console.log('🔍 Loading subscriptions with URL:', url)
+      console.log('🔍 Filter:', statusParam)
+      
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ Response not OK:', response.status, errorText)
+        throw new Error(`HTTP ${response.status}: ${errorText}`)
+      }
+      
       const data = await response.json()
-      console.log('Subscriptions loaded:', data)
-      console.log('Filter:', subscriptionFilter, 'Subscriptions count:', data.subscriptions?.length || 0)
-      setSubscriptions(data.subscriptions || [])
+      console.log('✅ Subscriptions API response:', data)
+      console.log('✅ Filter:', subscriptionFilter, 'Subscriptions count:', data.subscriptions?.length || 0)
+      console.log('✅ Subscriptions data:', data.subscriptions)
+      
+      if (data.success && Array.isArray(data.subscriptions)) {
+        setSubscriptions(data.subscriptions)
+        setSubscriptionsError('')
+      } else {
+        console.warn('⚠️ Unexpected response format:', data)
+        setSubscriptions(data.subscriptions || [])
+        setSubscriptionsError('Unexpected response format from server')
+      }
     } catch (error) {
-      console.error('Error loading subscriptions:', error)
+      console.error('❌ Error loading subscriptions:', error)
       setSubscriptions([])
+      setSubscriptionsError(error.message || 'Failed to load subscriptions')
     } finally {
       setLoading(false)
     }
@@ -1277,6 +1296,11 @@ export default function AdminDashboard() {
 
               {/* Subscriptions List */}
               <div className="p-6">
+                {subscriptionsError && (
+                  <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-600 text-sm">Error: {subscriptionsError}</p>
+                  </div>
+                )}
                 {loading ? (
                   <div className="text-center py-8 text-gray-500">Loading subscriptions...</div>
                 ) : subscriptions.length === 0 ? (
@@ -1289,6 +1313,11 @@ export default function AdminDashboard() {
                           ? `No ${subscriptionFilter} subscriptions found`
                           : 'No subscriptions found'}
                     </p>
+                    {subscriptionFilter === 'pending' && (
+                      <p className="text-xs text-gray-400 mt-2">
+                        Tip: Check if subscriptions exist with status 'all' filter
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -1301,11 +1330,11 @@ export default function AdminDashboard() {
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-3">
                               <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold">
-                                {sub.username?.charAt(0).toUpperCase() || 'U'}
+                                {(sub.username || sub.user?.username || 'U')?.charAt(0).toUpperCase() || 'U'}
                               </div>
                               <div>
-                                <h3 className="font-semibold text-gray-900">{sub.username}</h3>
-                                <p className="text-sm text-gray-600">{sub.email}</p>
+                                <h3 className="font-semibold text-gray-900">{sub.username || sub.user?.username || 'Unknown User'}</h3>
+                                <p className="text-sm text-gray-600">{sub.email || sub.user?.email || 'No email'}</p>
                               </div>
                               <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                                 sub.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
