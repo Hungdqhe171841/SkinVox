@@ -50,6 +50,17 @@ export default function AdminDashboard() {
   const [subscriptions, setSubscriptions] = useState([])
   const [subscriptionStats, setSubscriptionStats] = useState({})
   const [subscriptionFilter, setSubscriptionFilter] = useState('pending')
+  const [users, setUsers] = useState([])
+  const [usersPagination, setUsersPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalUsers: 0,
+    hasNext: false,
+    hasPrev: false
+  })
+  const [usersSearchTerm, setUsersSearchTerm] = useState('')
+  const [usersRoleFilter, setUsersRoleFilter] = useState('')
+  const [usersLoading, setUsersLoading] = useState(false)
   const [dashboardStats, setDashboardStats] = useState({
     overview: {
       totalUsers: 0,
@@ -106,7 +117,17 @@ export default function AdminDashboard() {
       loadSubscriptions()
       loadSubscriptionStats()
     }
-  }, [activeTab, subscriptionFilter])
+    if (activeTab === 'users') {
+      loadUsers()
+    }
+  }, [activeTab])
+
+  // Reload subscriptions when filter changes (only if premium tab is active)
+  useEffect(() => {
+    if (activeTab === 'premium') {
+      loadSubscriptions()
+    }
+  }, [subscriptionFilter])
 
   const loadDashboardStats = async () => {
     try {
@@ -196,14 +217,16 @@ export default function AdminDashboard() {
   const loadSubscriptions = async () => {
     setLoading(true)
     try {
+      const statusParam = subscriptionFilter === 'all' ? 'all' : subscriptionFilter
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/premium/admin/subscriptions?status=${subscriptionFilter}`,
+        `${import.meta.env.VITE_API_URL}/api/premium/admin/subscriptions?status=${statusParam}`,
         {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         }
       )
       const data = await response.json()
       console.log('Subscriptions loaded:', data)
+      console.log('Filter:', subscriptionFilter, 'Subscriptions count:', data.subscriptions?.length || 0)
       setSubscriptions(data.subscriptions || [])
     } catch (error) {
       console.error('Error loading subscriptions:', error)
@@ -224,6 +247,59 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error loading subscription stats:', error)
       setSubscriptionStats({})
+    }
+  }
+
+  const loadUsers = async (page = 1) => {
+    setUsersLoading(true)
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '10',
+        ...(usersSearchTerm && { search: usersSearchTerm }),
+        ...(usersRoleFilter && { role: usersRoleFilter })
+      })
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users?${params}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      })
+      const data = await response.json()
+      console.log('Users loaded:', data)
+      setUsers(data.users || [])
+      setUsersPagination(data.pagination || {
+        currentPage: 1,
+        totalPages: 1,
+        totalUsers: 0,
+        hasNext: false,
+        hasPrev: false
+      })
+    } catch (error) {
+      console.error('Error loading users:', error)
+      setUsers([])
+    } finally {
+      setUsersLoading(false)
+    }
+  }
+
+  const handleDeleteUser = async (userId) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa user này?')) {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users/${userId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        })
+        
+        if (response.ok) {
+          alert('Xóa user thành công!')
+          loadUsers(usersPagination.currentPage)
+        } else {
+          const errorData = await response.json()
+          alert(`Có lỗi xảy ra: ${errorData.message}`)
+        }
+      } catch (error) {
+        console.error('Error deleting user:', error)
+        alert('Có lỗi xảy ra khi xóa user!')
+      }
     }
   }
 
@@ -894,11 +970,234 @@ export default function AdminDashboard() {
                 <p className="text-gray-600">Manage user accounts and permissions</p>
               </div>
             </div>
-            
-            <div className="bg-white p-8 rounded-lg shadow text-center">
-              <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">User Management</h3>
-              <p className="text-gray-600">User management interface will be implemented here.</p>
+
+            {/* Search and Filter */}
+            <div className="bg-white p-4 rounded-lg shadow">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Search users by username or email..."
+                      value={usersSearchTerm}
+                      onChange={(e) => {
+                        setUsersSearchTerm(e.target.value)
+                      }}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          loadUsers(1)
+                        }
+                      }}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <select
+                    value={usersRoleFilter}
+                    onChange={(e) => {
+                      setUsersRoleFilter(e.target.value)
+                      loadUsers(1)
+                    }}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">All Roles</option>
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                  <button
+                    onClick={() => {
+                      setUsersSearchTerm('')
+                      setUsersRoleFilter('')
+                      loadUsers(1)
+                    }}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center"
+                  >
+                    <Filter className="w-4 h-4 mr-2" />
+                    Reset
+                  </button>
+                  <button
+                    onClick={() => loadUsers(1)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+                  >
+                    <Search className="w-4 h-4 mr-2" />
+                    Search
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Users List */}
+            <div className="bg-white rounded-lg shadow">
+              {usersLoading ? (
+                <div className="p-8 text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-2 text-gray-600">Loading users...</p>
+                </div>
+              ) : (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            User
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Email
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Role
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Premium
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Joined
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {users.length === 0 ? (
+                          <tr>
+                            <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                              <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                              <p>No users found</p>
+                            </td>
+                          </tr>
+                        ) : (
+                          users.map((userItem) => (
+                            <tr key={userItem._id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                                    {userItem.username?.charAt(0).toUpperCase() || 'U'}
+                                  </div>
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {userItem.username || 'N/A'}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">{userItem.email || 'N/A'}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  userItem.role === 'admin' 
+                                    ? 'bg-purple-100 text-purple-800' 
+                                    : 'bg-blue-100 text-blue-800'
+                                }`}>
+                                  {userItem.role || 'user'}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {userItem.isPremium ? (
+                                  <div className="flex items-center">
+                                    <Crown className="w-4 h-4 text-yellow-500 mr-1" />
+                                    <span className="text-sm text-gray-900">Premium</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-sm text-gray-500">Regular</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {userItem.createdAt 
+                                  ? new Date(userItem.createdAt).toLocaleDateString('vi-VN')
+                                  : 'N/A'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                {userItem._id !== (user?._id || user?.id) && (
+                                  <button
+                                    onClick={() => handleDeleteUser(userItem._id)}
+                                    className="text-red-600 hover:text-red-900"
+                                    title="Xóa user"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Pagination */}
+                  {usersPagination.totalPages > 1 && (
+                    <div className="bg-gray-50 px-6 py-3 flex items-center justify-between border-t border-gray-200">
+                      <div className="flex-1 flex justify-between sm:hidden">
+                        <button
+                          onClick={() => loadUsers(usersPagination.currentPage - 1)}
+                          disabled={!usersPagination.hasPrev}
+                          className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
+                            usersPagination.hasPrev
+                              ? 'bg-white text-gray-700 hover:bg-gray-50'
+                              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          }`}
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={() => loadUsers(usersPagination.currentPage + 1)}
+                          disabled={!usersPagination.hasNext}
+                          className={`ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
+                            usersPagination.hasNext
+                              ? 'bg-white text-gray-700 hover:bg-gray-50'
+                              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          }`}
+                        >
+                          Next
+                        </button>
+                      </div>
+                      <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                          <p className="text-sm text-gray-700">
+                            Showing <span className="font-medium">{(usersPagination.currentPage - 1) * 10 + 1}</span> to{' '}
+                            <span className="font-medium">
+                              {Math.min(usersPagination.currentPage * 10, usersPagination.totalUsers)}
+                            </span> of{' '}
+                            <span className="font-medium">{usersPagination.totalUsers}</span> users
+                          </p>
+                        </div>
+                        <div>
+                          <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            <button
+                              onClick={() => loadUsers(usersPagination.currentPage - 1)}
+                              disabled={!usersPagination.hasPrev}
+                              className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 text-sm font-medium ${
+                                usersPagination.hasPrev
+                                  ? 'bg-white text-gray-500 hover:bg-gray-50'
+                                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              }`}
+                            >
+                              Previous
+                            </button>
+                            <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                              Page {usersPagination.currentPage} of {usersPagination.totalPages}
+                            </span>
+                            <button
+                              onClick={() => loadUsers(usersPagination.currentPage + 1)}
+                              disabled={!usersPagination.hasNext}
+                              className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 text-sm font-medium ${
+                                usersPagination.hasNext
+                                  ? 'bg-white text-gray-500 hover:bg-gray-50'
+                                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              }`}
+                            >
+                              Next
+                            </button>
+                          </nav>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         )}
@@ -983,7 +1282,13 @@ export default function AdminDashboard() {
                 ) : subscriptions.length === 0 ? (
                   <div className="text-center py-12">
                     <Crown className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">No {subscriptionFilter !== 'all' ? subscriptionFilter : ''} subscriptions found</p>
+                    <p className="text-gray-500">
+                      {subscriptionFilter === 'pending' 
+                        ? 'No pending subscription requests found' 
+                        : subscriptionFilter !== 'all' 
+                          ? `No ${subscriptionFilter} subscriptions found`
+                          : 'No subscriptions found'}
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-4">

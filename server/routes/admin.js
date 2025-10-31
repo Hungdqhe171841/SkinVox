@@ -8,6 +8,7 @@ const cloudStorage = require('../services/cloudStorage');
 const User = require('../models/User');
 const Blog = require('../models/Blog');
 const Review = require('../models/Review');
+const BlogComment = require('../models/BlogComment');
 const Category = require('../models/Category');
 const Lipstick = require('../models/Lipstick');
 const Eyeshadow = require('../models/Eyeshadow');
@@ -148,7 +149,9 @@ router.get('/dashboard', async (req, res) => {
     // Get total counts
     const totalUsers = await User.countDocuments();
     const totalBlogs = await Blog.countDocuments();
-    const totalReviews = await Review.countDocuments();
+    const productReviews = await Review.countDocuments();
+    const blogComments = await BlogComment.countDocuments();
+    const totalReviews = productReviews + blogComments; // Total reviews = product reviews + blog comments
     const totalCategories = await Category.countDocuments();
     
     // Get product counts by category
