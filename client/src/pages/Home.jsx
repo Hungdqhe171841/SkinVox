@@ -74,9 +74,9 @@ const HomePage = () => {
         />
         <div className="hero-overlay">
           <h1 className="hero-title">Just Like Nature Intended</h1>
-          <p className="hero-subtitle">Handcrafted Organic Soaps & Candles</p>
+          <p className="hero-subtitle">Sản phẩm Hữu cơ Thủ công từ Thiên nhiên</p>
           <button className="hero-cta" onClick={() => navigate('/beautybar')}>
-            Shop now
+            Mua ngay
             <ShoppingCart className="hero-cta-icon" />
           </button>
         </div>
@@ -156,7 +156,7 @@ const HomePage = () => {
             <button className="carousel-btn prev">‹</button>
             <div className="testimonial-slide">
               <p className="testimonial-text">
-                "Your skincare products redefine luxury, delivering visible results that speak louder than words."
+                "Sản phẩm chăm sóc da của bạn định nghĩa lại sự sang trọng, mang lại kết quả rõ ràng nói lên tất cả."
               </p>
               <div className="testimonial-author">
                 <img 
@@ -166,7 +166,7 @@ const HomePage = () => {
                 />
                 <div>
                   <h4 className="author-name">Jonathan Taylor</h4>
-                  <p className="author-title">CEO at Creativex</p>
+                  <p className="author-title">CEO tại Creativex</p>
                 </div>
               </div>
             </div>
@@ -180,19 +180,18 @@ const HomePage = () => {
         <div className="container">
           <h2 className="section-title">Most Popular Product</h2>
           <p className="section-description">
-            The Retinol Renewal Serum is this month's #1 affiliate purchase! Stable, potent, and delivers 
-            dramatic texture improvements. The anti-aging holy grail.
+            Serum Retinol Renewal là sản phẩm liên kết bán chạy số 1 tháng này! Ổn định, mạnh mẽ và mang lại cải thiện đáng kể về kết cấu da. Chén thánh chống lão hóa.
           </p>
           
           {loading ? (
-            <div className="loading-text">Loading products...</div>
+            <div className="loading-text">Đang tải sản phẩm...</div>
           ) : products.length === 0 ? (
-            <div className="no-products">No products available</div>
+            <div className="no-products">Không có sản phẩm</div>
                      ) : (
              <div className={`products-grid ${products.length > 0 && products.length < 4 ? 'products-grid-center' : ''}`}>
                {products.map((product) => (
                 <div key={product._id} className="product-card">
-                  <a href="#" className="explore-link">Explore</a>
+                  <a href="#" className="explore-link">Khám phá</a>
                   <img 
                     src={product.image || 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&h=300&fit=crop'} 
                     alt={product.name}
@@ -203,11 +202,11 @@ const HomePage = () => {
                   <div className="product-actions">
                     <button className="btn-ar">
                       <Eye className="btn-icon" />
-                      Try AR
+                      Thử AR
                     </button>
                     <button className="btn-shop">
                       <ShoppingCart className="btn-icon" />
-                      Shop now
+                      Mua ngay
                     </button>
                   </div>
                 </div>
@@ -217,7 +216,7 @@ const HomePage = () => {
 
           <div className="view-all-cta">
             <button className="btn-view-all" onClick={() => navigate('/beautybar')}>
-              View all skincare product
+              Xem tất cả sản phẩm skincare
             </button>
           </div>
         </div>
@@ -246,12 +245,12 @@ const HomePage = () => {
                    </div>
                    <h3 className="blog-title">{blog.title}</h3>
                    <p className="blog-description">
-                     {blog.description || 'Read more about this featured blog post...'}
+                     {blog.description || 'Đọc thêm về bài viết nổi bật này...'}
                    </p>
                    <div className="blog-stats" style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '14px', color: '#666' }}>
                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                        <MessageSquare size={16} />
-                       <span>{blog.commentCount || 0} comments</span>
+                       <span>{blog.commentCount || 0} bình luận</span>
                      </div>
                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                        <Star size={16} className={blog.rating > 0 ? 'fill-yellow-400 text-yellow-400' : ''} />
@@ -261,7 +260,7 @@ const HomePage = () => {
                  </article>
                ))
              ) : (
-               <div className="loading-text">Loading featured blogs...</div>
+               <div className="loading-text">Đang tải blog nổi bật...</div>
              )}
            </div>
         </div>
@@ -278,30 +277,30 @@ const HomePage = () => {
             <div className="appendix-card">
               <h3 className="appendix-title">User Guide</h3>
               <ul className="appendix-list">
-                <li>How to choose products for your skin type</li>
-                <li>Basic skincare routine</li>
-                <li>Natural makeup tips</li>
-                <li>Beauty product storage</li>
+                <li>Cách chọn sản phẩm phù hợp với loại da của bạn</li>
+                <li>Quy trình chăm sóc da cơ bản</li>
+                <li>Mẹo trang điểm tự nhiên</li>
+                <li>Bảo quản sản phẩm làm đẹp</li>
               </ul>
             </div>
 
             <div className="appendix-card">
               <h3 className="appendix-title">Resources</h3>
               <ul className="appendix-list">
-                <li>Skincare tutorial videos</li>
-                <li>Skincare routine e-book</li>
-                <li>Product selection checklist</li>
-                <li>Seasonal skincare schedule</li>
+                <li>Video hướng dẫn chăm sóc da</li>
+                <li>E-book quy trình chăm sóc da</li>
+                <li>Bảng kiểm tra lựa chọn sản phẩm</li>
+                <li>Lịch chăm sóc da theo mùa</li>
               </ul>
             </div>
 
             <div className="appendix-card">
               <h3 className="appendix-title">Useful Links</h3>
               <ul className="appendix-list">
-                <li>In-depth beauty blog</li>
-                <li>Community experience sharing</li>
-                <li>Online expert consultation</li>
-                <li>Free beauty courses</li>
+                <li>Blog làm đẹp chuyên sâu</li>
+                <li>Chia sẻ kinh nghiệm cộng đồng</li>
+                <li>Tư vấn chuyên gia trực tuyến</li>
+                <li>Khóa học làm đẹp miễn phí</li>
               </ul>
             </div>
           </div>
