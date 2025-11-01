@@ -36,16 +36,17 @@ export default function Chatbot() {
       timestamp: new Date()
     }
 
+    // Prepare conversation history BEFORE adding current message to avoid duplication
+    const historyForAI = messages.slice(-6).map(msg => ({
+      sender: msg.sender,
+      text: msg.text
+    }))
+
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setLoading(true)
 
     try {
-      // Prepare conversation history (last 6 messages for context)
-      const historyForAI = messages.slice(-6).map(msg => ({
-        sender: msg.sender,
-        text: msg.text
-      }))
 
       const response = await api.post('/api/chatbot/message', {
         message: userMessage.text,
