@@ -1,18 +1,17 @@
 import React from 'react';
+import Chatbot from '../components/Chatbot';
 
 const MakeupAR = () => {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">ChatBot</h1>
-        <p className="text-lg text-gray-600 mb-8">Coming Soon...</p>
-        <div className="bg-white rounded-lg shadow-md p-8 max-w-md mx-auto">
-          <div className="animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-5/6 mx-auto"></div>
-          </div>
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8 px-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-4 sm:mb-8">
+          <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2">ChatBot - Trợ lý làm đẹp</h1>
+          <p className="text-sm sm:text-lg text-gray-600">
+            Đặt câu hỏi về makeup, skincare, và sản phẩm làm đẹp
+          </p>
         </div>
+        <Chatbot />
       </div>
     </div>
   );

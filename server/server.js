@@ -137,6 +137,8 @@ app.use('/api/reviews', require('./routes/reviews'));
 console.log('🛣️ Server Debug - Reviews routes mounted at /api/reviews');
 app.use('/api/premium', require('./routes/premium'));
 console.log('🛣️ Server Debug - Premium routes mounted at /api/premium');
+app.use('/api/chatbot', require('./routes/chatbot'));
+console.log('🛣️ Server Debug - Chatbot routes mounted at /api/chatbot');
 // app.use('/api/users', require('./routes/users'));
 
 // Error handling middleware

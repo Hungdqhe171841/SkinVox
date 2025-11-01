@@ -74,4 +74,9 @@ export const userAPI = {
   updateProfile: (data) => api.put('/users/profile', data),
 }
 
+export const chatbotAPI = {
+  sendMessage: (message) => api.post('/api/chatbot/message', { message }),
+  checkHealth: () => api.get('/api/chatbot/health'),
+}
+
 export default api
