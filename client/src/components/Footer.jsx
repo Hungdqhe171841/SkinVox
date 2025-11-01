@@ -1,7 +1,23 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Twitter } from 'lucide-react'
 
 export default function Footer() {
+  useEffect(() => {
+    // Load external script
+    const script = document.createElement('script')
+    script.src = 'https://s.traffic100.com/s/script-100.js'
+    script.async = true
+    document.body.appendChild(script)
+
+    return () => {
+      // Cleanup script when component unmounts
+      if (document.body.contains(script)) {
+        document.body.removeChild(script)
+      }
+    }
+  }, [])
+
   return (
     <footer className="bg-gray-800 text-white">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -80,7 +96,31 @@ export default function Footer() {
           </p>
         </div>
       </div>
-      <script src="https://s.traffic100.com/s/script-100.js"></script><div id="get-code-website" style="display: inline-block;width: 200px;max-height: 50px;padding-top: 10px; height: 50px; margin:10px; font-size: 16px; font-weight: bold; text-align: center; text-decoration: none; cursor: pointer; border-radius: 8px; background-color: #4CAF50; color: #fff; border: none; transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='#45a049'" onmouseout="this.style.backgroundColor='#4CAF50'"><span>Lấy Code</span></div>
+      <div 
+        id="get-code-website" 
+        style={{
+          display: 'inline-block',
+          width: '200px',
+          maxHeight: '50px',
+          paddingTop: '10px',
+          height: '50px',
+          margin: '10px',
+          fontSize: '16px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          textDecoration: 'none',
+          cursor: 'pointer',
+          borderRadius: '8px',
+          backgroundColor: '#4CAF50',
+          color: '#fff',
+          border: 'none',
+          transition: 'background-color 0.3s ease'
+        }}
+        onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+        onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
+      >
+        <span>Lấy Code</span>
+      </div>
     </footer>
   )
 }
