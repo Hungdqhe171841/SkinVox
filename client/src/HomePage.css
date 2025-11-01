@@ -482,6 +482,26 @@
   overflow: hidden;
 }
 
+.blog-stats {
+  display: flex;
+  gap: 1rem;
+  margin: 0 0.75rem 0.75rem;
+  padding-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  border-top: 1px solid #f3f4f6;
+}
+
+.blog-stats > div {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.blog-stats svg {
+  flex-shrink: 0;
+}
+
 /* Star Ratings Section */
 .star-ratings-section {
   background: #f9fafb;

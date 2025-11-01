@@ -68,7 +68,7 @@ const HomePage = () => {
       {/* Hero Section */}
       <section className="hero-section">
         <img 
-          src="https://images.unsplash.com/photo-1612817288484-6f916006741a?w=1200&h=600&fit=crop" 
+          src="/assets/home1.png" 
           alt="Beauty Products" 
           className="hero-image"
         />
@@ -95,7 +95,7 @@ const HomePage = () => {
               <ClipboardCheck className="feature-icon" />
               <h3 className="feature-title">Phân tích Dựa trên Khoa học</h3>
               <p className="feature-description">
-                SkinVox đi sâu vào bảng thành phần (INCI), phân tích hoạt chất, độ ổn định và yếu tố có thể gây kích ứng — để bạn biết chính xác mình đang thoa gì lên da.
+                SkinVox đi sâu vào bảng thành phần (INCI), phân tích hoạt chất, độ ổn định và yếu tố có thể gây kích ứng - để bạn biết chính xác mình đang thoa gì lên da.
               </p>
               <a href="#" className="feature-link">Tìm hiểu thêm</a>
             </div>
@@ -104,7 +104,7 @@ const HomePage = () => {
               <Target className="feature-icon" />
               <h3 className="feature-title">Giải pháp Theo Mục Tiêu</h3>
               <p className="feature-description">
-                Chúng tôi phân loại sản phẩm theo loại da, tình trạng (mụn, lão hóa, nhạy cảm…) và ngân sách — giúp bạn chỉ mua thứ thật sự hiệu quả cho nhu cầu của mình.
+                Chúng tôi phân loại sản phẩm theo loại da, tình trạng (mụn, lão hóa, nhạy cảm…) và ngân sách - giúp bạn chỉ mua thứ thật sự hiệu quả cho nhu cầu của mình.
               </p>
               <a href="#" className="feature-link">Tìm hiểu thêm</a>
             </div>
@@ -131,7 +131,7 @@ const HomePage = () => {
               <Compass className="feature-icon" />
               <h3 className="feature-title">Giá trị Xứng đáng</h3>
               <p className="feature-description">
-                Chúng tôi giúp bạn đánh giá hiệu quả–chi phí thực sự, chỉ ra đâu là khoản "đầu tư dài hạn" đáng tiền và đâu chỉ là lời quảng cáo.
+                Chúng tôi giúp bạn đánh giá hiệu quả - chi phí thực sự, chỉ ra đâu là khoản "đầu tư dài hạn" đáng tiền và đâu chỉ là lời quảng cáo.
               </p>
               <a href="#" className="feature-link">Tìm hiểu thêm</a>
             </div>
@@ -144,33 +144,6 @@ const HomePage = () => {
               </p>
               <a href="#" className="feature-link">Tìm hiểu thêm</a>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="testimonials-section">
-        <div className="container">
-          <h2 className="section-title">What Our Customer Said</h2>
-          <div className="testimonial-carousel">
-            <button className="carousel-btn prev">‹</button>
-            <div className="testimonial-slide">
-              <p className="testimonial-text">
-                "Sản phẩm chăm sóc da của bạn định nghĩa lại sự sang trọng, mang lại kết quả rõ ràng nói lên tất cả."
-              </p>
-              <div className="testimonial-author">
-                <img 
-                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop" 
-                  alt="Customer" 
-                  className="testimonial-avatar"
-                />
-                <div>
-                  <h4 className="author-name">Jonathan Taylor</h4>
-                  <p className="author-title">CEO tại Creativex</p>
-                </div>
-              </div>
-            </div>
-            <button className="carousel-btn next">›</button>
           </div>
         </div>
       </section>
@@ -247,12 +220,12 @@ const HomePage = () => {
                    <p className="blog-description">
                      {blog.description || 'Đọc thêm về bài viết nổi bật này...'}
                    </p>
-                   <div className="blog-stats" style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '14px', color: '#666' }}>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                   <div className="blog-stats">
+                     <div>
                        <MessageSquare size={16} />
                        <span>{blog.commentCount || 0} bình luận</span>
                      </div>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                     <div>
                        <Star size={16} className={blog.rating > 0 ? 'fill-yellow-400 text-yellow-400' : ''} />
                        <span>{blog.rating ? blog.rating.toFixed(1) : '0.0'} ({blog.ratingCount || 0})</span>
                      </div>
