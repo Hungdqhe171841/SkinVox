@@ -41,6 +41,12 @@ api.interceptors.response.use(
     console.log('❌ API Debug - Response error:', error.response?.status, error.config?.url)
     console.log('❌ API Debug - Error data:', error.response?.data)
     
+    // Only log 404 if it's not a favicon or static resource
+    if (error.config?.url && !error.config.url.includes('favicon') && !error.config.url.includes('static')) {
+      console.error(`❌ API Debug - Request failed: ${error.config.method?.toUpperCase()} ${error.config.url}`)
+      console.error(`❌ API Debug - Status: ${error.response?.status || 'No response'}`)
+    }
+    
     if (error.response?.status === 401) {
       console.log('🔒 API Debug - 401 Unauthorized, removing token and redirecting to login')
       localStorage.removeItem('token')
