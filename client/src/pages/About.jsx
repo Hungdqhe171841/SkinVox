@@ -11,7 +11,11 @@ import {
   Lightbulb,
   ShoppingCart,
   MessageCircle,
-  CheckCircle2
+  CheckCircle2,
+  BookOpen,
+  TrendingUp,
+  Calendar,
+  ArrowRight
 } from 'lucide-react'
 
 export default function About() {
@@ -27,8 +31,8 @@ export default function About() {
               Về Chúng Tôi
             </h1>
             <p className="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto leading-relaxed animate-slide-in-from-bottom-4">
-              SkinVox - Nền tảng làm đẹp thông minh với công nghệ AR tiên tiến, 
-              giúp bạn khám phá và thử nghiệm các sản phẩm makeup một cách trực quan và chính xác.
+              Trao quyền làm đẹp bằng tri thức - SkinVox là nền tảng tri thức và cảm hứng làm đẹp, 
+              được xây dựng trên ba giá trị cốt lõi: Trung thực – Khoa học – Cộng đồng.
             </p>
           </div>
         </div>
@@ -104,12 +108,24 @@ export default function About() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900">Sứ Mệnh</h3>
               </div>
-              <p className="text-gray-700 leading-relaxed text-lg">
-                SkinVox cam kết mang lại trải nghiệm mua sắm làm đẹp thông minh và cá nhân hóa, 
-                sử dụng công nghệ AR để giúp khách hàng đưa ra quyết định chính xác và tự tin. 
-                Chúng tôi tin rằng mọi người đều xứng đáng được trải nghiệm vẻ đẹp tự nhiên của mình 
-                với những sản phẩm chất lượng cao và phù hợp nhất.
-              </p>
+              <h4 className="text-lg font-semibold text-gray-800 mb-4">Trao quyền làm đẹp bằng tri thức</h4>
+              <div className="space-y-4 text-gray-700 leading-relaxed">
+                <p>
+                  Tại SkinVox, chúng tôi tin rằng mỗi người đều có quyền hiểu rõ làn da của mình và tự tin 
+                  chăm sóc bản thân theo cách khoa học, lành mạnh và bền vững.
+                </p>
+                <p>
+                  Sứ mệnh của chúng tôi là truyền tải kiến thức làm đẹp chính xác, dễ hiểu và đáng tin cậy 
+                  đến mọi người – đặc biệt là những ai đang bắt đầu hành trình chăm sóc da và trang điểm.
+                </p>
+                <p className="italic text-gray-600 border-l-4 border-rose-400 pl-4 py-2">
+                  "Đẹp không chỉ là vẻ ngoài – đó là sự tự tin và hiểu biết về chính mình."
+                </p>
+                <p>
+                  SkinVox mong muốn trở thành người bạn đồng hành của bạn trên con đường tìm hiểu và yêu thương 
+                  làn da mỗi ngày, giúp bạn hiểu – chọn – và sử dụng đúng sản phẩm phù hợp nhất với bản thân.
+                </p>
+              </div>
             </div>
 
             {/* Vision Card */}
@@ -120,11 +136,32 @@ export default function About() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900">Tầm Nhìn</h3>
               </div>
-              <p className="text-gray-700 leading-relaxed text-lg">
-                Trở thành nền tảng làm đẹp hàng đầu tại Việt Nam và khu vực, nơi công nghệ AI và AR 
-                được tích hợp sâu để mang lại trải nghiệm mua sắm độc đáo. Chúng tôi hướng tới việc 
-                xây dựng một cộng đồng nơi mọi người có thể chia sẻ, học hỏi và khám phá vẻ đẹp của 
-                chính mình với sự tự tin và kiến thức đầy đủ.
+              <h4 className="text-lg font-semibold text-gray-800 mb-4">Trở thành cộng đồng làm đẹp đáng tin cậy tại Việt Nam</h4>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                Chúng tôi hướng đến việc xây dựng một cộng đồng chia sẻ kiến thức làm đẹp chuẩn mực, 
+                nơi mọi người có thể:
+              </p>
+              <ul className="space-y-3 text-gray-700">
+                <li className="flex items-start">
+                  <CheckCircle2 className="w-5 h-5 text-rose-400 mr-2 mt-0.5 flex-shrink-0" />
+                  <span>Học hỏi kiến thức skincare và makeup từ các chuyên gia, bài viết khoa học, và trải nghiệm thực tế.</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle2 className="w-5 h-5 text-rose-400 mr-2 mt-0.5 flex-shrink-0" />
+                  <span>Trao đổi, đặt câu hỏi, nhận tư vấn qua hệ thống chatbox và diễn đàn thân thiện.</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle2 className="w-5 h-5 text-rose-400 mr-2 mt-0.5 flex-shrink-0" />
+                  <span>Truy cập nguồn thông tin minh bạch, giúp bạn tránh xa "hype" quảng cáo và tập trung vào giá trị thật của làn da.</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle2 className="w-5 h-5 text-rose-400 mr-2 mt-0.5 flex-shrink-0" />
+                  <span>Đồng hành cùng công nghệ AR giúp bạn tìm được sản phẩm thực sự phù hợp với bản thân.</span>
+                </li>
+              </ul>
+              <p className="text-gray-700 mt-4 leading-relaxed">
+                SkinVox không chỉ là một blog, mà là một nền tảng tri thức và cảm hứng làm đẹp, 
+                được xây dựng trên ba giá trị cốt lõi: <strong className="text-gray-900">Trung thực – Khoa học – Cộng đồng</strong>.
               </p>
             </div>
           </div>
@@ -139,81 +176,136 @@ export default function About() {
               Giá Trị Cốt Lõi
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Những nguyên tắc dẫn dắt mọi hoạt động của chúng tôi
+              Ba nguyên tắc cơ bản dẫn dắt mọi hoạt động của chúng tôi
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Value 1: Innovation */}
-            <div className="group bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
-              <div className="w-14 h-14 bg-gradient-to-br from-rose-400 to-pink-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Sparkles className="w-7 h-7 text-white" />
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Value 1: Trung thực */}
+            <div className="group bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 animate-fade-in">
+              <div className="w-16 h-16 bg-gradient-to-br from-rose-400 to-pink-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Shield className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Đổi Mới</h3>
-              <p className="text-gray-700 leading-relaxed">
-                Chúng tôi không ngừng đổi mới và áp dụng công nghệ tiên tiến nhất để mang lại 
-                trải nghiệm tốt nhất cho người dùng.
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Trung Thực</h3>
+              <p className="text-gray-700 leading-relaxed text-lg">
+                Chúng tôi cam kết đánh giá trung thực, minh bạch trong mọi thông tin sản phẩm, 
+                giúp bạn tránh xa những "hype" quảng cáo và tập trung vào giá trị thật của từng sản phẩm.
               </p>
             </div>
 
-            {/* Value 2: Quality */}
-            <div className="group bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
-              <div className="w-14 h-14 bg-gradient-to-br from-pink-400 to-rose-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Award className="w-7 h-7 text-white" />
+            {/* Value 2: Khoa học */}
+            <div className="group bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 animate-fade-in">
+              <div className="w-16 h-16 bg-gradient-to-br from-pink-400 to-rose-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <BookOpen className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Chất Lượng</h3>
-              <p className="text-gray-700 leading-relaxed">
-                Chúng tôi chỉ cung cấp những sản phẩm được kiểm định chất lượng, đảm bảo an toàn 
-                và hiệu quả cho người sử dụng.
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Khoa Học</h3>
+              <p className="text-gray-700 leading-relaxed text-lg">
+                Mọi kiến thức và đánh giá của chúng tôi đều dựa trên nghiên cứu khoa học, bài viết chuyên sâu 
+                và trải nghiệm thực tế, giúp bạn hiểu rõ làn da và sản phẩm phù hợp.
               </p>
             </div>
 
-            {/* Value 3: Transparency */}
-            <div className="group bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
-              <div className="w-14 h-14 bg-gradient-to-br from-pink-400 to-rose-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Shield className="w-7 h-7 text-white" />
+            {/* Value 3: Cộng đồng */}
+            <div className="group bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 animate-fade-in">
+              <div className="w-16 h-16 bg-gradient-to-br from-rose-400 to-pink-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Users className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Minh Bạch</h3>
-              <p className="text-gray-700 leading-relaxed">
-                Chúng tôi cam kết minh bạch trong mọi giao dịch, đánh giá trung thực và công khai 
-                thông tin sản phẩm một cách đầy đủ.
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Cộng Đồng</h3>
+              <p className="text-gray-700 leading-relaxed text-lg">
+                Xây dựng một cộng đồng tích cực nơi mọi người có thể chia sẻ kinh nghiệm, hỏi đáp, 
+                nhận tư vấn và cùng nhau phát triển trong hành trình chăm sóc da và làm đẹp.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Value 4: Community */}
-            <div className="group bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
-              <div className="w-14 h-14 bg-gradient-to-br from-rose-400 to-pink-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Users className="w-7 h-7 text-white" />
+      {/* Future Goals Section */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-pink-50 via-rose-50 to-pink-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="flex items-center justify-center mb-4">
+              <TrendingUp className="w-8 h-8 text-rose-400 mr-3" />
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                Mục Tiêu Tương Lai
+              </h2>
+            </div>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Bền vững và lan tỏa - Hành trình phát triển của SkinVox
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Short-term Goals */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-gradient-to-br from-rose-400 to-pink-400 rounded-xl flex items-center justify-center mr-4">
+                  <Calendar className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">Ngắn Hạn</h3>
+                  <p className="text-sm text-gray-500">2025 – 2026</p>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Cộng Đồng</h3>
-              <p className="text-gray-700 leading-relaxed">
-                Chúng tôi xây dựng một cộng đồng tích cực nơi mọi người có thể chia sẻ kinh nghiệm 
-                và hỗ trợ lẫn nhau trong hành trình làm đẹp.
-              </p>
+              <ul className="space-y-4">
+                <li className="flex items-start">
+                  <ArrowRight className="w-5 h-5 text-rose-400 mr-3 mt-1 flex-shrink-0" />
+                  <span className="text-gray-700">
+                    Hoàn thiện hệ thống nội dung chuyên sâu về chăm sóc da, trang điểm và chăm sóc bản thân.
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <ArrowRight className="w-5 h-5 text-rose-400 mr-3 mt-1 flex-shrink-0" />
+                  <span className="text-gray-700">
+                    Ra mắt chuyên mục review minh bạch, chỉ giới thiệu sản phẩm thực sự hiệu quả và an toàn.
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <ArrowRight className="w-5 h-5 text-rose-400 mr-3 mt-1 flex-shrink-0" />
+                  <span className="text-gray-700">
+                    Nâng cấp chatbox tư vấn thông minh, giúp người dùng hiểu rõ làn da và sản phẩm phù hợp hơn.
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <ArrowRight className="w-5 h-5 text-rose-400 mr-3 mt-1 flex-shrink-0" />
+                  <span className="text-gray-700">
+                    Nâng cấp hệ thống AR, cập nhật nhiều tính năng sản phẩm, ưu tiên hành trình cá nhân hóa cho người dùng.
+                  </span>
+                </li>
+              </ul>
             </div>
 
-            {/* Value 5: Global Reach */}
-            <div className="group bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
-              <div className="w-14 h-14 bg-gradient-to-br from-rose-400 to-pink-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Globe className="w-7 h-7 text-white" />
+            {/* Long-term Goals */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-rose-400 rounded-xl flex items-center justify-center mr-4">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">Dài Hạn</h3>
+                  <p className="text-sm text-gray-500">2027 trở đi</p>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Tiếp Cận Toàn Cầu</h3>
-              <p className="text-gray-700 leading-relaxed">
-                Chúng tôi mang đến những xu hướng và sản phẩm làm đẹp tốt nhất từ khắp nơi trên thế giới, 
-                phù hợp với nhu cầu của thị trường Việt Nam.
-              </p>
-            </div>
-
-            {/* Value 6: Customer Care */}
-            <div className="group bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
-              <div className="w-14 h-14 bg-gradient-to-br from-pink-400 to-rose-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Heart className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Chăm Sóc Khách Hàng</h3>
-              <p className="text-gray-700 leading-relaxed">
-                Sự hài lòng của khách hàng là ưu tiên hàng đầu. Chúng tôi luôn lắng nghe và cải thiện 
-                dịch vụ để đáp ứng mọi nhu cầu của bạn.
-              </p>
+              <ul className="space-y-4">
+                <li className="flex items-start">
+                  <ArrowRight className="w-5 h-5 text-pink-400 mr-3 mt-1 flex-shrink-0" />
+                  <span className="text-gray-700">
+                    Phát triển SkinVox thành trung tâm kiến thức làm đẹp số 1 tại Việt Nam, kết nối với chuyên gia và thương hiệu uy tín.
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <ArrowRight className="w-5 h-5 text-pink-400 mr-3 mt-1 flex-shrink-0" />
+                  <span className="text-gray-700">
+                    Tổ chức các chiến dịch truyền thông, workshop và dự án cộng đồng lan tỏa thông điệp "Hiểu da – Yêu da – Sống đẹp".
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <ArrowRight className="w-5 h-5 text-pink-400 mr-3 mt-1 flex-shrink-0" />
+                  <span className="text-gray-700">
+                    Tiến tới xây dựng ứng dụng SkinVox App, cá nhân hóa hành trình chăm sóc da cho từng người dùng.
+                  </span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
