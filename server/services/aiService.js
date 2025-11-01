@@ -66,7 +66,10 @@ Hãy trả lời ngắn gọn, dễ hiểu và hữu ích. Nếu được hỏi 
     // Don't test models - just use the first one and let it fail naturally if wrong
     if (!this.geminiModel || !this.workingModelName) {
       // Try different model name formats - some may need different API versions
+      // gemini-2.0-flash-exp is the working model for this API key
       const modelsToTry = [
+        'gemini-2.0-flash-exp', // Experimental but working!
+        'gemini-2.5-pro-exp-03-25', // Alternative experimental
         'gemini-pro',       // Legacy but stable - most compatible
         'gemini-1.0-pro',   // Alternative legacy
         'gemini-1.5-flash', // Newer model
@@ -120,9 +123,11 @@ Hãy trả lời ngắn gọn, dễ hiểu và hữu ích. Nếu được hỏi 
         // If current model fails (404, etc.), try other models
         console.log(`⚠️  Current model (${this.workingModelName}) failed, trying other models...`);
         
-        // Try models in order - start with most compatible
+        // Try models in order - start with working experimental models
         const modelsToTry = [
-          'gemini-pro',       // Most compatible
+          'gemini-2.0-flash-exp', // Working!
+          'gemini-2.5-pro-exp-03-25',
+          'gemini-pro',       // Legacy
           'gemini-1.0-pro',   
           'gemini-1.5-flash',
           'gemini-1.5-pro'
