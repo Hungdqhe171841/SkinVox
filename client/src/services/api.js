@@ -104,4 +104,9 @@ export const chatbotAPI = {
   checkHealth: () => api.get('/api/chatbot/health'),
 }
 
+export const blogAPI = {
+  savePost: (blogId) => api.post(`/api/blog/blogs/${blogId}/save`),
+  getSavedPosts: () => api.get('/api/blog/saved-posts'),
+}
+
 export default api

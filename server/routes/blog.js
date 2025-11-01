@@ -482,4 +482,74 @@ router.post('/blogs/:id/like', async (req, res) => {
   }
 });
 
+// Save/Unsave blog post
+// @route   POST /api/blog/blogs/:id/save
+// @desc    Save or unsave a blog post
+// @access  Private (requires authentication)
+router.post('/blogs/:id/save', auth, async (req, res) => {
+  try {
+    const User = require('../models/User');
+    const user = await User.findById(req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+    
+    const blogIndex = user.savedPosts.indexOf(req.params.id);
+    
+    if (blogIndex > -1) {
+      // Unsave: remove from savedPosts
+      user.savedPosts.splice(blogIndex, 1);
+      await user.save();
+      res.json({ 
+        saved: false,
+        message: 'Blog removed from saved posts'
+      });
+    } else {
+      // Save: add to savedPosts
+      user.savedPosts.push(req.params.id);
+      await user.save();
+      res.json({ 
+        saved: true,
+        message: 'Blog saved successfully'
+      });
+    }
+  } catch (error) {
+    console.error('❌ Blog Debug - Save blog error:', error);
+    res.status(500).json({ message: 'Error saving blog', error: error.message });
+  }
+});
+
+// Get user's saved posts
+// @route   GET /api/blog/saved-posts
+// @desc    Get all saved blog posts for current user
+// @access  Private (requires authentication)
+router.get('/saved-posts', auth, async (req, res) => {
+  try {
+    const User = require('../models/User');
+    const user = await User.findById(req.user.id).populate('savedPosts');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Filter out null/undefined blogs (in case a saved blog was deleted)
+    const savedBlogs = user.savedPosts.filter(blog => blog !== null && blog !== undefined);
+    
+    res.json({
+      success: true,
+      blogs: savedBlogs,
+      count: savedBlogs.length
+    });
+  } catch (error) {
+    console.error('❌ Blog Debug - Get saved posts error:', error);
+    res.status(500).json({ message: 'Error getting saved posts', error: error.message });
+  }
+});
+
 module.exports = router;

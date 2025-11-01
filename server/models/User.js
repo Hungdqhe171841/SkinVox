@@ -51,7 +51,11 @@ const userSchema = new mongoose.Schema({
   lastLogin: {
     type: Date,
     default: null
-  }
+  },
+  savedPosts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Blog'
+  }]
 }, {
   timestamps: true
 });

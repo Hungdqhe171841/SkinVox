@@ -1,17 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { Calendar, User, Tag, ArrowLeft, Share2, Heart, ExternalLink, Star } from 'lucide-react'
+import { Calendar, User, Tag, ArrowLeft, Share2, Heart, ExternalLink, Star, Bookmark } from 'lucide-react'
 import { useAnalytics, useTrackBlogInteraction } from '../hooks/useAnalytics'
+import { useAuth } from '../contexts/AuthContext'
+import { blogAPI } from '../services/api'
 import BlogComments from '../components/BlogComments'
+import toast from 'react-hot-toast'
 import '../styles/Blog.css'
 
 export default function BlogDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [blog, setBlog] = useState(null)
   const [relatedBlogs, setRelatedBlogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [liked, setLiked] = useState(false)
+  const [saved, setSaved] = useState(false)
   
   // Google Analytics hooks
   useAnalytics()
@@ -20,7 +25,20 @@ export default function BlogDetail() {
   useEffect(() => {
     loadBlog()
     loadRelatedBlogs()
-  }, [id])
+    if (user) {
+      checkIfSaved()
+    }
+  }, [id, user])
+
+  const checkIfSaved = async () => {
+    try {
+      const response = await blogAPI.getSavedPosts()
+      const savedIds = response.data.blogs.map(blog => blog._id)
+      setSaved(savedIds.includes(id))
+    } catch (error) {
+      console.error('Error checking saved status:', error)
+    }
+  }
 
   const loadBlog = async () => {
     try {
@@ -94,6 +112,24 @@ export default function BlogDetail() {
     } else {
       navigator.clipboard.writeText(window.location.href)
       alert('Link đã được copy vào clipboard!')
+    }
+  }
+
+  const handleSave = async () => {
+    if (!user) {
+      toast.error('Vui lòng đăng nhập để lưu bài viết')
+      navigate('/login')
+      return
+    }
+
+    try {
+      const response = await blogAPI.savePost(id)
+      const isSaved = response.data.saved
+      setSaved(isSaved)
+      toast.success(isSaved ? 'Đã lưu bài viết' : 'Đã bỏ lưu bài viết')
+    } catch (error) {
+      console.error('Error saving post:', error)
+      toast.error('Có lỗi xảy ra khi lưu bài viết')
     }
   }
 
@@ -272,6 +308,15 @@ export default function BlogDetail() {
                 <Heart size={16} fill={liked ? 'currentColor' : 'none'} />
                 {liked ? 'Đã thích' : 'Thích'}
               </button>
+              {user && (
+                <button 
+                  onClick={handleSave}
+                  className={`action-btn ${saved ? 'saved' : ''}`}
+                >
+                  <Bookmark size={16} fill={saved ? 'currentColor' : 'none'} />
+                  {saved ? 'Đã lưu' : 'Lưu'}
+                </button>
+              )}
               <button onClick={handleShare} className="action-btn">
                 <Share2 size={16} />
                 Chia sẻ

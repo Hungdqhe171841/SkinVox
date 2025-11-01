@@ -1,19 +1,69 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Calendar, User, ArrowRight, Eye, MessageSquare, Star } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Calendar, User, ArrowRight, Eye, MessageSquare, Star, Bookmark } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { blogAPI } from '../services/api'
+import toast from 'react-hot-toast'
 import '../styles/Blog.css'
 
 export default function Blog() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [blogs, setBlogs] = useState([])
   const [categories, setCategories] = useState([])
   const [filteredBlogs, setFilteredBlogs] = useState([])
   const [loading, setLoading] = useState(true)
+  const [savedPostIds, setSavedPostIds] = useState(new Set())
 
   useEffect(() => {
     loadBlogs()
     loadCategories()
-  }, [])
+    if (user) {
+      loadSavedPosts()
+    }
+  }, [user])
+
+  const loadSavedPosts = async () => {
+    try {
+      const response = await blogAPI.getSavedPosts()
+      const savedIds = new Set(response.data.blogs.map(blog => blog._id))
+      setSavedPostIds(savedIds)
+    } catch (error) {
+      console.error('Error loading saved posts:', error)
+    }
+  }
+
+  const handleSavePost = async (e, blogId) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!user) {
+      toast.error('Vui lòng đăng nhập để lưu bài viết')
+      navigate('/login')
+      return
+    }
+
+    try {
+      const response = await blogAPI.savePost(blogId)
+      const isSaved = response.data.saved
+      
+      setSavedPostIds(prev => {
+        const newSet = new Set(prev)
+        if (isSaved) {
+          newSet.add(blogId)
+        } else {
+          newSet.delete(blogId)
+        }
+        return newSet
+      })
+      
+      toast.success(isSaved ? 'Đã lưu bài viết' : 'Đã bỏ lưu bài viết')
+    } catch (error) {
+      console.error('Error saving post:', error)
+      toast.error('Có lỗi xảy ra khi lưu bài viết')
+    }
+  }
 
   useEffect(() => {
     console.log('Filtering blogs:', { selectedCategory, blogsCount: blogs.length })
@@ -220,7 +270,8 @@ export default function Blog() {
                     overflow: 'hidden',
                     borderRadius: '8px',
                     marginBottom: '16px',
-                    backgroundColor: '#f3f4f6'
+                    backgroundColor: '#f3f4f6',
+                    position: 'relative'
                   }}>
                     <img 
                       src={blog.featuredImage || (blog.images && blog.images[0]) || "/assets/Ava.jpg"} 
@@ -234,6 +285,43 @@ export default function Blog() {
                         e.target.src = "/assets/Ava.jpg"
                       }}
                     />
+                    {user && (
+                      <button
+                        onClick={(e) => handleSavePost(e, blog._id)}
+                        style={{
+                          position: 'absolute',
+                          top: '8px',
+                          right: '8px',
+                          background: 'rgba(255, 255, 255, 0.9)',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '36px',
+                          height: '36px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                          transition: 'all 0.2s',
+                          zIndex: 10
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 1)'
+                          e.currentTarget.style.transform = 'scale(1.1)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)'
+                          e.currentTarget.style.transform = 'scale(1)'
+                        }}
+                        title={savedPostIds.has(blog._id) ? 'Bỏ lưu bài viết' : 'Lưu bài viết'}
+                      >
+                        <Bookmark 
+                          size={18} 
+                          fill={savedPostIds.has(blog._id) ? '#ec4899' : 'none'}
+                          color={savedPostIds.has(blog._id) ? '#ec4899' : '#6b7280'}
+                        />
+                      </button>
+                    )}
                   </div>
                   
                   {/* Blog Content */}
