@@ -8,8 +8,8 @@ const CameraView = ({ onReady }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const width = 800;
-    const height = 640;
+    const width = 600;
+    const height = 450;
 
     const video = videoRef.current;
     const canvas = canvasRef.current;

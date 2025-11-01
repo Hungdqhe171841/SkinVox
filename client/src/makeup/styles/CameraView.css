@@ -4,17 +4,19 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  max-width: 800px;
+  max-width: 600px;
   margin: 0 auto;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   background: #000;
+  aspect-ratio: 4 / 3;
 }
 
 .camera-video {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   display: block;
   transform: scaleX(-1); /* Mirror the video */
 }
@@ -72,7 +74,7 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  max-width: 800px;
+  max-width: 600px;
   margin: 0 auto;
   border-radius: 12px;
   background: #f8f9fa;
