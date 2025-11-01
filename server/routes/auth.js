@@ -103,6 +103,12 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    // Check if premium has expired
+    if (user.isPremium && user.premiumExpiresAt && new Date(user.premiumExpiresAt) < new Date()) {
+      user.isPremium = false;
+      await user.save();
+    }
+
     console.log('✅ Server Debug - Login successful, sending response');
     res.json({
       message: 'Login successful',
@@ -111,7 +117,14 @@ router.post('/login', async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role
+        role: user.role,
+        avatar: user.avatar,
+        isPremium: user.isPremium,
+        premiumExpiresAt: user.premiumExpiresAt,
+        premiumActivatedAt: user.premiumActivatedAt,
+        createdAt: user.createdAt,
+        lastLogin: user.lastLogin,
+        savedPosts: user.savedPosts || []
       }
     });
   } catch (error) {
@@ -139,13 +152,25 @@ router.get('/me', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Check if premium has expired
+    if (user.isPremium && user.premiumExpiresAt && new Date(user.premiumExpiresAt) < new Date()) {
+      user.isPremium = false;
+      await user.save();
+    }
+
     res.json({
       user: {
         id: user._id,
         username: user.username,
         email: user.email,
         role: user.role,
-        avatar: user.avatar
+        avatar: user.avatar,
+        isPremium: user.isPremium,
+        premiumExpiresAt: user.premiumExpiresAt,
+        premiumActivatedAt: user.premiumActivatedAt,
+        createdAt: user.createdAt,
+        lastLogin: user.lastLogin,
+        savedPosts: user.savedPosts || []
       }
     });
   } catch (error) {

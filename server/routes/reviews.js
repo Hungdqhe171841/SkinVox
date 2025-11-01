@@ -87,12 +87,7 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ message: 'Comment must be at least 10 characters' });
     }
     
-    // Check if user already reviewed
-    const existingReview = await WebsiteReview.findOne({ user: req.user.id });
-    if (existingReview) {
-      return res.status(400).json({ message: 'You have already submitted a review. You can update it instead.' });
-    }
-    
+    // Allow users to submit multiple reviews
     // Create new review
     const newReview = new WebsiteReview({
       user: req.user.id,

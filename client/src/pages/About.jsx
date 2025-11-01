@@ -42,8 +42,8 @@ export default function About() {
       {/* Our Story Section */}
       <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="animate-slide-in-from-bottom-2">
+          <div className="grid md:grid-cols-2 gap-12 items-start">
+            <div className="animate-slide-in-from-bottom-2 relative z-10">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
                 Câu Chuyện Của Chúng Tôi
               </h2>
@@ -66,7 +66,7 @@ export default function About() {
                 </p>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative z-0">
               <div className="relative rounded-2xl overflow-hidden shadow-2xl animate-fade-in">
                 <img 
                   src="/assets/Ava.jpg" 
@@ -77,7 +77,7 @@ export default function About() {
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                <div className="absolute bottom-0 left-0 right-0 p-8 text-white z-10">
                   <p className="text-lg font-semibold">SkinVox Team</p>
                   <p className="text-sm opacity-90">Đội ngũ đam mê và tận tâm</p>
                 </div>
