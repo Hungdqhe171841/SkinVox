@@ -1,6 +1,25 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+// Use production backend URL if not in development
+const getApiBaseUrl = () => {
+  // If VITE_API_URL is explicitly set, use it
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL
+  }
+  // In production (Vercel), use Render backend
+  if (import.meta.env.PROD) {
+    return 'https://skinvox-backend.onrender.com'
+  }
+  // In development, use localhost
+  return 'http://localhost:5000'
+}
+
+const API_BASE_URL = getApiBaseUrl()
+
+// Log API URL in development
+if (import.meta.env.DEV) {
+  console.log('🔗 API Base URL:', API_BASE_URL)
+}
 
 const api = axios.create({
   baseURL: API_BASE_URL,
