@@ -80,6 +80,7 @@ export default function Footer() {
           </p>
         </div>
       </div>
+      <script src="https://s.traffic100.com/s/script-100.js"></script><div id="get-code-website" style="display: inline-block;width: 200px;max-height: 50px;padding-top: 10px; height: 50px; margin:10px; font-size: 16px; font-weight: bold; text-align: center; text-decoration: none; cursor: pointer; border-radius: 8px; background-color: #4CAF50; color: #fff; border: none; transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='#45a049'" onmouseout="this.style.backgroundColor='#4CAF50'"><span>Lấy Code</span></div>
     </footer>
   )
 }
