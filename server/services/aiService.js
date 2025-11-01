@@ -209,7 +209,8 @@ Hãy trả lời ngắn gọn, dễ hiểu và hữu ích. Nếu được hỏi 
    */
   async getAIResponse(message, conversationHistory = []) {
     // Try Gemini first (free tier)
-    if (this.geminiAI && this.geminiModel) {
+    // Note: geminiModel might be null initially, but getGeminiResponse will initialize it
+    if (this.geminiAI) {
       try {
         console.log('🤖 Using Gemini AI...');
         const response = await this.getGeminiResponse(message, conversationHistory);

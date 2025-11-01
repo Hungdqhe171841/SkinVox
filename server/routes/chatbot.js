@@ -272,7 +272,8 @@ router.post('/message', async (req, res) => {
     res.json({
       success: true,
       response: response,
-      provider: provider,
+      provider: provider, // 'gemini', 'openai', or 'fallback'
+      aiEnabled: provider !== 'fallback',
       timestamp: new Date().toISOString()
     });
   } catch (error) {
