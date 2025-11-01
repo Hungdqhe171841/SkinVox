@@ -41,15 +41,23 @@ export default function Chatbot() {
     setLoading(true)
 
     try {
+      // Prepare conversation history (last 6 messages for context)
+      const historyForAI = messages.slice(-6).map(msg => ({
+        sender: msg.sender,
+        text: msg.text
+      }))
+
       const response = await api.post('/api/chatbot/message', {
-        message: userMessage.text
+        message: userMessage.text,
+        conversationHistory: historyForAI
       })
 
       const botMessage = {
         id: Date.now() + 1,
         text: response.data.response || 'Xin lỗi, tôi không hiểu câu hỏi của bạn.',
         sender: 'bot',
-        timestamp: new Date()
+        timestamp: new Date(),
+        provider: response.data.provider || 'fallback'
       }
 
       setMessages(prev => [...prev, botMessage])

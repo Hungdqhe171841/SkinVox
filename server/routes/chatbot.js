@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const aiService = require('../services/aiService');
 
 // Knowledge base for beauty and makeup questions
 const knowledgeBase = {
@@ -226,11 +227,11 @@ Bạn muốn biết gì cụ thể?`;
 }
 
 // @route   POST /api/chatbot/message
-// @desc    Handle chatbot message and return response
+// @desc    Handle chatbot message and return response using AI (Gemini/OpenAI) with fallback
 // @access  Public
 router.post('/message', async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, conversationHistory = [] } = req.body;
     
     if (!message || !message.trim()) {
       return res.status(400).json({
@@ -239,14 +240,34 @@ router.post('/message', async (req, res) => {
       });
     }
     
-    // Simulate thinking time (optional, for better UX)
-    await new Promise(resolve => setTimeout(resolve, 500));
+    let response = null;
+    let provider = 'fallback';
     
-    const response = findResponse(message);
+    // Try AI first if available
+    if (aiService.isAvailable()) {
+      try {
+        const aiResult = await aiService.getAIResponse(message, conversationHistory);
+        if (aiResult) {
+          response = aiResult.response;
+          provider = aiResult.provider;
+          console.log(`✅ Chatbot: Using ${provider} AI`);
+        }
+      } catch (error) {
+        console.error('❌ AI Service error:', error.message);
+        // Fall through to knowledge base
+      }
+    }
+    
+    // Fallback to knowledge base if AI fails or not available
+    if (!response) {
+      console.log('📚 Chatbot: Using knowledge base fallback');
+      response = findResponse(message);
+    }
     
     res.json({
       success: true,
       response: response,
+      provider: provider,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -260,12 +281,14 @@ router.post('/message', async (req, res) => {
 });
 
 // @route   GET /api/chatbot/health
-// @desc    Check chatbot service health
+// @desc    Check chatbot service health and AI availability
 // @access  Public
 router.get('/health', (req, res) => {
   res.json({
     success: true,
     message: 'Chatbot service is running',
+    aiAvailable: aiService.isAvailable(),
+    aiProviders: aiService.getAvailableProviders(),
     timestamp: new Date().toISOString()
   });
 });
