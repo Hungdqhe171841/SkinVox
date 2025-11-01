@@ -32,7 +32,8 @@ const router = createBrowserRouter([
       { path: "beautybar", element: <BeautyBar /> },
       { path: "blog", element: <Blog /> },
       { path: "blog/:id", element: <BlogDetail /> },
-      { path: "makeup-ar", element: <MakeupAR /> },
+      { path: "chatbot", element: <MakeupAR /> },
+      { path: "makeup-ar", element: <MakeupAR /> }, // Keep for backward compatibility
       { path: "premium", element: <PremiumSubscription /> },
       { 
         path: "dashboard", 

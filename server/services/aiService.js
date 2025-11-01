@@ -63,6 +63,7 @@ Hãy trả lời ngắn gọn, dễ hiểu và hữu ích. Nếu được hỏi 
     }
 
     // Determine working model if not set yet
+    // Don't test models - just use the first one and let it fail naturally if wrong
     if (!this.geminiModel || !this.workingModelName) {
       const modelsToTry = [
         'gemini-1.5-flash',  // Fast and free - recommended
@@ -71,27 +72,25 @@ Hãy trả lời ngắn gọn, dễ hiểu và hữu ích. Nếu được hỏi 
         'gemini-1.0-pro'    // Alternative
       ];
       
+      // Try to initialize with first available model without testing
+      // This avoids 404 errors during initialization
       for (const modelName of modelsToTry) {
         try {
           const testModel = this.geminiAI.getGenerativeModel({ model: modelName });
-          // Test with simple string (most compatible way)
-          const testResult = await testModel.generateContent('Hi');
-          
-          // If we get here, model works
+          // Just set it - we'll test when actually calling
           this.geminiModel = testModel;
           this.workingModelName = modelName;
-          console.log(`✅ Gemini model initialized: ${modelName}`);
+          console.log(`✅ Gemini model set to: ${modelName} (will verify on first use)`);
           break;
         } catch (e) {
-          console.log(`⚠️  Model ${modelName} not available: ${e.message.substring(0, 60)}...`);
-          // Try next model
+          console.log(`⚠️  Could not initialize model ${modelName}`);
           continue;
         }
       }
       
       if (!this.geminiModel) {
-        console.error('❌ No working Gemini model found. Available models may have changed or API key needs permissions.');
-        throw new Error('No working Gemini model found. Please check API key permissions and enabled APIs in Google Cloud Console.');
+        console.error('❌ Could not initialize any Gemini model');
+        throw new Error('Gemini AI not properly initialized');
       }
     }
 
@@ -110,12 +109,46 @@ Hãy trả lời ngắn gọn, dễ hiểu và hữu ích. Nếu được hỏi 
       // Build prompt with proper format for Gemini
       const prompt = `${this.systemPrompt}\n\n${conversationContext}User: ${message}\nAssistant:`;
 
-      // Use simple string format (most compatible)
-      const result = await this.geminiModel.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-
-      return text.trim();
+      // Try current model first
+      try {
+        const result = await this.geminiModel.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        return text.trim();
+      } catch (modelError) {
+        // If current model fails (404, etc.), try other models
+        console.log(`⚠️  Current model (${this.workingModelName}) failed, trying other models...`);
+        
+        const modelsToTry = [
+          'gemini-1.5-flash',
+          'gemini-1.5-pro',
+          'gemini-pro',
+          'gemini-1.0-pro'
+        ].filter(name => name !== this.workingModelName);
+        
+        for (const modelName of modelsToTry) {
+          try {
+            console.log(`🔄 Trying model: ${modelName}...`);
+            const altModel = this.geminiAI.getGenerativeModel({ model: modelName });
+            const result = await altModel.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+            
+            // Update to working model
+            this.geminiModel = altModel;
+            this.workingModelName = modelName;
+            console.log(`✅ Switched to working model: ${modelName}`);
+            
+            return text.trim();
+          } catch (e) {
+            // Try next model
+            continue;
+          }
+        }
+        
+        // If all models fail, throw the original error
+        throw modelError;
+      }
     } catch (error) {
       console.error('❌ Gemini API error:', error.message);
       // Reset model to try different one next time

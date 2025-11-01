@@ -88,7 +88,7 @@ export default function Navbar() {
               </Link>
             )}
             <Link
-              to="/makeup-ar"
+              to="/chatbot"
               className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               ChatBot
@@ -194,7 +194,7 @@ export default function Navbar() {
                 Blog
               </Link>
               <Link
-                to="/makeup-ar"
+                to="/chatbot"
                 className="block text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-base font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >

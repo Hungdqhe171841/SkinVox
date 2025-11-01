@@ -48,7 +48,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/makeup-ar" className="text-gray-300 hover:text-white transition-colors">
+                <Link to="/chatbot" className="text-gray-300 hover:text-white transition-colors">
                   ChatBot
                 </Link>
               </li>
