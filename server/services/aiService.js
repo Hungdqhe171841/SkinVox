@@ -65,11 +65,12 @@ Hãy trả lời ngắn gọn, dễ hiểu và hữu ích. Nếu được hỏi 
     // Determine working model if not set yet
     // Don't test models - just use the first one and let it fail naturally if wrong
     if (!this.geminiModel || !this.workingModelName) {
+      // Try different model name formats - some may need different API versions
       const modelsToTry = [
-        'gemini-1.5-flash',  // Fast and free - recommended
-        'gemini-1.5-pro',   // More capable
-        'gemini-pro',       // Legacy but stable
-        'gemini-1.0-pro'    // Alternative
+        'gemini-pro',       // Legacy but stable - most compatible
+        'gemini-1.0-pro',   // Alternative legacy
+        'gemini-1.5-flash', // Newer model
+        'gemini-1.5-pro'    // Newer model
       ];
       
       // Try to initialize with first available model without testing
@@ -119,11 +120,12 @@ Hãy trả lời ngắn gọn, dễ hiểu và hữu ích. Nếu được hỏi 
         // If current model fails (404, etc.), try other models
         console.log(`⚠️  Current model (${this.workingModelName}) failed, trying other models...`);
         
+        // Try models in order - start with most compatible
         const modelsToTry = [
+          'gemini-pro',       // Most compatible
+          'gemini-1.0-pro',   
           'gemini-1.5-flash',
-          'gemini-1.5-pro',
-          'gemini-pro',
-          'gemini-1.0-pro'
+          'gemini-1.5-pro'
         ].filter(name => name !== this.workingModelName);
         
         for (const modelName of modelsToTry) {
