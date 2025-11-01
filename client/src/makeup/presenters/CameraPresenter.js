@@ -940,7 +940,34 @@ export class CameraPresenter {
       oc.stroke();
       oc.restore();
 
-      // 4) Removed outer-V spot for cleaner horizontal wing shape
+      // 4) Nhấn outer-V nhẹ tại đuôi (theo đường đã nâng) - Optional feature
+      if (eyeshadow.enableOuterV !== false) {
+        const outer = upLifted[upLifted.length - 1];
+        const prev = upLifted[upLifted.length - 2];
+        let tx = outer.x - prev.x,
+          ty = outer.y - prev.y;
+        const len = Math.hypot(tx, ty) || 1;
+        tx /= len;
+        ty /= len;
+        let nx = -ty,
+          ny = tx;
+        if ((outer.x - cx) * nx + (outer.y - cy) * ny < 0) {
+          nx = -nx;
+          ny = -ny;
+        }
+        const spotX = outer.x + nx * (upperBase * 0.65) + tx * (upperBase * 0.5);
+        const spotY = outer.y + ny * (upperBase * 0.65) + ty * (upperBase * 0.5);
+        this._softSpot(
+          oc,
+          spotX,
+          spotY,
+          upperBase * 0.8,
+          baseColor,
+          Math.min(0.85, intensity * 1.1),
+          Math.max(5, softness * 0.7),
+          "multiply"
+        );
+      }
       
       oc.restore();
     };
@@ -1068,18 +1095,61 @@ export class CameraPresenter {
     ctx.closePath();
   }
 
-  _softSpot(ctx, x, y, radius, color, alpha, blur, mode) {
+  _softSpot(ctx, x, y, radius, color, alpha = 1, blur = 8, mode = "source-over") {
     ctx.save();
     if (mode) ctx.globalCompositeOperation = mode;
-    ctx.globalAlpha = alpha || 0.35;
-    if ("filter" in ctx) ctx.filter = `blur(${blur || 5}px)`;
+    ctx.globalAlpha = alpha;
     const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
     grad.addColorStop(0, color);
-    grad.addColorStop(1, color.replace(/[\d.]+\)$/g, "0)"));
+    grad.addColorStop(1, "rgba(0,0,0,0)");
+    if ("filter" in ctx) ctx.filter = `blur(${blur}px)`;
     ctx.fillStyle = grad;
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, Math.PI * 2);
     ctx.fill();
+    if ("filter" in ctx) ctx.filter = "none";
+    ctx.restore();
+  }
+
+  // Helper method để vẽ bridge giữa mí trên và mí dưới ở đuôi mắt
+  _bridgeOuterCorner(ctx, upper, lower, center, thickness, color, alpha, blur) {
+    if (!upper?.length || !lower?.length) return;
+    const a = upper[upper.length - 1]; // điểm A (đuôi mí trên)
+    const b = lower[lower.length - 1]; // điểm B (đuôi mí dưới)
+
+    // Pháp tuyến hướng ra ngoài để đẩy control point ra phía thái dương
+    const ref = upper[Math.max(0, upper.length - 2)];
+    let tx = a.x - ref.x,
+      ty = a.y - ref.y;
+    const tlen = Math.hypot(tx, ty) || 1;
+    tx /= tlen;
+    ty /= tlen;
+    let nx = -ty,
+      ny = tx;
+    const vx = a.x - center.cx,
+      vy = a.y - center.cy;
+    if (nx * vx + ny * vy < 0) {
+      nx = -nx;
+      ny = -ny;
+    }
+
+    const mid = {
+      x: (a.x + b.x) / 2 + nx * (thickness * 0.8),
+      y: (a.y + b.y) / 2 + ny * (thickness * 0.8),
+    };
+
+    ctx.save();
+    if ("filter" in ctx) ctx.filter = `blur(${blur}px)`;
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = thickness;
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.quadraticCurveTo(mid.x, mid.y, b.x, b.y);
+    ctx.stroke();
+    if ("filter" in ctx) ctx.filter = "none";
     ctx.restore();
   }
 }
