@@ -18,6 +18,7 @@ import Blog from './pages/Blog'
 import BlogDetail from './pages/BlogDetail'
 import MakeupAR from './pages/MakeupAR'
 import PremiumSubscription from './pages/PremiumSubscription'
+import About from './pages/About'
 import NotFound from './pages/NotFound'
 
 // Create router with future flags
@@ -34,6 +35,7 @@ const router = createBrowserRouter([
       { path: "blog/:id", element: <BlogDetail /> },
       { path: "chatbot", element: <MakeupAR /> },
       { path: "makeup-ar", element: <MakeupAR /> }, // Keep for backward compatibility
+      { path: "about", element: <About /> },
       { path: "premium", element: <PremiumSubscription /> },
       { 
         path: "dashboard", 
