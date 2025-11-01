@@ -65,30 +65,33 @@ Hãy trả lời ngắn gọn, dễ hiểu và hữu ích. Nếu được hỏi 
     // Determine working model if not set yet
     if (!this.geminiModel || !this.workingModelName) {
       const modelsToTry = [
-        'gemini-1.5-flash',
-        'gemini-1.5-pro',
-        'gemini-pro',
-        'gemini-1.5-flash-latest',
-        'gemini-1.5-pro-latest'
+        'gemini-1.5-flash',  // Fast and free - recommended
+        'gemini-1.5-pro',   // More capable
+        'gemini-pro',       // Legacy but stable
+        'gemini-1.0-pro'    // Alternative
       ];
       
       for (const modelName of modelsToTry) {
         try {
           const testModel = this.geminiAI.getGenerativeModel({ model: modelName });
-          // Test with simple query
-          await testModel.generateContent('test');
+          // Test with simple string (most compatible way)
+          const testResult = await testModel.generateContent('Hi');
+          
+          // If we get here, model works
           this.geminiModel = testModel;
           this.workingModelName = modelName;
-          console.log(`✅ Using Gemini model: ${modelName}`);
+          console.log(`✅ Gemini model initialized: ${modelName}`);
           break;
         } catch (e) {
+          console.log(`⚠️  Model ${modelName} not available: ${e.message.substring(0, 60)}...`);
           // Try next model
           continue;
         }
       }
       
       if (!this.geminiModel) {
-        throw new Error('No working Gemini model found');
+        console.error('❌ No working Gemini model found. Available models may have changed or API key needs permissions.');
+        throw new Error('No working Gemini model found. Please check API key permissions and enabled APIs in Google Cloud Console.');
       }
     }
 
@@ -104,8 +107,10 @@ Hãy trả lời ngắn gọn, dễ hiểu và hữu ích. Nếu được hỏi 
         }).join('\n') + '\n';
       }
 
+      // Build prompt with proper format for Gemini
       const prompt = `${this.systemPrompt}\n\n${conversationContext}User: ${message}\nAssistant:`;
 
+      // Use simple string format (most compatible)
       const result = await this.geminiModel.generateContent(prompt);
       const response = await result.response;
       const text = response.text();

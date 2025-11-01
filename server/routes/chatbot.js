@@ -246,21 +246,26 @@ router.post('/message', async (req, res) => {
     // Try AI first if available
     if (aiService.isAvailable()) {
       try {
+        console.log('🤖 Chatbot: Attempting to use AI...');
         const aiResult = await aiService.getAIResponse(message, conversationHistory);
         if (aiResult) {
           response = aiResult.response;
           provider = aiResult.provider;
-          console.log(`✅ Chatbot: Using ${provider} AI`);
+          console.log(`✅ Chatbot: Successfully using ${provider} AI`);
+        } else {
+          console.log('⚠️  Chatbot: AI service returned null, using fallback');
         }
       } catch (error) {
-        console.error('❌ AI Service error:', error.message);
+        console.error('❌ Chatbot: AI Service error:', error.message);
+        console.log('📚 Chatbot: Falling back to knowledge base');
         // Fall through to knowledge base
       }
+    } else {
+      console.log('📚 Chatbot: AI not available, using knowledge base');
     }
     
     // Fallback to knowledge base if AI fails or not available
     if (!response) {
-      console.log('📚 Chatbot: Using knowledge base fallback');
       response = findResponse(message);
     }
     
@@ -283,13 +288,35 @@ router.post('/message', async (req, res) => {
 // @route   GET /api/chatbot/health
 // @desc    Check chatbot service health and AI availability
 // @access  Public
-router.get('/health', (req, res) => {
+router.get('/health', async (req, res) => {
+  const aiAvailable = aiService.isAvailable();
+  const providers = aiService.getAvailableProviders();
+  
+  // Test Gemini connection if available
+  let geminiTest = null;
+  if (aiAvailable && providers.includes('Gemini')) {
+    try {
+      const testResult = await aiService.getAIResponse('test', []);
+      geminiTest = {
+        status: 'connected',
+        provider: testResult.provider
+      };
+    } catch (error) {
+      geminiTest = {
+        status: 'error',
+        error: error.message.substring(0, 100)
+      };
+    }
+  }
+  
   res.json({
     success: true,
     message: 'Chatbot service is running',
-    aiAvailable: aiService.isAvailable(),
-    aiProviders: aiService.getAvailableProviders(),
-    timestamp: new Date().toISOString()
+    aiAvailable: aiAvailable,
+    aiProviders: providers,
+    geminiTest: geminiTest,
+    timestamp: new Date().toISOString(),
+    note: aiAvailable ? 'AI is configured and ready' : 'AI not configured - using knowledge base fallback'
   });
 });
 
