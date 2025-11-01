@@ -20,10 +20,10 @@ export default function About() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-20 md:py-28">
+      <section className="relative bg-gradient-to-br from-rose-50 via-pink-50 to-rose-50 py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent mb-6 animate-fade-in">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-rose-400 via-pink-400 to-rose-400 bg-clip-text text-transparent mb-6 animate-fade-in">
               Về Chúng Tôi
             </h1>
             <p className="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto leading-relaxed animate-slide-in-from-bottom-4">
@@ -32,7 +32,7 @@ export default function About() {
             </p>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-rose-200 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-pink-200 to-transparent"></div>
       </section>
 
       {/* Our Story Section */}
@@ -84,7 +84,7 @@ export default function About() {
       </section>
 
       {/* Mission & Vision Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-pink-50 via-rose-50 to-pink-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -99,7 +99,7 @@ export default function About() {
             {/* Mission Card */}
             <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 animate-slide-in-from-bottom-2">
               <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-pink-500 rounded-xl flex items-center justify-center mr-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-rose-400 to-pink-400 rounded-xl flex items-center justify-center mr-4">
                   <Target className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900">Sứ Mệnh</h3>
@@ -115,7 +115,7 @@ export default function About() {
             {/* Vision Card */}
             <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 animate-slide-in-from-bottom-4">
               <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mr-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-rose-400 rounded-xl flex items-center justify-center mr-4">
                   <Lightbulb className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900">Tầm Nhìn</h3>
@@ -146,7 +146,7 @@ export default function About() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Value 1: Innovation */}
             <div className="group bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
-              <div className="w-14 h-14 bg-gradient-to-br from-rose-500 to-pink-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <div className="w-14 h-14 bg-gradient-to-br from-rose-400 to-pink-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Sparkles className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Đổi Mới</h3>
@@ -157,8 +157,8 @@ export default function About() {
             </div>
 
             {/* Value 2: Quality */}
-            <div className="group bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
-              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="group bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
+              <div className="w-14 h-14 bg-gradient-to-br from-pink-400 to-rose-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Award className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Chất Lượng</h3>
@@ -170,7 +170,7 @@ export default function About() {
 
             {/* Value 3: Transparency */}
             <div className="group bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
-              <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <div className="w-14 h-14 bg-gradient-to-br from-pink-400 to-rose-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Shield className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Minh Bạch</h3>
@@ -181,8 +181,8 @@ export default function About() {
             </div>
 
             {/* Value 4: Community */}
-            <div className="group bg-gradient-to-br from-purple-50 to-rose-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
-              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-rose-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="group bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
+              <div className="w-14 h-14 bg-gradient-to-br from-rose-400 to-pink-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Users className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Cộng Đồng</h3>
@@ -193,8 +193,8 @@ export default function About() {
             </div>
 
             {/* Value 5: Global Reach */}
-            <div className="group bg-gradient-to-br from-rose-50 to-purple-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
-              <div className="w-14 h-14 bg-gradient-to-br from-rose-500 to-purple-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="group bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
+              <div className="w-14 h-14 bg-gradient-to-br from-rose-400 to-pink-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Globe className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Tiếp Cận Toàn Cầu</h3>
@@ -205,8 +205,8 @@ export default function About() {
             </div>
 
             {/* Value 6: Customer Care */}
-            <div className="group bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
-              <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-purple-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="group bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
+              <div className="w-14 h-14 bg-gradient-to-br from-pink-400 to-rose-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Heart className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Chăm Sóc Khách Hàng</h3>
@@ -220,7 +220,7 @@ export default function About() {
       </section>
 
       {/* Technology Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-gray-50 to-purple-50">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-pink-50 to-rose-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -233,7 +233,7 @@ export default function About() {
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-gradient-to-br from-rose-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-rose-400 to-pink-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Augmented Reality</h3>
@@ -244,7 +244,7 @@ export default function About() {
             </div>
 
             <div className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-pink-400 to-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <MessageCircle className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">AI Chatbot</h3>
@@ -255,7 +255,7 @@ export default function About() {
             </div>
 
             <div className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-rose-400 to-pink-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Phân Tích Khoa Học</h3>
@@ -269,18 +269,18 @@ export default function About() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-rose-600 via-pink-600 to-purple-600">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-rose-400 via-pink-400 to-rose-400">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Sẵn Sàng Bắt Đầu Hành Trình Làm Đẹp Của Bạn?
           </h2>
-          <p className="text-xl text-white/90 mb-8 leading-relaxed">
+          <p className="text-xl text-white/95 mb-8 leading-relaxed">
             Khám phá các sản phẩm làm đẹp chất lượng cao và trải nghiệm công nghệ AR độc đáo của chúng tôi
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => navigate('/beautybar')}
-              className="bg-white text-rose-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+              className="bg-white text-rose-500 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
             >
               <ShoppingCart className="w-5 h-5" />
               Khám Phá Sản Phẩm
