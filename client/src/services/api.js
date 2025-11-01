@@ -16,10 +16,10 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl()
 
-// Log API URL in development
-if (import.meta.env.DEV) {
-  console.log('🔗 API Base URL:', API_BASE_URL)
-}
+// Log API URL (always, for debugging)
+console.log('🔗 API Base URL:', API_BASE_URL)
+console.log('🔗 Environment:', import.meta.env.MODE)
+console.log('🔗 VITE_API_URL set:', !!import.meta.env.VITE_API_URL)
 
 const api = axios.create({
   baseURL: API_BASE_URL,
