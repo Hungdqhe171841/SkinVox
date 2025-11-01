@@ -298,10 +298,19 @@ router.get('/health', async (req, res) => {
   if (aiAvailable && providers.includes('Gemini')) {
     try {
       const testResult = await aiService.getAIResponse('test', []);
-      geminiTest = {
-        status: 'connected',
-        provider: testResult.provider
-      };
+      if (testResult && testResult.provider) {
+        geminiTest = {
+          status: 'connected',
+          provider: testResult.provider
+        };
+      } else {
+        // AI returned null, meaning it fell back to knowledge base
+        geminiTest = {
+          status: 'fallback',
+          message: 'Gemini API not working, using knowledge base fallback',
+          error: 'All models failed or API not enabled'
+        };
+      }
     } catch (error) {
       geminiTest = {
         status: 'error',
