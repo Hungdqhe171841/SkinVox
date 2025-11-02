@@ -67,6 +67,12 @@ export default function Navbar() {
               About Us
             </Link>
             <Link
+              to="/"
+              className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Home
+            </Link>
+            <Link
               to="/beautybar"
               className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
@@ -92,12 +98,6 @@ export default function Navbar() {
               className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               ChatBot
-            </Link>
-            <Link
-              to="/"
-              className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Home
             </Link>
             
                    {user ? (
@@ -180,6 +180,13 @@ export default function Navbar() {
                 About Us
               </Link>
               <Link
+                to="/"
+                className="block text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-base font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link
                 to="/beautybar"
                 className="block text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-base font-medium"
                 onClick={() => setIsMenuOpen(false)}
@@ -199,13 +206,6 @@ export default function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 ChatBot
-              </Link>
-              <Link
-                to="/"
-                className="block text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-base font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Home
               </Link>
               
                      {user ? (
