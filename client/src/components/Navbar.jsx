@@ -61,10 +61,10 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             <Link
-              to="/"
+              to="/about"
               className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
-              Home
+              About Us
             </Link>
             <Link
               to="/beautybar"
@@ -94,10 +94,10 @@ export default function Navbar() {
               ChatBot
             </Link>
             <Link
-              to="/about"
+              to="/"
               className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
-              About Us
+              Home
             </Link>
             
                    {user ? (
@@ -173,11 +173,11 @@ export default function Navbar() {
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t">
               <Link
-                to="/"
+                to="/about"
                 className="block text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-base font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Home
+                About Us
               </Link>
               <Link
                 to="/beautybar"
@@ -201,11 +201,11 @@ export default function Navbar() {
                 ChatBot
               </Link>
               <Link
-                to="/about"
+                to="/"
                 className="block text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-base font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
-                About Us
+                Home
               </Link>
               
                      {user ? (
