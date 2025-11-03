@@ -57,6 +57,7 @@ export default function AdminDashboard() {
     total: 0,
     limit: 10
   })
+  const [subscriptionsSearchTerm, setSubscriptionsSearchTerm] = useState('')
   const [users, setUsers] = useState([])
   const [usersPagination, setUsersPagination] = useState({
     currentPage: 1,
@@ -230,7 +231,8 @@ export default function AdminDashboard() {
       const params = new URLSearchParams({
         status: statusParam,
         page: String(page),
-        limit: String(subscriptionsPagination.limit)
+        limit: String(subscriptionsPagination.limit),
+        ...(subscriptionsSearchTerm && { search: subscriptionsSearchTerm })
       })
       const url = `${import.meta.env.VITE_API_URL}/api/premium/admin/subscriptions?${params.toString()}`
       console.log('🔍 Loading subscriptions with URL:', url)
@@ -1296,7 +1298,8 @@ export default function AdminDashboard() {
             {/* Filter Tabs */}
             <div className="bg-white rounded-lg shadow">
               <div className="border-b border-gray-200">
-                <nav className="flex space-x-4 px-6 pt-4">
+                <nav className="flex items-center justify-between px-6 pt-4">
+                  <div className="flex space-x-4">
                   {['pending', 'approved', 'rejected', 'all'].map(status => (
                     <button
                       key={status}
@@ -1310,6 +1313,42 @@ export default function AdminDashboard() {
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </button>
                   ))}
+                  </div>
+                  <div className="flex items-center gap-2 pb-4">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Search by username/email..."
+                        value={subscriptionsSearchTerm}
+                        onChange={(e) => setSubscriptionsSearchTerm(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { setSubscriptionsPagination(p => ({ ...p, currentPage: 1 })); loadSubscriptions(1) }}}
+                        className="w-64 pl-3 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      />
+                      <button
+                        onClick={() => { setSubscriptionsPagination(p => ({ ...p, currentPage: 1 })); loadSubscriptions(1) }}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 px-2 py-1 text-sm text-gray-600 hover:text-gray-900"
+                        title="Search"
+                      >
+                        🔎
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => { setSubscriptionsPagination(p => ({ ...p, limit: 0, currentPage: 1 })); loadSubscriptions(1) }}
+                      className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                      title="View full list"
+                    >
+                      View All
+                    </button>
+                    {subscriptionsPagination.limit === 0 && (
+                      <button
+                        onClick={() => { setSubscriptionsPagination(p => ({ ...p, limit: 10, currentPage: 1 })); loadSubscriptions(1) }}
+                        className="px-3 py-2 text-sm bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                        title="Back to paginated"
+                      >
+                        Paginate
+                      </button>
+                    )}
+                  </div>
                 </nav>
               </div>
 

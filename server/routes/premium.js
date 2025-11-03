@@ -207,13 +207,20 @@ router.get('/plans', (req, res) => {
 // @access  Admin
 router.get('/admin/subscriptions', auth, adminAuth, async (req, res) => {
   try {
-    const { status = 'all', page = 1, limit = 20 } = req.query;
+    const { status = 'all', page = 1, limit = 20, search = '' } = req.query;
     
-    console.log('💎 Premium Debug - Admin fetching subscriptions:', { status, page, limit });
+    console.log('💎 Premium Debug - Admin fetching subscriptions:', { status, page, limit, search });
     
     let query = {};
     if (status !== 'all') {
       query.status = status;
+    }
+    if (search && String(search).trim().length > 0) {
+      const text = String(search).trim();
+      query.$or = [
+        { username: { $regex: text, $options: 'i' } },
+        { email: { $regex: text, $options: 'i' } }
+      ];
     }
     
     console.log('💎 Premium Debug - Query:', query);
@@ -222,11 +229,13 @@ router.get('/admin/subscriptions', auth, adminAuth, async (req, res) => {
     const total = await PremiumSubscription.countDocuments(query);
     console.log('💎 Premium Debug - Total subscriptions found:', total);
     
-    const subscriptions = await PremiumSubscription.find(query)
-      .sort({ createdAt: -1 })
-      .limit(parseInt(limit))
-      .skip((parseInt(page) - 1) * parseInt(limit))
-      .lean(); // Use lean() for better performance and to avoid populate issues
+    const limitInt = parseInt(limit);
+    const pageInt = parseInt(page);
+    let queryBuilder = PremiumSubscription.find(query).sort({ createdAt: -1 });
+    if (Number.isFinite(limitInt) && limitInt > 0) {
+      queryBuilder = queryBuilder.limit(limitInt).skip((pageInt - 1) * limitInt);
+    }
+    const subscriptions = await queryBuilder.lean(); // Use lean() for better performance and to avoid populate issues
     
     // Manually populate user info (use stored username/email as fallback)
     const subscriptionsWithUser = await Promise.all(
@@ -271,8 +280,8 @@ router.get('/admin/subscriptions', auth, adminAuth, async (req, res) => {
     res.json({
       success: true,
       subscriptions: subscriptionsWithUser,
-      totalPages: Math.ceil(total / parseInt(limit)),
-      currentPage: parseInt(page),
+      totalPages: (Number.isFinite(limitInt) && limitInt > 0) ? Math.ceil(total / limitInt) : 1,
+      currentPage: (Number.isFinite(limitInt) && limitInt > 0) ? pageInt : 1,
       total
     });
   } catch (error) {
