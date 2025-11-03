@@ -1339,6 +1339,7 @@ export default function AdminDashboard() {
                     )}
                   </div>
                 ) : (
+                  <>
                   <div className="space-y-4">
                     {subscriptions.map((sub) => (
                       <div
@@ -1514,6 +1515,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   )}
+                  </>
                 )}
               </div>
             </div>
