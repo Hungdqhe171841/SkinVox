@@ -19,23 +19,39 @@ const WebsiteReviews = () => {
     loadStats();
   }, []);
 
-  const loadReviews = async () => {
+  const loadReviews = async (retryCount = 0) => {
     try {
       const response = await axios.get(`${API_URL}/api/reviews?limit=6`);
       setReviews(response.data.reviews || []);
     } catch (error) {
-      console.error('Error loading reviews:', error);
+      if (error.response?.status === 429 && retryCount < 2) {
+        // Rate limit reached, retry after delay
+        const delay = (retryCount + 1) * 2000; // 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return loadReviews(retryCount + 1);
+      }
+      if (import.meta.env.DEV) {
+        console.error('Error loading reviews:', error);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const loadStats = async () => {
+  const loadStats = async (retryCount = 0) => {
     try {
       const response = await axios.get(`${API_URL}/api/reviews/stats`);
       setStats(response.data.stats);
     } catch (error) {
-      console.error('Error loading stats:', error);
+      if (error.response?.status === 429 && retryCount < 2) {
+        // Rate limit reached, retry after delay
+        const delay = (retryCount + 1) * 2000; // 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return loadStats(retryCount + 1);
+      }
+      if (import.meta.env.DEV) {
+        console.error('Error loading stats:', error);
+      }
     }
   };
 

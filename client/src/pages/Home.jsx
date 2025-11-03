@@ -15,51 +15,70 @@ const HomePage = () => {
     loadBlogs()
   }, [])
 
-  const loadProducts = async () => {
+  const loadProducts = async (retryCount = 0) => {
     try {
-      console.log('Loading featured products...')
+      if (import.meta.env.DEV) {
+        console.log('Loading featured products...')
+      }
       const apiUrl = import.meta.env.VITE_API_URL || 'https://skinvox-backend.onrender.com'
       const response = await fetch(`${apiUrl}/api/beautybar/products?page=1&limit=4&sortBy=createdAt&sortOrder=desc`)
-      console.log('Products response:', response)
+      
+      if (response.status === 429 && retryCount < 2) {
+        // Rate limit reached, retry after delay
+        const delay = (retryCount + 1) * 2000 // 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, delay))
+        return loadProducts(retryCount + 1)
+      }
+      
       if (response.ok) {
         const data = await response.json()
-        console.log('Products data:', data)
         setProducts(data.products || [])
-      } else {
-        console.error('Products response not OK:', response.status, response.statusText)
+      } else if (response.status !== 429) {
+        if (import.meta.env.DEV) {
+          console.error('Products response not OK:', response.status, response.statusText)
+        }
       }
     } catch (error) {
-      console.error('Error loading products:', error)
+      if (import.meta.env.DEV) {
+        console.error('Error loading products:', error)
+      }
     } finally {
       setLoading(false)
     }
   }
 
-  const loadBlogs = async () => {
+  const loadBlogs = async (retryCount = 0) => {
     try {
-      console.log('Loading featured blogs...')
+      if (import.meta.env.DEV) {
+        console.log('Loading featured blogs...')
+      }
       const apiUrl = import.meta.env.VITE_API_URL || 'https://skinvox-backend.onrender.com'
       const response = await fetch(`${apiUrl}/api/blog/blogs`)
-      console.log('Blogs response:', response)
+      
+      if (response.status === 429 && retryCount < 2) {
+        // Rate limit reached, retry after delay
+        const delay = (retryCount + 1) * 2000 // 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, delay))
+        return loadBlogs(retryCount + 1)
+      }
+      
       if (response.ok) {
         const data = await response.json()
-        console.log('Blogs data:', data)
         // Filter blogs with formatType 2 (Nổi bật) on the client side
         const allBlogs = data.blogs || data || []
-        console.log('All blogs:', allBlogs)
-        console.log('All blogs count:', allBlogs.length)
-        console.log('FormatType values:', allBlogs.map(b => ({ title: b.title, formatType: b.formatType })))
         // formatType: 2 = "Nổi bật" (featured blogs)
         // Show max 4 blogs
         const featuredBlogs = allBlogs.filter(blog => blog.formatType === 2).slice(0, 4)
-        console.log('Featured blogs:', featuredBlogs)
-        console.log('Featured blogs count:', featuredBlogs.length)
         setBlogs(featuredBlogs)
-      } else {
-        console.error('Blogs response not OK:', response.status, response.statusText)
+      } else if (response.status !== 429) {
+        if (import.meta.env.DEV) {
+          console.error('Blogs response not OK:', response.status, response.statusText)
+        }
       }
     } catch (error) {
-      console.error('Error loading blogs:', error)
+      if (import.meta.env.DEV) {
+        console.error('Error loading blogs:', error)
+      }
     }
   }
 

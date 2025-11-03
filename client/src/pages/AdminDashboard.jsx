@@ -51,6 +51,12 @@ export default function AdminDashboard() {
   const [subscriptionStats, setSubscriptionStats] = useState({})
   const [subscriptionFilter, setSubscriptionFilter] = useState('pending')
   const [subscriptionsError, setSubscriptionsError] = useState('')
+  const [subscriptionsPagination, setSubscriptionsPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    total: 0,
+    limit: 10
+  })
   const [users, setUsers] = useState([])
   const [usersPagination, setUsersPagination] = useState({
     currentPage: 1,
@@ -126,7 +132,9 @@ export default function AdminDashboard() {
   // Reload subscriptions when filter changes (only if premium tab is active)
   useEffect(() => {
     if (activeTab === 'premium') {
-      loadSubscriptions()
+      // reset to first page when filter changes
+      setSubscriptionsPagination(prev => ({ ...prev, currentPage: 1 }))
+      loadSubscriptions(1)
     }
   }, [subscriptionFilter])
 
@@ -215,11 +223,16 @@ export default function AdminDashboard() {
     }
   }
 
-  const loadSubscriptions = async () => {
+  const loadSubscriptions = async (page = subscriptionsPagination.currentPage || 1) => {
     setLoading(true)
     try {
       const statusParam = subscriptionFilter === 'all' ? 'all' : subscriptionFilter
-      const url = `${import.meta.env.VITE_API_URL}/api/premium/admin/subscriptions?status=${statusParam}`
+      const params = new URLSearchParams({
+        status: statusParam,
+        page: String(page),
+        limit: String(subscriptionsPagination.limit)
+      })
+      const url = `${import.meta.env.VITE_API_URL}/api/premium/admin/subscriptions?${params.toString()}`
       console.log('🔍 Loading subscriptions with URL:', url)
       console.log('🔍 Filter:', statusParam)
       
@@ -240,6 +253,12 @@ export default function AdminDashboard() {
       
       if (data.success && Array.isArray(data.subscriptions)) {
         setSubscriptions(data.subscriptions)
+        setSubscriptionsPagination(prev => ({
+          ...prev,
+          currentPage: data.currentPage || page,
+          totalPages: data.totalPages || 1,
+          total: data.total || data.subscriptions.length || 0
+        }))
         setSubscriptionsError('')
       } else {
         console.warn('⚠️ Unexpected response format:', data)
@@ -1427,6 +1446,74 @@ export default function AdminDashboard() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Pagination */}
+                  {subscriptionsPagination.totalPages > 1 && (
+                    <div className="bg-gray-50 px-6 py-3 mt-4 flex items-center justify-between border-t border-gray-200">
+                      <div className="flex-1 flex justify-between sm:hidden">
+                        <button
+                          onClick={() => loadSubscriptions(Math.max(1, subscriptionsPagination.currentPage - 1))}
+                          disabled={subscriptionsPagination.currentPage <= 1}
+                          className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
+                            subscriptionsPagination.currentPage > 1
+                              ? 'bg-white text-gray-700 hover:bg-gray-50'
+                              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          }`}
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={() => loadSubscriptions(Math.min(subscriptionsPagination.totalPages, subscriptionsPagination.currentPage + 1))}
+                          disabled={subscriptionsPagination.currentPage >= subscriptionsPagination.totalPages}
+                          className={`ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
+                            subscriptionsPagination.currentPage < subscriptionsPagination.totalPages
+                              ? 'bg-white text-gray-700 hover:bg-gray-50'
+                              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          }`}
+                        >
+                          Next
+                        </button>
+                      </div>
+                      <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                          <p className="text-sm text-gray-700">
+                            Showing <span className="font-medium">{(subscriptionsPagination.currentPage - 1) * subscriptionsPagination.limit + 1}</span> to{' '}
+                            <span className="font-medium">{Math.min(subscriptionsPagination.currentPage * subscriptionsPagination.limit, subscriptionsPagination.total)}</span> of{' '}
+                            <span className="font-medium">{subscriptionsPagination.total}</span> subscriptions
+                          </p>
+                        </div>
+                        <div>
+                          <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            <button
+                              onClick={() => loadSubscriptions(Math.max(1, subscriptionsPagination.currentPage - 1))}
+                              disabled={subscriptionsPagination.currentPage <= 1}
+                              className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 text-sm font-medium ${
+                                subscriptionsPagination.currentPage > 1
+                                  ? 'bg-white text-gray-500 hover:bg-gray-50'
+                                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              }`}
+                            >
+                              Previous
+                            </button>
+                            <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                              Page {subscriptionsPagination.currentPage} of {subscriptionsPagination.totalPages}
+                            </span>
+                            <button
+                              onClick={() => loadSubscriptions(Math.min(subscriptionsPagination.totalPages, subscriptionsPagination.currentPage + 1))}
+                              disabled={subscriptionsPagination.currentPage >= subscriptionsPagination.totalPages}
+                              className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 text-sm font-medium ${
+                                subscriptionsPagination.currentPage < subscriptionsPagination.totalPages
+                                  ? 'bg-white text-gray-500 hover:bg-gray-50'
+                                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              }`}
+                            >
+                              Next
+                            </button>
+                          </nav>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 )}
               </div>
             </div>
