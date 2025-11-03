@@ -59,7 +59,7 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center gap-6">
             <Link
               to="/about"
               className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
@@ -100,47 +100,47 @@ export default function Navbar() {
               ChatBot
             </Link>
             
-                   {user ? (
-                     <div className="flex items-center space-x-4">
-                       {user.role === 'admin' && (
-                         <Link
-                           to="/admin/dashboard"
-                           className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                         >
-                           Admin Dashboard
-                         </Link>
-                       )}
-                       <Link
-                         to="/profile"
-                         className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                       >
-                         Profile
-                       </Link>
-                      <div className="flex items-center space-x-2">
-                        <User className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm text-gray-700">{user.username}</span>
-                        {isPremium && (
-                          <span className="text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 px-2 py-1 rounded-full flex items-center gap-1">
-                            <Crown className="w-3 h-3" />
-                            Premium
-                          </span>
-                        )}
-                        {user.role === 'admin' && (
-                          <span className="text-xs bg-primary-100 text-primary-800 px-2 py-1 rounded-full">
-                            Admin
-                          </span>
-                        )}
-                      </div>
-                       <button
-                         onClick={handleLogout}
-                         className="flex items-center space-x-1 text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                       >
-                         <LogOut className="w-4 h-4" />
-                         <span>Logout</span>
-                       </button>
-                     </div>
+            {user ? (
+              <>
+                {user.role === 'admin' && (
+                  <Link
+                    to="/admin/dashboard"
+                    className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
+                <Link
+                  to="/profile"
+                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Profile
+                </Link>
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-700">{user.username}</span>
+                  {isPremium && (
+                    <span className="text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 px-2 py-1 rounded-full flex items-center gap-1">
+                      <Crown className="w-3 h-3" />
+                      Premium
+                    </span>
+                  )}
+                  {user.role === 'admin' && (
+                    <span className="text-xs bg-primary-100 text-primary-800 px-2 py-1 rounded-full">
+                      Admin
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1 text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </>
             ) : (
-              <div className="flex items-center space-x-4">
+              <>
                 <Link
                   to="/login"
                   className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
@@ -153,7 +153,7 @@ export default function Navbar() {
                 >
                   Sign Up
                 </Link>
-              </div>
+              </>
             )}
           </div>
 
