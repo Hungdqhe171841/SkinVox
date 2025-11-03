@@ -1315,39 +1315,53 @@ export default function AdminDashboard() {
                   ))}
                   </div>
                   <div className="flex items-center gap-2 pb-4">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Search by username/email..."
-                        value={subscriptionsSearchTerm}
-                        onChange={(e) => setSubscriptionsSearchTerm(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === 'Enter') { setSubscriptionsPagination(p => ({ ...p, currentPage: 1 })); loadSubscriptions(1) }}}
-                        className="w-64 pl-3 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      />
-                      <button
-                        onClick={() => { setSubscriptionsPagination(p => ({ ...p, currentPage: 1 })); loadSubscriptions(1) }}
-                        className="absolute right-1 top-1/2 -translate-y-1/2 px-2 py-1 text-sm text-gray-600 hover:text-gray-900"
-                        title="Search"
-                      >
-                        🔎
-                      </button>
-                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search by username/email..."
+                      value={subscriptionsSearchTerm}
+                      onChange={(e) => setSubscriptionsSearchTerm(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          setSubscriptionsPagination(p => ({ ...p, currentPage: 1 }))
+                          loadSubscriptions(1)
+                        }
+                      }}
+                      className="w-72 pl-3 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    />
                     <button
-                      onClick={() => { setSubscriptionsPagination(p => ({ ...p, limit: 0, currentPage: 1 })); loadSubscriptions(1) }}
-                      className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-                      title="View full list"
+                      type="button"
+                      onClick={() => { setSubscriptionsPagination(p => ({ ...p, currentPage: 1 })); loadSubscriptions(1) }}
+                      className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
-                      View All
+                      Search
                     </button>
-                    {subscriptionsPagination.limit === 0 && (
+                    <button
+                      type="button"
+                      onClick={() => { setSubscriptionsSearchTerm(''); setSubscriptionsPagination(p => ({ ...p, currentPage: 1 })); loadSubscriptions(1) }}
+                      className="px-3 py-2 text-sm bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    >
+                      Clear
+                    </button>
+                    <div className="ml-2 flex items-center gap-2">
                       <button
-                        onClick={() => { setSubscriptionsPagination(p => ({ ...p, limit: 10, currentPage: 1 })); loadSubscriptions(1) }}
-                        className="px-3 py-2 text-sm bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                        title="Back to paginated"
+                        type="button"
+                        onClick={() => { setSubscriptionsPagination(p => ({ ...p, limit: 0, currentPage: 1 })); loadSubscriptions(1) }}
+                        className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                        title="View full list"
                       >
-                        Paginate
+                        View All
                       </button>
-                    )}
+                      {subscriptionsPagination.limit === 0 && (
+                        <button
+                          type="button"
+                          onClick={() => { setSubscriptionsPagination(p => ({ ...p, limit: 10, currentPage: 1 })); loadSubscriptions(1) }}
+                          className="px-3 py-2 text-sm bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                          title="Back to paginated"
+                        >
+                          Paginate
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </nav>
               </div>
