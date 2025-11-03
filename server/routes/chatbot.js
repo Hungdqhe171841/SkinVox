@@ -1,6 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const aiService = require('../services/aiService');
+const Blog = require('../models/Blog');
+const Lipstick = require('../models/Lipstick');
+const Eyeshadow = require('../models/Eyeshadow');
+const Blush = require('../models/Blush');
+const Eyebrows = require('../models/Eyebrows');
+const Eyeliners = require('../models/Eyeliners');
 
 // Knowledge base for beauty and makeup questions
 const knowledgeBase = {
@@ -243,11 +249,43 @@ router.post('/message', async (req, res) => {
     let response = null;
     let provider = 'fallback';
     
+    // Retrieve real data (blogs + products) relevant to the user message
+    let contextText = '';
+    try {
+      const searchTerm = String(message).slice(0, 120);
+      const [blogs, lipsticks, eyeshadows, blush, eyebrows, eyeliners] = await Promise.all([
+        Blog.find({ $text: { $search: searchTerm }, status: 'published' })
+          .select('title description createdAt')
+          .limit(3),
+        Lipstick.find({ $text: { $search: searchTerm } }).select('name brand').limit(3),
+        Eyeshadow.find({ $text: { $search: searchTerm } }).select('name brand').limit(3),
+        Blush.find({ $text: { $search: searchTerm } }).select('name brand').limit(3),
+        Eyebrows.find({ $text: { $search: searchTerm } }).select('name brand').limit(3),
+        Eyeliners.find({ $text: { $search: searchTerm } }).select('name brand').limit(3)
+      ]);
+      const productLines = [
+        ...lipsticks.map(p => `- Son/Lipstick: ${p.name} (${p.brand || 'N/A'})`),
+        ...eyeshadows.map(p => `- Eyeshadow: ${p.name} (${p.brand || 'N/A'})`),
+        ...blush.map(p => `- Blush: ${p.name} (${p.brand || 'N/A'})`),
+        ...eyebrows.map(p => `- Eyebrow: ${p.name} (${p.brand || 'N/A'})`),
+        ...eyeliners.map(p => `- Eyeliner: ${p.name} (${p.brand || 'N/A'})`)
+      ].slice(0, 6);
+      const blogLines = blogs.map(b => `- ${b.title}`);
+      if (blogLines.length || productLines.length) {
+        contextText = `Dữ liệu thực từ SkinVox (tối đa 3 bài viết, 6 sản phẩm):\n` +
+          (blogLines.length ? `Bài viết liên quan:\n${blogLines.join('\n')}\n` : '') +
+          (productLines.length ? `Sản phẩm liên quan:\n${productLines.join('\n')}\n` : '');
+      }
+    } catch (ctxErr) {
+      console.log('Chatbot: skip context fetch (no index or empty):', ctxErr.message);
+    }
+    
     // Try AI first if available
     if (aiService.isAvailable()) {
       try {
         console.log('🤖 Chatbot: Attempting to use AI...');
-        const aiResult = await aiService.getAIResponse(message, conversationHistory);
+        const enriched = contextText ? `${contextText}\n\nCâu hỏi: ${message}` : message;
+        const aiResult = await aiService.getAIResponse(enriched, conversationHistory);
         if (aiResult) {
           response = aiResult.response;
           provider = aiResult.provider;
@@ -266,7 +304,12 @@ router.post('/message', async (req, res) => {
     
     // Fallback to knowledge base if AI fails or not available
     if (!response) {
-      response = findResponse(message);
+      // If we have context from real data, compose a helpful answer with links
+      if (contextText) {
+        response = `${findResponse(message)}\n\n${contextText}\nBạn có thể xem thêm tại mục Blog và BeautyBar để biết chi tiết.`;
+      } else {
+        response = findResponse(message);
+      }
     }
     
     res.json({
