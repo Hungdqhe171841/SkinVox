@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Calendar, User, ArrowRight, Eye, MessageSquare, Star, Bookmark } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { blogAPI } from '../services/api'
+import { blogAPI, API_BASE_URL } from '../services/api'
 import toast from 'react-hot-toast'
 import '../styles/Blog.css'
 
@@ -110,7 +110,8 @@ export default function Blog() {
 
   const loadBlogs = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/blog/blogs`)
+      const baseUrl = import.meta.env.VITE_API_URL || API_BASE_URL
+      const response = await fetch(`${baseUrl}/api/blog/blogs`)
       const data = await response.json()
       console.log('Blogs API response:', data)
       setBlogs(data.blogs || data || [])
@@ -122,7 +123,8 @@ export default function Blog() {
 
   const loadCategories = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/blog/blog-categories`)
+      const baseUrl = import.meta.env.VITE_API_URL || API_BASE_URL
+      const response = await fetch(`${baseUrl}/api/blog/blog-categories`)
       const data = await response.json()
       console.log('Categories API response:', data)
       

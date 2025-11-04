@@ -14,7 +14,7 @@ const getApiBaseUrl = () => {
   return 'http://localhost:5000'
 }
 
-const API_BASE_URL = getApiBaseUrl()
+export const API_BASE_URL = getApiBaseUrl()
 
 // Log API URL (only in development)
 if (import.meta.env.DEV) {
