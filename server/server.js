@@ -73,6 +73,8 @@ const corsOptions = {
 console.log('🌐 Server Debug - CORS origins:', allowedOrigins);
 console.log('🌐 Server Debug - Also allowing all *.vercel.app domains');
 app.use(cors(corsOptions));
+// Ensure preflight requests are handled for all routes
+app.options('*', cors(corsOptions));
 
 // CORS Debug middleware
 app.use((req, res, next) => {
