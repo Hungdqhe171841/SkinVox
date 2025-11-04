@@ -32,6 +32,8 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(helmet());
 app.use(morgan('combined'));
+// Trust proxy so req.ip reflects x-forwarded-for (Render/Vercel behind proxies)
+app.set('trust proxy', 1);
 
 // CORS Configuration - Dynamic origin checking
 const allowedOrigins = [
@@ -81,9 +83,24 @@ app.use((req, res, next) => {
 });
 
 // Rate limiting
+// Use a safer key and relax for public GETs to avoid false 429s from shared proxy IPs
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 300, // allow higher baseline to accommodate shared IPs
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const xff = req.headers['x-forwarded-for'];
+    if (typeof xff === 'string' && xff.length > 0) {
+      return xff.split(',')[0].trim();
+    }
+    if (Array.isArray(xff) && xff.length > 0) {
+      return String(xff[0]).split(',')[0].trim();
+    }
+    return req.ip;
+  },
+  // Do not rate-limit idempotent GETs; we will apply stricter limits on write routes
+  skip: (req) => req.method === 'GET'
 });
 app.use(limiter);
 
