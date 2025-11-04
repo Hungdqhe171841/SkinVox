@@ -111,7 +111,7 @@ export default function Blog() {
   const loadBlogs = async () => {
     try {
       const baseUrl = import.meta.env.VITE_API_URL || API_BASE_URL
-      const response = await fetch(`${baseUrl}/api/blog/blogs`)
+      const response = await fetch(`${baseUrl}/api/blog/blogs?limit=1000`)
       const data = await response.json()
       console.log('Blogs API response:', data)
       setBlogs(data.blogs || data || [])

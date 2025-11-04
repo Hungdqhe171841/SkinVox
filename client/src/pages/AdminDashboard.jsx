@@ -141,7 +141,8 @@ export default function AdminDashboard() {
 
   const loadDashboardStats = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/dashboard`, {
+      const baseUrl = import.meta.env.VITE_API_URL || window.__API_BASE_URL__ || ''
+      const response = await fetch(`${baseUrl}/api/admin/dashboard`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -157,7 +158,8 @@ export default function AdminDashboard() {
   const loadBlogs = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/blogs`, {
+      const baseUrl = import.meta.env.VITE_API_URL || window.__API_BASE_URL__ || ''
+      const response = await fetch(`${baseUrl}/api/admin/blogs?limit=1000`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -170,7 +172,8 @@ export default function AdminDashboard() {
       console.error('Error loading blogs:', error)
       // Fallback to public blog API if admin API fails
       try {
-        const fallbackResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/blog/blogs`)
+        const baseUrl = import.meta.env.VITE_API_URL || window.__API_BASE_URL__ || ''
+        const fallbackResponse = await fetch(`${baseUrl}/api/blog/blogs?limit=1000`)
         const fallbackData = await fallbackResponse.json()
         console.log('Fallback blogs API response:', fallbackData)
         setBlogs(fallbackData.blogs || [])
