@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heart, ShoppingCart, Eye } from 'lucide-react';
+import { getProductImage, handleImageError } from '../utils/imageUtils';
 
 function ProductCard({ product, viewMode, onTryAR, renderStars, toVnd }) {
   const getCategoryColor = (category) => {
@@ -34,12 +35,10 @@ function ProductCard({ product, viewMode, onTryAR, renderStars, toVnd }) {
       {/* Product Image */}
       <div className="product-image-container">
         <img
-          src={product.image}
+          src={getProductImage(product.image, 'No Image')}
           alt={product.name}
           className="product-image"
-          onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/300x300?text=No+Image';
-          }}
+          onError={(e) => handleImageError(e, 'No Image')}
         />
         
         {/* Overlay Actions */}

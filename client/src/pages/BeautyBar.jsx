@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import ARModal from '../makeup/components/ARModal'
 import { useAnalytics, useTrackProductInteraction } from '../hooks/useAnalytics'
+import { getProductImage, handleImageError } from '../utils/imageUtils'
 import '../styles/ProductPage.css'
 import { 
   Search, 
@@ -175,13 +176,8 @@ export default function BeautyBar() {
       .trim();
   };
 
-  const getProductImage = (product) => {
-    // Use image path from database if available, otherwise fallback to placeholder
-    if (product.image) {
-      return product.image;
-    }
-    // Fallback to placeholder if no image path
-    return 'https://via.placeholder.com/300x300?text=No+Image';
+  const getProductImageUrl = (product) => {
+    return getProductImage(product.image, 'No Image');
   };
 
   const getCategoryColor = (category) => {
@@ -296,12 +292,10 @@ export default function BeautyBar() {
                     >
                     <div className="product-image-container">
                         <img
-                          src={getProductImage(product)}
+                          src={getProductImageUrl(product)}
                           alt={product.name}
                         className="product-image"
-                          onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/300x300?text=No+Image';
-                        }}
+                          onError={(e) => handleImageError(e, 'No Image')}
                       />
                       <span className="explore-badge">
                           Explore
